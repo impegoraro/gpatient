@@ -1,0 +1,16 @@
+*.o
+*~
+*.bak
+src/herbanaria
+Makefile.in
+Makefile
+INSTALL
+aclocal.m4
+autom4te.cache
+config.status
+config.log
+configure
+depcomp
+install-sh
+missing
+.deps
