@@ -12,19 +12,24 @@
 #include <vector>
 #include <sqlite3.h>
 
+#include "../person.h"
+
 class DBHandler
 {
 protected:
 	std::string m_dbname;
 
 	sqlite3 *m_db;
-
-
 public:
+	// PersonID, Person Name
+	sigc::signal<void, guint32, const Glib::ustring&> signal_person_added;
+
 	DBHandler(const std::string& dbname);
 
-	std::vector<std::string>* get_patients(void) const;
-
+	int person_insert(const Person& p) const;
+	bool person_remove(unsigned int id) const;
+	void get_patients(void) const;
+	const Glib::ustring& get_database_path(void);
 	bool open(void);
 	void close(void);
 };

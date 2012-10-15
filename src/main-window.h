@@ -1,60 +1,70 @@
+/*
+ * main-window.h
+ *
+ *  Created on: Aug 24, 2012
+ *      Author: ilan
+ */
+
 #ifndef MAIN_WINDOW_H_
 #define MAIN_WINDOW_H_
 
 #include <gtkmm.h>
-#include <iostream>
 
-using namespace std;
-using namespace Gtk;
+#include "person.h"
+#include "db/dbhandler.h"
 
-class MainWindow : public Window
+class MainWindow : public Gtk::Window
 {
 protected:
-	class ListPatientsCols : public TreeModel::ColumnRecord
+	class ListPatientsCols : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
 
 		ListPatientsCols()
-		{ add(m_col_id);add(m_col_name); }
+		{ add(m_col_id); add(m_col_name); }
 
-		TreeModelColumn<unsigned int> m_col_id;
-		TreeModelColumn<Glib::ustring> m_col_name;
+		Gtk::TreeModelColumn<unsigned int> m_col_id;
+		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
 	};
 
-	MenuBar m_mainMenu;
-	Menu m_filemenu;
-	MenuItem m_mFile;
-	ImageMenuItem m_mfQuit;
+	Gtk::MenuBar m_mainMenu;
+	Gtk::Menu m_filemenu;
+	Gtk::MenuItem m_mFile;
+	Gtk::ImageMenuItem m_mfQuit;
 
-	Menu m_helpmenu;
-	MenuItem m_mHelp;
-	ImageMenuItem m_mhAbout;
+	Gtk::Menu m_helpmenu;
+	Gtk::MenuItem m_mHelp;
+	Gtk::ImageMenuItem m_mhAbout;
 
 
-	Toolbar m_mainToolbar;
-	ToolButton m_mtbAdd;
-	ToolButton m_mtbRemove;
-	Paned m_paned1;
-	Label m_lblPatients;
-	Entry m_entryPatients;
-	TreeView m_treePatients;
+	Gtk::Toolbar m_mainToolbar;
+	Gtk::ToolButton m_mtbAdd;
+	Gtk::ToolButton m_mtbEdit;
+	Gtk::ToolButton m_mtbRemove;
+	Gtk::Paned m_paned1;
+	Gtk::Label m_lblPatients;
+	Gtk::Entry m_entryPatients;
+	Gtk::TreeView m_treePatients;
 
-	Toolbar m_tbVisits;
-	TreeView m_treeVisits;
+	Gtk::Toolbar m_tbVisits;
+	Gtk::TreeView m_treeVisits;
 
 	ListPatientsCols m_lpCols;
 
-	Glib::RefPtr<ListStore> m_modelPatients;
+	Glib::RefPtr<Gtk::ListStore> m_modelPatients;
+
+	DBHandler m_db;
 	bool m_entryPatientStatus;
 public:
 
-	MainWindow(string title);
+	MainWindow(const Glib::ustring& title, const Glib::ustring& dbpath);
 
 	/* Helper Functions */
-	void hlpr_append_patient(unsigned int id, const Glib::ustring& name);
+	void hlpr_append_patient(guint32 id, const Glib::ustring& name);
 
 	/* Signal Handlers */
 	void on_btnToolAdd_clicked(void);
+	void on_btnToolEdit_clicked(void);
 	void on_btnToolRemove_clicked(void);
 
 	void on_window_show(void);
@@ -62,6 +72,7 @@ public:
 	bool on_entryPatient_focusIn(GdkEventFocus *focus);
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
 
+	void on_mhAbout_activate(void);
 };
 
 #endif
