@@ -104,7 +104,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_cmbMaritalStatus.append("Solteiro(a)");
 	m_cmbMaritalStatus.append("Viúvo(a)");
 	m_cmbMaritalStatus.append("Outro...");
-	m_cmbMaritalStatus.set_active(0);
+	m_cmbMaritalStatus.set_active(2);
 
 	m_lblTitle.set_alignment(0.00f, 0.5f);
 	m_lblTitle.set_use_markup();
@@ -151,7 +151,8 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_txtAddress.set_max_length(100);
 	m_txtNacionality.set_max_length(30);
 	m_txtBirthplace.set_max_length(30);
-	m_txtProfession.set_max_length(31);
+	m_txtProfession.set_max_length(30);
+	m_txtLocation.set_max_length(50);
 	m_txtTaxNumber.set_max_length(9);
 	m_txtPhone.set_size_request(75, -1);
 	m_txtPhone.set_max_length(9);

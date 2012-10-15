@@ -42,6 +42,7 @@ const ustring& DBHandler::get_database_path(void)
 int DBHandler::person_insert(const Person& p) const
 {
 	int res = 0;
+	bool shouldRollback = false;
 
 	/*TODO: Handle the errors correctly */
 	if(p.get_name().length() == 0) {
@@ -98,23 +99,29 @@ int DBHandler::person_insert(const Person& p) const
 			pid = sqlite3_last_insert_rowid(m_db);
 
 			if(sqlite3_prepare_v2(m_db, qPhones.c_str(), -1, &stmtP, NULL) == SQLITE_OK) {
+				int errCode;
 				for(int i=0; i< 2; i++) {
 					sqlite3_bind_int(stmtP, 1, phones[i]);
 					sqlite3_bind_int(stmtP, 2, pid);
 					sqlite3_bind_int(stmtP, 3, i + 1);
 					sqlite3_bind_int(stmtP, 4, 351);
-					if(sqlite3_step(stmtP) == SQLITE_DONE)
+					if((errCode = sqlite3_step(stmtP)) == SQLITE_DONE)
 						sqlite3_reset(stmtP);
-					else {
-						std::cerr<< "Error inserting phones: "<< sqlite3_errmsg(m_db)<<std::endl;
+					else if(errCode == SQLITE_ERROR) {
+						shouldRollback = true;
+						break;
 					}
 				}
 				sqlite3_finalize(stmtP);
 			} else {
+				shouldRollback = true;
 				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
 			}
 
-			// End the transaction...
+			if(shouldRollback)
+				qFinish = "ROLLBACK TRANSACTION;";
+
+			// End the transaction... either by issuing a rollback or commit.
 			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
 				//Error could start transaction...
 				if(stmtB != NULL)
@@ -140,14 +147,13 @@ bool DBHandler::person_remove(unsigned int id) const
 	/*TODO: Handle errors correctly */
 
 	if(m_db != NULL) {
-		stringstream ss;
 		sqlite3_stmt *stmt;
-		string query = "DELETE FROM Person WHERE PersonID = ";
+		string query = "DELETE FROM Person WHERE (PersonID = ?)";
 
-		ss<< id;
-		query += ss.str();
 
 		if(sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
+			sqlite3_bind_int(stmt, 1, id);
+
 			if(sqlite3_step(stmt) == SQLITE_DONE)
 				res = true;
 			sqlite3_finalize(stmt);
