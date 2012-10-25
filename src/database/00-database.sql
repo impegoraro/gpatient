@@ -13,11 +13,11 @@ CREATE TABLE Contact
 (
 	ContactID INTEGER PRIMARY KEY AUTOINCREMENT,
 	ContactNumber INTEGER NOT NULL,
-    RefPersonID INTEGER NOT NULL,
+	RefPersonID INTEGER NOT NULL,
 	RefNumberTypeID INTEGER NOT NULL,
 	RefCountryCode INTEGER NOT NULL,
 
-    FOREIGN KEY(RefPersonID) REFERENCES Person(PersonID),
+	FOREIGN KEY(RefPersonID) REFERENCES Person(PersonID),
 	FOREIGN KEY(RefNumberTypeID) REFERENCES NumberType(NumberTypeID),
 	FOREIGN KEY(RefCountryCode) REFERENCES Country(Code)
 );

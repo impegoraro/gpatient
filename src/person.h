@@ -61,9 +61,10 @@ protected:
 
 public:
 	Person();
-	Person(const Glib::ustring & name, float height, BloodType bloodtype, bool sex);
-	Person(unsigned int id, const std::string& name, float height, BloodType bloodtype, bool sex);
+	Person(guint32 id);
 
+	guint32 get_id() const;
+	void set_id(guint32 id);
 	const Glib::ustring& get_address() const;
 	void set_address(const Glib::ustring& address);
 	const Glib::Date& get_birthday() const;
@@ -79,8 +80,6 @@ public:
 	void set_email(const Glib::ustring& email);
 	float get_height() const;
 	void set_height(float height);
-	guint32 get_id() const;
-	void set_id(guint32 id);
 	const Glib::ustring& get_locality() const;
 	void set_locality(const Glib::ustring& locality);
 	MaritalStatus get_marital_status() const;

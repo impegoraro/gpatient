@@ -10,6 +10,8 @@
 #endif
 
 #include <gtkmm.h>
+#include <cstring>
+#include <cstdlib>
 #include <iostream>
 
 #include "patient-window.h"
@@ -21,6 +23,7 @@ using namespace Gtk;
 
 static bool helper_entry_focusIn(NumericEntry& entry, bool& value);
 static bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text);
+static void inline helper_entry_set_state(NumericEntry& entry, bool state = true);
 
 PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, PatientWindowType type) :
 	Dialog((ustring)title, parent, true), m_type(type),
@@ -49,27 +52,28 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	frPersonal->add(*tbPersonal);
 	frContacts->add(*tbContacts);
 
+
 	tbPersonal->attach(m_lblName, 0, 1, 0, 1, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_txtName, 1, 3, 0, 1, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_txtName, 1, 3, 0, 1, FILL | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblHeight, 0, 1, 1, 2, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_txtHeight, 1, 3, 1, 2, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_txtHeight, 1, 3, 1, 2, FILL | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblSex, 0, 1, 2, 3, FILL, FILL, 4, 0);
 	tbPersonal->attach(m_rbMale, 1, 2, 2, 3, FILL, FILL, 0, 0);
-	tbPersonal->attach(m_rbFemale, 2, 3, 2, 3, FILL, FILL, 0, 0);
+	tbPersonal->attach(m_rbFemale, 2, 3, 2, 3, FILL, FILL, 2, 0);
 	tbPersonal->attach(m_lblNacionality, 0, 1, 3, 4, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_txtNacionality, 1, 3, 3, 4, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_txtNacionality, 1, 3, 3, 4, FILL | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblBirthday, 0, 1, 4, 5, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_txtBirthday, 1, 3, 4, 5, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_txtBirthday, 1, 3, 4, 5, FILL | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblBirthplace, 0, 1, 5, 6, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_txtBirthplace, 1, 3, 5, 6, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_txtBirthplace, 1, 3, 5, 6, FILL | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblProfession, 0, 1, 6, 7, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_txtProfession, 1, 3, 6, 7, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_txtProfession, 1, 3, 6, 7, FILL | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblBlood, 0, 1, 7, 8, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_cmbBlood, 1, 3, 7, 8, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_cmbBlood, 1, 3, 7, 8, FILL | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblTaxNumber, 0, 1, 8, 9, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_txtTaxNumber, 1, 3, 8, 9, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_txtTaxNumber, 1, 3, 8, 9, FILL | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblMaritalStatus, 0, 1, 9, 10, FILL, FILL, 4, 0);
-	tbPersonal->attach(m_cmbMaritalStatus, 1, 3, 9, 10, FILL | EXPAND, FILL, 0, 0);
+	tbPersonal->attach(m_cmbMaritalStatus, 1, 3, 9, 10, FILL | EXPAND, FILL, 2, 0);
 
 	boxPhones->pack_start(m_txtPhone, true, true, 1);
 	boxPhones->pack_start(m_txtCellphone, true, true, 1);
@@ -82,15 +86,14 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbContacts->attach(m_txtZip2, 4, 5, 1, 2, FILL | EXPAND, FILL, 0, 0);
 	tbContacts->attach(m_lblContact, 0, 1, 2, 3, FILL, FILL, 4, 0);
 	tbContacts->attach(*boxPhones, 1, 5, 2, 3, FILL | EXPAND, FILL, 0, 0);
-	//tbContacts->attach(m_txtCellphone, 2, 5, 2, 3, FILL | EXPAND | SHRINK, FILL, 0, 0);
 	tbContacts->attach(m_lblEmail, 0, 1, 3, 4, FILL, FILL, 4, 0);
 	tbContacts->attach(m_txtEmail, 1, 5, 3, 4, FILL | EXPAND, FILL, 0, 0);
 	tbContacts->attach(m_lblReferer, 0, 1, 4, 5, FILL, FILL, 4, 0);
 	tbContacts->attach(m_txtReferer, 1, 5, 4, 5, FILL| EXPAND, FILL, 0, 0);
 
 	tbmain->attach(m_lblTitle, 0, 2, 0, 1, FILL | EXPAND, FILL, 4, 20);
-	tbmain->attach(*frPersonal, 0, 1, 1, 2, FILL, FILL | EXPAND, 2, 0);
-	tbmain->attach(*frContacts, 1, 2, 1, 2, FILL, FILL, 0, 0);
+	tbmain->attach(*frPersonal, 0, 1, 1, 2, FILL, FILL | EXPAND, 1, 0);
+	tbmain->attach(*frContacts, 1, 2, 1, 2, FILL, FILL, 1, 0);
 
 	/* TODO: Remove deprecated code... Using it for the sake of windows compatibility */
 	m_cmbBlood.append("A"); m_cmbBlood.append("A+"); m_cmbBlood.append("A-");
@@ -186,15 +189,57 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 
 	set_skip_pager_hint();
 	set_skip_taskbar_hint();
-
 	get_vbox()->pack_start(*tbmain);
-	set_size_request(785,420);
+
+	set_size_request(695,420);
 	set_resizable(false);
 }
 
 guint32 PatientWindow::get_id(void) const
 {
 	return m_id;
+}
+
+void PatientWindow::set_person(const Person& p)
+{
+	char *str, *zip2;
+
+	m_id = p.get_id();
+	m_txtName.set_text(p.get_name());
+	m_txtHeight.set_value(p.get_height());
+	m_rbFemale.set_active(!p.get_sex());
+	str = strdup(p.get_zip());
+	zip2 = strchr(str, '-');
+	if(zip2 != NULL) {
+		*zip2 = '\0';
+		zip2++;
+		m_txtZip1.set_text(str);
+		m_txtZip2.set_text(zip2);
+	}
+	free(str);
+	m_txtNacionality.set_text(p.get_nationality());
+	str = (char*)calloc(sizeof(char), 11);
+	sprintf(str, "%u/%u/%u", p.get_birthday().get_day(), p.get_birthday().get_month(), p.get_birthday().get_year());
+	m_txtBirthday.set_text(str);
+
+	m_txtBirthplace.set_text(p.get_birthplace());
+	m_txtProfession.set_text(p.get_profession());
+	m_cmbBlood.set_active(p.get_blood_type());
+	m_txtAddress.set_text(p.get_address());
+	m_cmbMaritalStatus.set_active(p.get_marital_status());
+	m_txtLocation.set_text(p.get_locality());
+	sprintf(str, "%d", p.get_phone());
+	m_txtPhone.set_text((ustring)str);
+	sprintf(str, "%d", p.get_cellphone());
+	m_txtCellphone.set_text((ustring)str);
+	m_txtEmail.set_text(p.get_email());
+	m_txtReferer.set_text(p.get_referer());
+	sprintf(str, "%d", p.get_tax_number());
+	m_txtTaxNumber.set_text((ustring)str);
+	free(str);
+	m_cellphoneStatus = m_phoneStatus=false;
+	helper_entry_set_state(m_txtPhone, false);
+	helper_entry_set_state(m_txtCellphone, false);
 }
 
 void PatientWindow::get_person(Person& p) const
@@ -216,26 +261,6 @@ void PatientWindow::get_person(Person& p) const
 	p.set_email(m_txtEmail.get_text());
 	p.set_referer(m_txtReferer.get_text());
 	p.set_tax_number(atoi(m_txtTaxNumber.get_text().c_str()));
-}
-
-void PatientWindow::set_person(const Person& p)
-{
-	m_txtName.set_text(p.get_name());
-	m_txtHeight.set_value(p.get_height());
-
-	if(p.get_sex())
-		m_rbMale.activate();
-	else
-		m_rbFemale.activate();
-
-	if(p.get_blood_type() == Person::BT_A)
-		m_cmbBlood.set_active(0);
-	else if(p.get_blood_type() == Person::BT_B)
-		m_cmbBlood.set_active(1);
-	else if(p.get_blood_type() == Person::BT_AB)
-		m_cmbBlood.set_active(2);
-	else
-		m_cmbBlood.set_active(3);
 }
 
 void PatientWindow::on_btnAdd_clicked(void)
@@ -265,7 +290,7 @@ bool PatientWindow::on_CellphoneFocusOut(GdkEventFocus *focus)
 bool helper_entry_focusIn(NumericEntry& entry, bool& value)
 {
 	if(value) {
-		entry.unset_text(STATE_NORMAL);
+		helper_entry_set_state(entry, false);
 		entry.set_allow_alphanumeric();
 		entry.set_text("");
 		entry.set_allow_alphanumeric(false);
@@ -279,10 +304,10 @@ bool helper_entry_focusIn(NumericEntry& entry, bool& value)
 bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text)
 {
 	if(!value && entry.get_text_length() == 0) {
-		entry.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
+		helper_entry_set_state(entry, true);
 		entry.set_max_length(14);
 		entry.set_allow_alphanumeric();
-		entry.set_text((string)text);
+		entry.set_text((ustring)text);
 		entry.set_allow_alphanumeric(false);
 		value = true;
 	}
@@ -290,6 +315,14 @@ bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text)
 	return true;
 }
 
+static void inline helper_entry_set_state(NumericEntry& entry, bool state)
+{
+	if(state) {
+		entry.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
+	} else {
+		entry.unset_text(STATE_NORMAL);
+	}
+}
 
 void NumericEntry::on_insert_text(const Glib::ustring& text, int *position)
 {
