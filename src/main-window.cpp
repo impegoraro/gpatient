@@ -163,12 +163,15 @@ void MainWindow::on_btnToolEdit_clicked(void)
 
 	if(*iter) {
 		TreeModel::Row row = *iter;
+		Person p(row[cols.m_col_id]);
+		m_db.open();
+		if(m_db.get_person(row[cols.m_col_id], p)) {
+			pw.set_person(p);
+			if(pw.run() == RESPONSE_ACCEPT) {
 
-		//Person p(row[cols.m_col_id], row[cols.m_col_name], row[cols.m_col_height], Person::get_blood_from_string((string)row[cols.m_col_bt]), row[cols.m_col_sex]);
-		//pw.set_person(p);
-		//if(pw.run() == RESPONSE_ACCEPT) {
-
-		//}
+			}
+		}
+		m_db.close();
 	}
 }
 
@@ -228,7 +231,7 @@ void MainWindow::on_mhAbout_activate(void)
 {
 	AboutDialog about;
 	vector<ustring> authors;
-	authors.push_back("Ilan Pegoraro");
+	authors.push_back("Ilan Pegoraro <iemoreirap@gmail.com>");
 
 	//about.set_default_icon(get_icon());
 	//about.set_modal();
@@ -237,7 +240,7 @@ void MainWindow::on_mhAbout_activate(void)
 	about.set_program_name(ustring(PACKAGE_NAME));
 	about.set_version(ustring(PACKAGE_VERSION));
 	about.set_comments("Permite gestão de pacientes, com o respectivo histórico de cada visita");
-	about.set_copyright("(C) 2012 " + authors[0]);
+	about.set_copyright("(C) 2012 Ilan Pegoraro");
 	about.set_authors(authors);
 
 

@@ -29,6 +29,7 @@ public:
 	int person_insert(const Person& p) const;
 	bool person_remove(unsigned int id) const;
 	void get_patients(void) const;
+	bool get_person(const guint32 id, Person& p) const;
 	const Glib::ustring& get_database_path(void);
 	bool open(void);
 	void close(void);

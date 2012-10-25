@@ -79,6 +79,7 @@ protected:
 
 	bool m_phoneStatus;
 	bool m_cellphoneStatus;
+
 public:
 
 	PatientWindow(Gtk::Window& parent, const std::string& title = "Dados do Paciente",PatientWindowType type = PW_TYPE_ADD);
@@ -92,7 +93,6 @@ public:
 	bool on_PhoneFocusOut(GdkEventFocus *focus);
 	bool on_CellphoneFocusIn(GdkEventFocus *focus);
 	bool on_CellphoneFocusOut(GdkEventFocus *focus);
-
 };
 
 

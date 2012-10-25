@@ -9,8 +9,10 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <cstdlib>
 #include <sstream>
 
+#include "util.h"
 #include "dbhandler.h"
 
 using namespace Glib;
@@ -134,6 +136,94 @@ int DBHandler::person_insert(const Person& p) const
 			sqlite3_finalize(stmtE);
 		} else {
 			std::cout<< "Error (" << res <<") while inserting..."<< std::endl<< "'" << query <<"'"<<endl;
+		}
+	}
+
+	return res;
+}
+
+bool DBHandler::get_person(const guint32 id, Person& p) const
+{
+	bool res = false;
+	sqlite3_stmt *stmt;
+
+	if(m_db != NULL) {
+		string query = "SELECT Name, Address, Zip, Location, Sex, Height, Birthday, Birthplace, Nationality, " \
+					"Profession, TaxNumber, Referer, Email, RefBloodTypeID, RefMaritalStatusID FROM Person WHERE PersonID=?";
+
+		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
+			int val(SQLITE_ROW);
+			sqlite3_bind_int(stmt, 1, id);
+
+			while(val == SQLITE_ROW) {
+				val = sqlite3_step(stmt);
+				switch(val) {
+				case SQLITE_ROW: {
+					char *zip1, *zip2;
+
+					p.set_id(id);
+					p.set_name(ustring((const char*)sqlite3_column_text(stmt, 0)));
+					p.set_address(ustring((const char*)sqlite3_column_text(stmt, 1)));
+					zip1 = strdup((const char*)sqlite3_column_text(stmt, 2));
+					zip2 = strchr(zip1, '-');
+					if(zip2 != NULL) {
+						*zip2 = '\0';
+						zip2++;
+					}
+					p.set_zip(zip1, zip2);
+					free(zip1);
+					p.set_locality(ustring((const char*)sqlite3_column_text(stmt,3)));
+					p.set_sex((bool)sqlite3_column_int(stmt, 4));
+					p.set_height((float)sqlite3_column_double(stmt, 5));
+					p.set_birthday(Util::parse_date(string((const char*)sqlite3_column_text(stmt, 6))));
+					p.set_birthplace(ustring((const char*)sqlite3_column_text(stmt, 7)));
+					p.set_nationality(ustring((const char*)sqlite3_column_text(stmt, 8)));
+					p.set_profession(ustring((const char*)sqlite3_column_text(stmt, 9)));
+					p.set_tax_number((guint32)sqlite3_column_int(stmt, 10));
+					if(sqlite3_column_text(stmt, 11) != NULL)
+						p.set_referer(ustring((const char*)sqlite3_column_text(stmt, 11)));
+					p.set_email(ustring((const char *)sqlite3_column_text(stmt, 12)));
+					p.set_blood_type(sqlite3_column_int(stmt, 13));
+					p.set_marital_status(sqlite3_column_int(stmt, 14));
+					break;
+				}
+				case SQLITE_DONE: {
+					res = true;
+					break;
+				}
+				case SQLITE_ERROR:
+					res = false;
+					break;
+				}
+			}
+			sqlite3_finalize(stmt);
+			query = "SELECT ContactNumber FROM Contact WHERE RefPersonID = ? ORDER BY RefNumberTypeID";
+			if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
+				int val(SQLITE_ROW);
+				short phone=1;
+				sqlite3_bind_int(stmt, 1, id);
+
+				while(val == SQLITE_ROW) {
+					val = sqlite3_step(stmt);
+					switch(val) {
+					case SQLITE_ROW: {
+						if(phone){
+							p.set_phone((guint32)sqlite3_column_int(stmt, 0));
+							phone = 0;
+						} else
+							p.set_cellphone((guint32)sqlite3_column_int(stmt, 0));
+						break;
+					}
+					case SQLITE_DONE: {
+						res = true;
+						break;
+					}
+					case SQLITE_ERROR:
+						res = false;
+						break;
+					}
+				}
+			}
 		}
 	}
 

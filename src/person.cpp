@@ -17,15 +17,8 @@ Person::Person() : m_id(0), m_height(1.0), m_bloodtype(BT_A), m_sex(true), m_tax
 	memset(m_zip, 0, 9);
 }
 
-Person::Person(const ustring& name, float height, Person::BloodType bloodtype, bool sex) :
-	m_id(0), m_name(name), m_height(height), m_bloodtype(bloodtype), m_sex(sex), m_taxNumber(0),
-	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER)
-{
-	memset(m_zip, 0, 9);
-}
-
-Person::Person(unsigned int id, const string& name, float height, BloodType bloodtype, bool sex) :
-	m_id(id), m_name(name), m_height(height), m_bloodtype(bloodtype), m_sex(sex), m_taxNumber(0),
+Person::Person(guint32 id) :
+	m_id(id), m_height(1.0), m_bloodtype(BT_A), m_sex(true), m_taxNumber(0),
 	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER)
 {
 	memset(m_zip, 0, 9);
@@ -229,7 +222,8 @@ void Person::set_zip(const char *zip1, const char* zip2)
 		strncpy(m_zip, zip1,4);
 		strcat(m_zip, "-");
 		strncpy(m_zip + 5, zip2, 3);
-	}
+	} else
+		memset(m_zip, 0, 9);
 }
 
 const char* Person::get_zip() const {
