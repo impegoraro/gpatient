@@ -58,8 +58,12 @@ Date Util::parse_date(const std::string& strdate)
 ustring& Util::string_trim(ustring& str)
 {
 	unsigned int i = 0;
+
+	if(!str.length())
+		return str;
+
 	try {
-		while(true) {
+		while(i < str.length()) {
 			if(isspace(str[i])) i++;
 			else break;
 		}
@@ -70,7 +74,7 @@ ustring& Util::string_trim(ustring& str)
 
 	i = str.length() - 1;
 	try {
-		while(true) {
+		while(i > 0) {
 			if(isspace(str[i])) i--;
 			else break;
 		}
