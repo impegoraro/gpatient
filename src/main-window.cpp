@@ -91,7 +91,7 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 
 
 	set_title(title);
-	set_default_size(680,500);
+	set_default_size(720,500);
 	set_icon_name(((ustring)PACKAGE_NAME).lowercase());
 
 	/* Setting up columns in list patients */
@@ -112,7 +112,6 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	m_entryPatients.signal_focus_out_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusOut));
 	m_mhAbout.signal_activate().connect(sigc::mem_fun(*this, &MainWindow::on_mhAbout_activate));
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
-
 
 #ifdef WIN32
 	cout<< "appending theme... "<< ((ustring)PACKAGE_NAME).lowercase()<< endl;
@@ -146,7 +145,12 @@ void MainWindow::on_btnToolAdd_clicked(void)
 		Person tmp;
 		p.get_person(tmp);
 		m_db.open();
-		m_db.person_insert(tmp);
+		try {
+			m_db.person_insert(tmp);
+		} catch(std::invalid_argument& ex) {
+			MessageDialog msg(*this, ex.what(), false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+			msg.run();
+		}
 		m_db.close();
 	}
 }
@@ -167,7 +171,12 @@ void MainWindow::on_btnToolEdit_clicked(void)
 			if(pw.run() == RESPONSE_ACCEPT) {
 				pw.get_person(p);
 				row[cols.m_col_name] = p.get_name();
-				m_db.person_update(p);
+				try {
+					m_db.person_update(p);
+				} catch (std::invalid_argument& ex) {
+					MessageDialog msg(*this, ex.what(), false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+					msg.run();
+				}
 			}
 		}
 		m_db.close();

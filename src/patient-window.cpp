@@ -37,7 +37,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblTaxNumber("Nº _Identificação Fiscal:", true), m_lblMaritalStatus("Es_tado Civil:", true),
 	m_lblAddress("_Morada:", true), m_lblLocation("_Localidade:", true),
 	m_lblZip("-"), m_lblContact("_Contactos:", true), m_lblReferer("_Enviado por:", true),
-	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false)
+	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false), m_wincal(*this)
 {
 	Table *tbmain = manage(new Table(2, 2, false));
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
@@ -127,7 +127,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblMaritalStatus.set_alignment(1.0f, 0.5f);
 	m_lblMaritalStatus.set_mnemonic_widget(m_cmbMaritalStatus);
 
-
 	m_lblAddress.set_alignment(1.0f, 0.5f);
 	m_lblAddress.set_use_markup();
 	m_lblAddress.set_mnemonic_widget(m_txtAddress);
@@ -165,6 +164,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_txtZip1.set_max_length(4);
 	m_txtZip2.set_size_request(20, -1);
 	m_txtZip2.set_max_length(3);
+	m_txtBirthday.set_editable(false);
 	tbPersonal->set_size_request(286, -1);
 	tbContacts->set_size_request(286, -1);
 	frPersonal->set_shadow_type(ShadowType::SHADOW_OUT);
@@ -178,12 +178,21 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	btn = add_button(((type == PW_TYPE_ADD) ? Stock::ADD : Stock::EDIT), RESPONSE_ACCEPT);
 	add_button(Stock::CANCEL, RESPONSE_CANCEL);
 
+	m_txtName.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtName));
+	m_txtAddress.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtAddress));
+	m_txtNacionality.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtNacionality));
+	m_txtLocation.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtLocation));
+	m_txtBirthplace.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtBirthplace));
+	m_txtProfession.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtProfession));
+	m_txtEmail.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtEmail));
+	m_txtReferer.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtReferer));
 	m_txtPhone.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_PhoneFocusIn));
 	m_txtPhone.signal_focus_out_event().connect(sigc::mem_fun(*this, &PatientWindow::on_PhoneFocusOut));
 	m_txtCellphone.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_CellphoneFocusIn));
 	m_txtCellphone.signal_focus_out_event().connect(sigc::mem_fun(*this, &PatientWindow::on_CellphoneFocusOut));
 	m_txtName.signal_activate().connect(sigc::mem_fun(*btn, &Button::clicked));
 	m_txtHeight.signal_activate().connect(sigc::mem_fun(*btn, &Button::clicked));
+	m_txtBirthday.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_focusIn_show_calendar));
 
 	set_skip_pager_hint();
 	set_skip_taskbar_hint();
@@ -344,7 +353,76 @@ void DateEntry::on_insert_text(const Glib::ustring& text, int *position)
 		Gtk::Entry::on_insert_text(text, position);
 }
 
+bool PatientWindow::on_focusOut_trim(GdkEventFocus *event, Entry* entry)
+{
+	ustring str(entry->get_text());
+
+	entry->set_text(Util::string_trim(str));
+	return true;
+}
+
 bool PatientWindow::on_delete_event(GdkEventAny *event)
 {
 	std::cout<< "on delete event"<<std::endl;
+	return true;
+}
+
+bool PatientWindow::on_focusIn_show_calendar(GdkEventFocus *focus)
+{
+	int x, y;
+
+	get_window()->get_position(x, y);
+	m_wincal.popup(m_txtBirthday, x, y);
+	m_txtBirthplace.grab_focus();
+	return true;
+}
+
+/* Calendar Window */
+CalendarWindow::CalendarWindow(Window& win) : Dialog("", false, false), m_wDate(NULL)
+{
+	get_vbox()->pack_start(m_cal, true, true);
+	set_decorated(false);
+	m_cal.signal_day_selected_double_click().connect(sigc::mem_fun(*this, &CalendarWindow::on_selected_day));
+}
+
+void CalendarWindow::selected_date(Date& date) const
+{
+	m_cal.get_date(date);
+}
+
+void CalendarWindow::popup(Entry& widget, unsigned int x, unsigned int y)
+{
+	int tmpx, tmpy;
+	m_wDate = &widget;
+	Date tmp;
+
+	widget.get_window()->get_position(tmpx, tmpy);
+	move(x + tmpx, tmpy + y + widget.get_height());
+
+	if(m_wDate->get_text().length() > 0) {
+		tmp = Util::parse_date((string)m_wDate->get_text());
+		m_cal.select_month(tmp.get_month()-1, tmp.get_year());
+		m_cal.select_day(tmp.get_day());
+	}
+	m_cal.show();
+	run();
+}
+
+void CalendarWindow::on_selected_day(void)
+{
+	Date tmp;
+	m_cal.get_date(tmp);
+	m_wDate->set_text(tmp.format_string((ustring)"%d/%m/%Y"));
+	response(RESPONSE_ACCEPT);
+	hide();
+}
+
+bool CalendarWindow::on_focus_out_event(GdkEventFocus *focus)
+{
+	Date tmp;
+	m_cal.get_date(tmp);
+	m_wDate->set_text(tmp.format_string((ustring)"%d/%m/%Y"));
+	response(RESPONSE_ACCEPT);
+	hide();
+	return true;
 }

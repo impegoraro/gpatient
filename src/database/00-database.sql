@@ -17,7 +17,7 @@ CREATE TABLE Contact
 	RefNumberTypeID INTEGER NOT NULL,
 	RefCountryCode INTEGER NOT NULL,
 
-	PRIMARY KEY(RefPersonID, RefNumberType),
+	PRIMARY KEY(RefPersonID, RefNumberTypeID),
 	FOREIGN KEY(RefPersonID) REFERENCES Person(PersonID),
 	FOREIGN KEY(RefNumberTypeID) REFERENCES NumberType(NumberTypeID),
 	FOREIGN KEY(RefCountryCode) REFERENCES CountryCode(Code)

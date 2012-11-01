@@ -187,6 +187,13 @@ const char* Person::get_zip() const {
 	return m_zip;
 }
 
+bool Person::validate(void) const
+{
+	return(m_name.length() > 0 && (m_height >= 0.0 && m_height <= 3.0) && m_birthday.valid() && m_birthplace.length() > 0 && \
+			m_nationality.length() > 0 && m_profession.length() > 0 && m_address.length() > 0 && m_locality.length() > 0 && \
+			m_email.length() && m_taxNumber > 0 && m_phone > 0 && m_cellphone > 0 && strlen(m_zip) > 0);
+}
+
 ustring Person::get_blood_type_string(int val)
 {
 	ustring bloodType[] = {"A", "A+", "A-", "B", "B+", "B-", "O", "O+", "O-", "AB", "AB+", "AB-"};

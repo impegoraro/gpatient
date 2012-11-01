@@ -64,9 +64,8 @@ int DBHandler::person_insert(const Person& p) const
 	bool shouldRollback = false;
 
 	/*TODO: Handle the errors correctly */
-	if(p.get_name().length() == 0) {
-		throw std::exception();
-	}
+	if(!p.validate())
+		throw std::invalid_argument("Os dados da pessoa são inválidos.");
 
 	if(m_db != NULL) {
 		stringstream ss;
@@ -94,20 +93,22 @@ int DBHandler::person_insert(const Person& p) const
 			guint32 pid = 0;
 			guint32 phones[2] = {p.get_phone(), p.get_cellphone()};
 
-			sqlite3_bind_text(stmt, 1, p.get_name().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 2, p.get_address().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 3, p.get_zip(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 4, p.get_locality().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 1, p.get_name().c_str(), p.get_name().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, p.get_address().c_str(), p.get_address().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, p.get_zip(), strlen(p.get_zip()), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 4, p.get_locality().c_str(), p.get_locality().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 5, p.get_sex() ? 1:0);
 			sqlite3_bind_double(stmt, 6, p.get_height());
 			sqlite3_bind_text(stmt, 7, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 8, p.get_birthplace().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 9, p.get_nationality().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 10, p.get_profession().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, p.get_birthplace().c_str(), p.get_birthplace().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, p.get_nationality().c_str(), p.get_nationality().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, p.get_profession().c_str(), p.get_profession().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 11, p.get_tax_number());
 			if(p.get_referer().length()>0)
-				sqlite3_bind_text(stmt, 12, p.get_referer().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 13, p.get_email().c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 12, p.get_referer().c_str(), p.get_referer().bytes(), SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 12, NULL, -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 13, p.get_email().c_str(), p.get_email().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 14, p.get_marital_status());
 			sqlite3_bind_int(stmt, 15, p.get_blood_type());
 
@@ -173,9 +174,8 @@ int DBHandler::person_update(const Person& p) const
 	bool shouldRollback = false;
 
 	/*TODO: Handle the errors correctly */
-	if(p.get_name().length() == 0) {
-		throw std::exception();
-	}
+	if(!p.validate())
+		throw std::invalid_argument("Os dados da pessoa são inválidos.");
 
 	if(m_db != NULL) {
 		stringstream ss;
@@ -201,22 +201,22 @@ int DBHandler::person_update(const Person& p) const
 		if((res = sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
 			guint32 phones[2] = {p.get_phone(), p.get_cellphone()};
 
-			sqlite3_bind_text(stmt, 1, p.get_name().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 2, p.get_address().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 3, p.get_zip(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 4, p.get_locality().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 1, p.get_name().c_str(), p.get_name().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, p.get_address().c_str(), p.get_address().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, p.get_zip(), strlen(p.get_zip()), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 4, p.get_locality().c_str(), p.get_locality().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 5, p.get_sex() ? 1:0);
 			sqlite3_bind_double(stmt, 6, p.get_height());
 			sqlite3_bind_text(stmt, 7, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 8, p.get_birthplace().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 9, p.get_nationality().c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 10, p.get_profession().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, p.get_birthplace().c_str(), p.get_birthplace().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, p.get_nationality().c_str(), p.get_nationality().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, p.get_profession().c_str(), p.get_profession().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 11, p.get_tax_number());
 			if(p.get_referer().length()>0)
-				sqlite3_bind_text(stmt, 12, p.get_referer().c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 12, p.get_referer().c_str(), p.get_referer().bytes(), SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 12, NULL, -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 13, p.get_email().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 13, p.get_email().c_str(), p.get_email().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 14, p.get_marital_status());
 			sqlite3_bind_int(stmt, 15, p.get_blood_type());
 

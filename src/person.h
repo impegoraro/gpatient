@@ -102,6 +102,8 @@ public:
 	void set_zip(const char *zip1, const char* zip2);
 	const char* get_zip() const;
 
+	bool validate(void) const;
+
 	static Glib::ustring get_blood_type_string(int val);
 	static Glib::ustring get_marital_status_string(int val);
 };

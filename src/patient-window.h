@@ -36,6 +36,21 @@ protected:
 	virtual void on_insert_text(const Glib::ustring& text, int *position);
 };
 
+class CalendarWindow : public Gtk::Dialog
+{
+public:
+	CalendarWindow(Gtk::Window&);
+	void selected_date(Glib::Date&) const;
+	void popup(Gtk::Entry&, unsigned int x, unsigned int y);
+protected:
+	Gtk::Calendar m_cal;
+	Gtk::Entry *m_wDate;
+
+	void on_selected_day(void);
+
+	virtual bool on_focus_out_event(GdkEventFocus *);
+};
+
 class PatientWindow : public Gtk::Dialog
 {
 public:
@@ -95,6 +110,7 @@ protected:
 	Gtk::Button m_btnCancel;
 
 	PatientWindowType m_type;
+	CalendarWindow m_wincal;
 
 public:
 
@@ -103,14 +119,17 @@ public:
 	void get_person(Person&) const;
 	guint32 get_id(void) const;
 
+
+protected:
+	bool on_delete_event(GdkEventAny *);
 	bool on_PhoneFocusIn(GdkEventFocus *focus);
 	bool on_PhoneFocusOut(GdkEventFocus *focus);
 	bool on_CellphoneFocusIn(GdkEventFocus *focus);
 	bool on_CellphoneFocusOut(GdkEventFocus *focus);
 
-	bool on_focusOut_trim(GdkEventFocus*);
-protected:
-	virtual bool on_delete_event(GdkEventAny *);
+	bool on_focusIn_show_calendar(GdkEventFocus *focus);
+
+	bool on_focusOut_trim(GdkEventFocus*, Gtk::Entry*);
 };
 
 

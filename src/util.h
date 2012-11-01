@@ -18,6 +18,7 @@ public:
 	virtual ~Util();
 
 	static Glib::Date parse_date(const std::string& strdate);
+	static Glib::ustring& string_trim(Glib::ustring& str);
 };
 
 #endif /* UTIL_H_ */
