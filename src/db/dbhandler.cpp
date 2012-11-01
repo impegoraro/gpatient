@@ -14,29 +14,46 @@
 
 #include "util.h"
 #include "dbhandler.h"
+#include "../exceptions/sql-connection.h"
 
 using namespace Glib;
 using namespace std;
 
-DBHandler::DBHandler(const string& dbname) : m_dbname(dbname), m_db(NULL)
+DBHandler::DBHandler(const string& dbname, bool use_fk_constraint) : m_dbname(dbname), m_db(NULL), m_fkConstraint(use_fk_constraint)
 {
 }
 
 bool DBHandler::open(void)
 {
-	//TODO: throw already open exception
-	//if(m_isOpen())
-		//throw
-	return (sqlite3_open(m_dbname.c_str(), &m_db) == SQLITE_OK);
+	int res;
+
+	if(m_db != NULL)
+		throw(SqlConnectionOpenedException());
+
+	res = sqlite3_open(m_dbname.c_str(), &m_db);
+	if(res == SQLITE_OK) {
+		// Activating Foreign Key Constraints
+		ustring sql("PRAGMA foreign_keys=ON;");
+		sqlite3_stmt *stmt;
+
+		if(sqlite3_prepare_v2(m_db, sql.c_str(), sql.bytes(), &stmt, NULL) == SQLITE_OK) {
+			sqlite3_step(stmt);
+			sqlite3_finalize(stmt);
+		}
+	}
+	return res == SQLITE_OK;
 }
 
 void DBHandler::close(void)
 {
-	if(m_db != NULL)
+	if(m_db != NULL) {
 		sqlite3_close(m_db);
+		m_db = NULL;
+	} else
+		throw(SqlConnectionClosedException());
 }
 
-const ustring& DBHandler::get_database_path(void)
+const ustring& DBHandler::get_database_path(void) const
 {
 	return m_dbname;
 }
@@ -94,19 +111,129 @@ int DBHandler::person_insert(const Person& p) const
 			sqlite3_bind_int(stmt, 14, p.get_marital_status());
 			sqlite3_bind_int(stmt, 15, p.get_blood_type());
 
+			if(sqlite3_step(stmt) == SQLITE_DONE) {
+				res = 1;
+
+				pid = sqlite3_last_insert_rowid(m_db);
+
+				if(sqlite3_prepare_v2(m_db, qPhones.c_str(), -1, &stmtP, NULL) == SQLITE_OK) {
+					int errCode;
+					for(int i=0; i< 2; i++) {
+						sqlite3_bind_int(stmtP, 1, phones[i]);
+						sqlite3_bind_int(stmtP, 2, pid);
+						sqlite3_bind_int(stmtP, 3, i + 1);
+						sqlite3_bind_int(stmtP, 4, 351);
+						if((errCode = sqlite3_step(stmtP)) == SQLITE_DONE)
+							sqlite3_reset(stmtP);
+						else if(errCode == SQLITE_ERROR) {
+							shouldRollback = true;
+							break;
+						}
+					}
+					sqlite3_finalize(stmtP);
+				} else {
+					shouldRollback = true;
+					std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+				}
+
+				sqlite3_finalize(stmt);
+			} else {
+				shouldRollback = true;
+				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+			}
+
+			if(shouldRollback)
+				qFinish = "ROLLBACK TRANSACTION;";
+			else
+				m_signal_person_added.emit(pid, p.get_name());
+
+			// End the transaction... either by issuing a rollback or commit.
+			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
+				//Error could start transaction...
+				if(stmtB != NULL)
+					sqlite3_finalize(stmtB); // clean up
+				return -1;
+			}
+
+			//cleanup
+			sqlite3_finalize(stmtB);
+			sqlite3_finalize(stmtE);
+		} else {
+			std::cout<< "Error (" << res <<") while inserting..."<< std::endl<< "'" << query <<"'"<<endl;
+		}
+	} else
+		throw (SqlConnectionClosedException());
+
+	return res;
+}
+
+int DBHandler::person_update(const Person& p) const
+{
+	int res = 0;
+	bool shouldRollback = false;
+
+	/*TODO: Handle the errors correctly */
+	if(p.get_name().length() == 0) {
+		throw std::exception();
+	}
+
+	if(m_db != NULL) {
+		stringstream ss;
+		ss << p.get_height();
+
+		string qBegin = "BEGIN IMMEDIATE TRANSACTION;";
+		string query = "UPDATE Person " \
+						"SET Name = ?, Address = ?, Zip = ?, Location = ?, Sex = ?, Height = ?, Birthday = ?, " \
+						"Birthplace = ?, Nationality = ?, Profession = ?, TaxNumber = ?, Referer = ?, " \
+						"Email = ?, RefMaritalStatusID = ?, RefBloodTypeID = ? WHERE PersonID = ?;' ";
+		string qPhones = "UPDATE Contact SET ContactNumber = ? WHERE RefPersonID = ? AND RefNumberTypeID = ?;";
+		string qFinish = "COMMIT TRANSACTION;";
+
+		sqlite3_stmt *stmt, *stmtB, *stmtP, *stmtE;
+
+		if(sqlite3_prepare_v2(m_db, qBegin.c_str(), -1, &stmtB, NULL) == SQLITE_OK && sqlite3_step(stmtB) != SQLITE_DONE) {
+			//Error could start transaction...
+			if(stmtB != NULL)
+				sqlite3_finalize(stmtB);
+			return -1;
+		}
+
+		if((res = sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
+			guint32 phones[2] = {p.get_phone(), p.get_cellphone()};
+
+			sqlite3_bind_text(stmt, 1, p.get_name().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, p.get_address().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, p.get_zip(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 4, p.get_locality().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 5, p.get_sex() ? 1:0);
+			sqlite3_bind_double(stmt, 6, p.get_height());
+			sqlite3_bind_text(stmt, 7, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, p.get_birthplace().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, p.get_nationality().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, p.get_profession().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 11, p.get_tax_number());
+			if(p.get_referer().length()>0)
+				sqlite3_bind_text(stmt, 12, p.get_referer().c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 12, NULL, -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 13, p.get_email().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 14, p.get_marital_status());
+			sqlite3_bind_int(stmt, 15, p.get_blood_type());
+
+			sqlite3_bind_int(stmt, 16, p.get_id());
+
 			if(sqlite3_step(stmt) == SQLITE_DONE)
 				res = 1;
+			else
+				shouldRollback = true;
 			sqlite3_finalize(stmt);
-
-			pid = sqlite3_last_insert_rowid(m_db);
 
 			if(sqlite3_prepare_v2(m_db, qPhones.c_str(), -1, &stmtP, NULL) == SQLITE_OK) {
 				int errCode;
-				for(int i=0; i< 2; i++) {
-					sqlite3_bind_int(stmtP, 1, phones[i]);
-					sqlite3_bind_int(stmtP, 2, pid);
-					sqlite3_bind_int(stmtP, 3, i + 1);
-					sqlite3_bind_int(stmtP, 4, 351);
+				for(int i = 1; i <= 2; i++) {
+					sqlite3_bind_int(stmtP, 1, phones[i-1]);
+					sqlite3_bind_int(stmtP, 2, p.get_id());
+					sqlite3_bind_int(stmtP, 3, i);
 					if((errCode = sqlite3_step(stmtP)) == SQLITE_DONE)
 						sqlite3_reset(stmtP);
 					else if(errCode == SQLITE_ERROR) {
@@ -135,9 +262,10 @@ int DBHandler::person_insert(const Person& p) const
 			sqlite3_finalize(stmtB);
 			sqlite3_finalize(stmtE);
 		} else {
-			std::cout<< "Error (" << res <<") while inserting..."<< std::endl<< "'" << query <<"'"<<endl;
+			std::cout<< "Error (" << res <<") while updating..."<< std::endl<< "'" << query <<"'"<<endl;
 		}
-	}
+	} else
+		throw (SqlConnectionClosedException());
 
 	return res;
 }
@@ -172,7 +300,7 @@ bool DBHandler::get_person(const guint32 id, Person& p) const
 					}
 					p.set_zip(zip1, zip2);
 					free(zip1);
-					p.set_locality(ustring((const char*)sqlite3_column_text(stmt,3)));
+					p.set_locality(ustring((const char*)sqlite3_column_text(stmt, 3)));
 					p.set_sex((bool)sqlite3_column_int(stmt, 4));
 					p.set_height((float)sqlite3_column_double(stmt, 5));
 					p.set_birthday(Util::parse_date(string((const char*)sqlite3_column_text(stmt, 6))));
@@ -225,7 +353,8 @@ bool DBHandler::get_person(const guint32 id, Person& p) const
 				}
 			}
 		}
-	}
+	} else
+		throw (SqlConnectionClosedException());
 
 	return res;
 }
@@ -248,7 +377,8 @@ bool DBHandler::person_remove(unsigned int id) const
 				res = true;
 			sqlite3_finalize(stmt);
 		}
-	}
+	} else
+		throw (SqlConnectionClosedException());
 
 	return res;
 }
@@ -269,11 +399,16 @@ void DBHandler::get_patients(void) const
 					guint32 id = sqlite3_column_int(stmt, 0);
 					char *name = (char *)sqlite3_column_text(stmt, 1);
 
-					signal_person_added(id, (ustring)name);
+					m_signal_person_added.emit(id, (ustring)name);
 				} else
 					break; // Nothing else to do.
 			sqlite3_finalize(stmt);
 		}
-	}
+	} else
+		throw (SqlConnectionClosedException());
 }
 
+sigc::signal<void, guint32, const ustring&>& DBHandler::signal_person_added()
+{
+	return m_signal_person_added;
+}

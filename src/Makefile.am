@@ -7,6 +7,7 @@ herbanaria_SOURCES = util.h util.cpp \
                      configuration/key.h configuration/key.cpp \
                      configuration/section.h configuration/section.cpp \
                      configuration/configuration.h configuration/configuration.cpp \
+                     exceptions/sql-connection.h exceptions/sql-connection.cpp \
                      patient-window.h patient-window.cpp \
                      db/dbhandler.h db/dbhandler.cpp \
                      person.h person.cpp \

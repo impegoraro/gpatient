@@ -37,8 +37,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblTaxNumber("Nº _Identificação Fiscal:", true), m_lblMaritalStatus("Es_tado Civil:", true),
 	m_lblAddress("_Morada:", true), m_lblLocation("_Localidade:", true),
 	m_lblZip("-"), m_lblContact("_Contactos:", true), m_lblReferer("_Enviado por:", true),
-	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false)
-
+	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false)
 {
 	Table *tbmain = manage(new Table(2, 2, false));
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
@@ -48,10 +47,8 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	Table *tbContacts = manage(new Table(5, 5, false));
 	Button *btn;
 
-
 	frPersonal->add(*tbPersonal);
 	frContacts->add(*tbContacts);
-
 
 	tbPersonal->attach(m_lblName, 0, 1, 0, 1, FILL, FILL, 4, 0);
 	tbPersonal->attach(m_txtName, 1, 3, 0, 1, FILL | EXPAND, FILL, 2, 0);
@@ -153,6 +150,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_txtName.set_max_length(70);
 	m_txtAddress.set_max_length(100);
 	m_txtNacionality.set_max_length(30);
+	m_txtBirthday.set_max_length(10);
 	m_txtBirthplace.set_max_length(30);
 	m_txtProfession.set_max_length(30);
 	m_txtLocation.set_max_length(50);
@@ -178,7 +176,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	helper_entry_focusOut(m_txtCellphone, m_cellphoneStatus, (char*)"Telemóvel...");
 
 	btn = add_button(((type == PW_TYPE_ADD) ? Stock::ADD : Stock::EDIT), RESPONSE_ACCEPT);
-	btn->signal_clicked().connect(sigc::mem_fun(*this, &PatientWindow::on_btnAdd_clicked));
 	add_button(Stock::CANCEL, RESPONSE_CANCEL);
 
 	m_txtPhone.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_PhoneFocusIn));
@@ -225,17 +222,17 @@ void PatientWindow::set_person(const Person& p)
 
 	m_txtBirthplace.set_text(p.get_birthplace());
 	m_txtProfession.set_text(p.get_profession());
-	m_cmbBlood.set_active(p.get_blood_type());
+	m_cmbBlood.set_active(p.get_blood_type() - 1);
 	m_txtAddress.set_text(p.get_address());
-	m_cmbMaritalStatus.set_active(p.get_marital_status());
+	m_cmbMaritalStatus.set_active(p.get_marital_status() - 1);
 	m_txtLocation.set_text(p.get_locality());
-	sprintf(str, "%d", p.get_phone());
+	sprintf(str, "%u", p.get_phone());
 	m_txtPhone.set_text((ustring)str);
-	sprintf(str, "%d", p.get_cellphone());
+	sprintf(str, "%u", p.get_cellphone());
 	m_txtCellphone.set_text((ustring)str);
 	m_txtEmail.set_text(p.get_email());
 	m_txtReferer.set_text(p.get_referer());
-	sprintf(str, "%d", p.get_tax_number());
+	sprintf(str, "%u", p.get_tax_number());
 	m_txtTaxNumber.set_text((ustring)str);
 	free(str);
 	m_cellphoneStatus = m_phoneStatus=false;
@@ -253,22 +250,15 @@ void PatientWindow::get_person(Person& p) const
 	p.set_birthday(Util::parse_date((string) m_txtBirthday.get_text()));
 	p.set_birthplace(m_txtBirthplace.get_text());
 	p.set_profession(m_txtProfession.get_text());
-	p.set_blood_type(m_cmbBlood.get_active_row_number());
+	p.set_blood_type(m_cmbBlood.get_active_row_number() + 1);
 	p.set_address(m_txtAddress.get_text());
-	p.set_marital_status(m_cmbMaritalStatus.get_active_row_number());
+	p.set_marital_status(m_cmbMaritalStatus.get_active_row_number() + 1);
 	p.set_locality(m_txtLocation.get_text());
 	p.set_phone(atoi(m_txtPhone.get_text().c_str()));
 	p.set_cellphone(atoi(m_txtCellphone.get_text().c_str()));
 	p.set_email(m_txtEmail.get_text());
 	p.set_referer(m_txtReferer.get_text());
 	p.set_tax_number(atoi(m_txtTaxNumber.get_text().c_str()));
-}
-
-void PatientWindow::on_btnAdd_clicked(void)
-{
-	if(m_txtName.get_text_length() > 0) {
-
-	}
 }
 
 bool PatientWindow::on_PhoneFocusIn(GdkEventFocus *focus)
@@ -306,7 +296,6 @@ bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text)
 {
 	if(!value && entry.get_text_length() == 0) {
 		helper_entry_set_state(entry, true);
-		entry.set_max_length(14);
 		entry.set_allow_alphanumeric();
 		entry.set_text((ustring)text);
 		entry.set_allow_alphanumeric(false);
@@ -319,9 +308,11 @@ bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text)
 static void inline helper_entry_set_state(NumericEntry& entry, bool state)
 {
 	if(state) {
+		entry.set_max_length(14);
 		entry.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
 	} else {
 		entry.unset_text(STATE_NORMAL);
+		entry.set_max_length(9);
 	}
 }
 
@@ -339,7 +330,21 @@ void NumericEntry::on_insert_text(const Glib::ustring& text, int *position)
 		Gtk::Entry::on_insert_text(text, position);
 }
 
-void NumericEntry::set_allow_alphanumeric(bool allow)
+void DateEntry::on_insert_text(const Glib::ustring& text, int *position)
 {
-	this->m_allow_alphanumeric = allow;
+	bool allow(true);
+
+	for(int i=0; i < text.length(); i++) {
+		if(text.c_str()[i] < '0' || text.c_str()[i] > '9' ) {
+			allow = false;
+			break;
+		}
+	}
+	if(allow || m_allow_alphanumeric)
+		Gtk::Entry::on_insert_text(text, position);
+}
+
+bool PatientWindow::on_delete_event(GdkEventAny *event)
+{
+	std::cout<< "on delete event"<<std::endl;
 }

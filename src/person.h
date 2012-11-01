@@ -31,10 +31,10 @@ public:
 
 	enum MaritalStatus
 	{
-		MS_SINGLE = 0,
+		MS_MARRIED = 1,
 		MS_DIVORCED,
+		MS_SINGLE,
 		MS_WIDOWED,
-		MS_MARRIED,
 		MS_OTHER
 	};
 
@@ -73,7 +73,7 @@ public:
 	void set_birthplace(const Glib::ustring& birthplace);
 	BloodType get_blood_type() const;
 	void set_blood_type(BloodType bloodtype);
-	void set_blood_type(int val);
+	void set_blood_type(unsigned int val);
 	guint32 get_cellphone() const;
 	void set_cellphone(guint32 cellphone);
 	const Glib::ustring& get_email() const;
@@ -84,7 +84,7 @@ public:
 	void set_locality(const Glib::ustring& locality);
 	MaritalStatus get_marital_status() const;
 	void set_marital_status(MaritalStatus maritalStatus);
-	void set_marital_status(int val);
+	void set_marital_status(unsigned int val);
 	const Glib::ustring& get_nationality() const;
 	void set_nationality(const Glib::ustring& nationality);
 	const Glib::ustring& get_name() const;

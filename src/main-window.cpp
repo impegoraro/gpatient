@@ -104,7 +104,7 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	col->set_expand();
 	col->set_resizable();
 
-	m_db.signal_person_added.connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
+	m_db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
 	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
 	m_mtbRemove.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolRemove_clicked));
@@ -146,10 +146,7 @@ void MainWindow::on_btnToolAdd_clicked(void)
 		Person tmp;
 		p.get_person(tmp);
 		m_db.open();
-		if((res = m_db.person_insert(tmp)) > 0) {
-			tmp.set_id(res);
-			hlpr_append_patient(tmp.get_id(), tmp.get_name());
-		}
+		m_db.person_insert(tmp);
 		m_db.close();
 	}
 }
@@ -168,7 +165,9 @@ void MainWindow::on_btnToolEdit_clicked(void)
 		if(m_db.get_person(row[cols.m_col_id], p)) {
 			pw.set_person(p);
 			if(pw.run() == RESPONSE_ACCEPT) {
-
+				pw.get_person(p);
+				row[cols.m_col_name] = p.get_name();
+				m_db.person_update(p);
 			}
 		}
 		m_db.close();

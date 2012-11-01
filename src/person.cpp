@@ -56,45 +56,10 @@ void Person::set_blood_type(Person::BloodType bloodtype) {
 	m_bloodtype = bloodtype;
 }
 
-void Person::set_blood_type(int val) {
-	switch(val) {
-	case 0:
-		m_bloodtype = Person::BT_A;
-		break;
-	case 1:
-		m_bloodtype = Person::BT_A_PLUS;
-		break;
-	case 2:
-		m_bloodtype = Person::BT_A_MINUS;
-		break;
-	case 3:
-		m_bloodtype = Person::BT_B;
-		break;
-	case 4:
-		m_bloodtype = Person::BT_B_PLUS;
-		break;
-	case 5:
-		m_bloodtype = Person::BT_B_MINUS;
-		break;
-	case 6:
-		m_bloodtype = Person::BT_O;
-		break;
-	case 7:
-		m_bloodtype = Person::BT_O_PLUS;
-		break;
-	case 8:
-		m_bloodtype = Person::BT_O_MINUS;
-		break;
-	case 9:
-		m_bloodtype = Person::BT_AB;
-		break;
-	case 10:
-		m_bloodtype = Person::BT_AB_PLUS;
-		break;
-	case 11:
-		m_bloodtype = Person::BT_AB_MINUS;
-		break;
-	}
+void Person::set_blood_type(unsigned int val) {
+	BloodType array[] = {BT_A, BT_A_PLUS, BT_A_MINUS, BT_B, BT_B_PLUS, BT_B_MINUS, BT_O, BT_O_PLUS, BT_O_MINUS, BT_AB, BT_AB_PLUS, BT_AB_MINUS};
+
+	m_bloodtype = array[(val - 1) % 12];
 }
 
 guint32 Person::get_cellphone() const {
@@ -145,19 +110,10 @@ void Person::set_marital_status(Person::MaritalStatus maritalStatus) {
 	m_maritalStatus = maritalStatus;
 }
 
-void Person::set_marital_status(int val) {
-	switch(val) {
-	case 0:
-		m_maritalStatus = Person::MS_SINGLE ; break;
-	case 1:
-		m_maritalStatus = Person::MS_DIVORCED ; break;
-	case 2:
-		m_maritalStatus = Person::MS_WIDOWED ; break;
-	case 3:
-		m_maritalStatus = Person::MS_MARRIED ; break;
-	default:
-		m_maritalStatus = Person::MS_OTHER; break;
-	}
+void Person::set_marital_status(unsigned int val) {
+	MaritalStatus array[] = {MS_MARRIED, MS_SINGLE, MS_DIVORCED, MS_WIDOWED, MS_OTHER};
+
+	m_maritalStatus = array[(val-1) % 5];
 }
 
 void Person::set_nationality(const Glib::ustring& nationality) {
@@ -218,12 +174,13 @@ void Person::set_tax_number(guint32 taxNumber) {
 
 void Person::set_zip(const char *zip1, const char* zip2)
 {
+	memset(m_zip, 0, 9);
 	if(zip1 != NULL && strlen(zip1) == 4 && zip2 != NULL && strlen(zip2) == 3) {
-		strncpy(m_zip, zip1,4);
-		strcat(m_zip, "-");
-		strncpy(m_zip + 5, zip2, 3);
-	} else
-		memset(m_zip, 0, 9);
+		//strncpy(m_zip, zip1, 4);
+		//strcat(m_zip, "-");
+		//strncpy(m_zip + 5, zip2, 3);
+		sprintf(m_zip, "%s-%s", zip1, zip2);
+	}
 }
 
 const char* Person::get_zip() const {
@@ -233,11 +190,11 @@ const char* Person::get_zip() const {
 ustring Person::get_blood_type_string(int val)
 {
 	ustring bloodType[] = {"A", "A+", "A-", "B", "B+", "B-", "O", "O+", "O-", "AB", "AB+", "AB-"};
-	return bloodType[val];
+	return bloodType[val - 1];
 }
 
 ustring Person::get_marital_status_string(int val)
 {
 	ustring status[] = {"Casado(a)", "Divorciado(a)", "Solteiro(a)", "Viúvo(a)", "Outro..."};
-	return status[val];
+	return status[val - 1];
 }

@@ -15,7 +15,22 @@
 class NumericEntry : public Gtk::Entry
 {
 public:
-		void set_allow_alphanumeric(bool allow=true);
+	void set_allow_alphanumeric(bool allow=true)
+	{
+		this->m_allow_alphanumeric = allow;
+	}
+protected:
+	bool m_allow_alphanumeric = false;
+	virtual void on_insert_text(const Glib::ustring& text, int *position);
+};
+
+class DateEntry : public Gtk::Entry
+{
+public:
+	void set_allow_alphanumeric(bool allow=true)
+	{
+		this->m_allow_alphanumeric = allow;
+	}
 protected:
 	bool m_allow_alphanumeric = false;
 	virtual void on_insert_text(const Glib::ustring& text, int *position);
@@ -32,6 +47,10 @@ public:
 
 protected:
 	guint32 m_id;
+
+	bool m_phoneStatus;
+	bool m_cellphoneStatus;
+	bool m_dateStatus;
 	Gtk::Label m_lblTitle;
 
 	Gtk::Label m_lblName;
@@ -77,9 +96,6 @@ protected:
 
 	PatientWindowType m_type;
 
-	bool m_phoneStatus;
-	bool m_cellphoneStatus;
-
 public:
 
 	PatientWindow(Gtk::Window& parent, const std::string& title = "Dados do Paciente",PatientWindowType type = PW_TYPE_ADD);
@@ -87,12 +103,14 @@ public:
 	void get_person(Person&) const;
 	guint32 get_id(void) const;
 
-	void on_btnAdd_clicked(void);
-
 	bool on_PhoneFocusIn(GdkEventFocus *focus);
 	bool on_PhoneFocusOut(GdkEventFocus *focus);
 	bool on_CellphoneFocusIn(GdkEventFocus *focus);
 	bool on_CellphoneFocusOut(GdkEventFocus *focus);
+
+	bool on_focusOut_trim(GdkEventFocus*);
+protected:
+	virtual bool on_delete_event(GdkEventAny *);
 };
 
 
