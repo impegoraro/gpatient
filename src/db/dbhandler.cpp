@@ -383,16 +383,27 @@ bool DBHandler::person_remove(unsigned int id) const
 	return res;
 }
 
-void DBHandler::get_patients(void) const
+void DBHandler::get_patients(const ustring *name) const
 {
 	/*TODO: throw exception if db is not opened*/
-	const char *query = "SELECT PersonID, Name FROM Person ORDER BY Name ASC";
+	ustring query = "SELECT PersonID, Name FROM Person";
 
 	if(m_db != NULL) {
 		sqlite3_stmt *stmt;
+		ustring t_name("%");
 
-		if(sqlite3_prepare_v2(m_db, query, -1, &stmt, NULL) == SQLITE_OK) {
+		if(name != NULL) {
+			query += " WHERE Name LIKE ? ORDER BY Name ASC;";
+		} else
+			query += " ORDER BY Name ASC;";
+
+		if(sqlite3_prepare_v2(m_db, query.c_str(), query.bytes(), &stmt, NULL) == SQLITE_OK) {
 			int res;
+
+			if(name != NULL) {
+				t_name += *name + "%";
+				sqlite3_bind_text(stmt, 1, t_name.c_str(), t_name.bytes(), SQLITE_TRANSIENT);
+			}
 
 			while(true)
 				if(sqlite3_step(stmt) == SQLITE_ROW) {

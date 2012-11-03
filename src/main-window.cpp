@@ -135,6 +135,7 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	m_entryPatients.signal_focus_out_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusOut));
 	m_mhAbout.signal_activate().connect(sigc::mem_fun(*this, &MainWindow::on_mhAbout_activate));
 	m_treePatients.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_treePatients_selected));
+	m_entryPatients.signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_txtSearch_changed));
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
 
 	add(*mbox);
@@ -224,7 +225,7 @@ void MainWindow::on_btnToolRemove_clicked()
 void MainWindow::on_window_show(void)
 {
 	if(m_db.open()) {
-		m_db.get_patients();
+		m_db.get_patients(NULL);
 		m_db.close();
 	} else
 		cout<< "Error while opening the database..."<< endl;
@@ -233,9 +234,9 @@ void MainWindow::on_window_show(void)
 bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
 {
 	if(m_entryPatientStatus) {
+		m_entryPatientStatus = false;
 		m_entryPatients.unset_text(STATE_NORMAL);
 		m_entryPatients.set_text("");
-		m_entryPatientStatus = false;
 	}
 
 	return true;
@@ -244,9 +245,9 @@ bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
 bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 {
 	if(!m_entryPatientStatus && m_entryPatients.get_text_length() == 0) {
+		m_entryPatientStatus = true;
 		m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
 		m_entryPatients.set_text("Procurar...");
-		m_entryPatientStatus = true;
 	}
 
 	return true;
@@ -318,5 +319,23 @@ void  MainWindow::on_treePatients_selected()
 		m_lblpheight.set_alignment(0.1f, 0.5f);
 		m_lblpsex.set_use_markup();
 		m_lblpsex.set_alignment(0.1f, 0.5f);
+	}
+}
+
+void MainWindow::on_txtSearch_changed()
+{
+	try {
+		ustring tmp;
+		m_db.open();
+		m_modelPatients->clear();
+		if(m_entryPatientStatus)
+			m_db.get_patients(NULL);
+		else {
+			tmp = m_entryPatients.get_text();
+			m_db.get_patients(&tmp);
+		}
+		m_db.close();
+	} catch(SqlConnectionException& ex) {
+
 	}
 }

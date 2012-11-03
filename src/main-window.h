@@ -83,6 +83,7 @@ protected:
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
 
 	void on_treePatients_selected();
+	void on_txtSearch_changed();
 
 	void on_mhAbout_activate(void);
 };
