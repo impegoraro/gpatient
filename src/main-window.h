@@ -48,6 +48,7 @@ protected:
 
 	Gtk::Toolbar m_tbVisits;
 	Gtk::TreeView m_treeVisits;
+	Gtk::Label m_lblsugestions;
 
 	ListPatientsCols m_lpCols;
 
@@ -61,6 +62,9 @@ protected:
 	Gtk::Label m_lblpage;
 	Gtk::Label m_lblpsex;
 
+	//Glib::SignalTimeout m_searchTimeout;
+	sigc::connection m_connSearch;
+	Glib::Timer m_timerSearch;
 
 	DBHandler m_db;
 	bool m_entryPatientStatus;
@@ -86,6 +90,8 @@ protected:
 	void on_txtSearch_changed();
 
 	void on_mhAbout_activate(void);
+
+	bool handler_timeout_search();
 };
 
 #endif

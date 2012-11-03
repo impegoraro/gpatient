@@ -21,19 +21,28 @@ using namespace std;
 using namespace Glib;
 using namespace Gtk;
 
+
+// File Constant
+#define SEARCH_TIMEOUT 1.7568
+
 MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), m_db(dbpath),
 	m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),
 	m_mHelp("_Ajuda", true), m_mhAbout(Stock::ABOUT),
 	m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
 	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true),
-	m_frpinfo("<b>Identificação</b>")
+	m_frpinfo("<b>Identificação</b>"),
+	m_lblsugestions("<span size=\"xx-large\">Para começar selecione um paciente da lista</span>")
 {
 	Box *mbox = manage(new VBox()), *pbox1 = manage(new VBox()), *pbox2 = manage(new HBox());
 	ScrolledWindow *swPatients = manage(new ScrolledWindow()), *swVisits = manage(new ScrolledWindow());
 	m_modelPatients = ListStore::create(m_lpCols);
 	Box *binfo, *pbox3;
 	Table *tbinfo;
+
+	// Clear search timer...
+	m_timerSearch.stop();
+	m_timerSearch.reset();
 
 	binfo = manage(new VBox(true, 2));
 	tbinfo = manage(new Table(5, 2, false));
@@ -72,6 +81,7 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 
 	pbox3->pack_start(m_frpinfo, false, true, 1);
 	pbox3->pack_start(*swVisits, true, true, 2);
+	pbox3->pack_start(m_lblsugestions, true, true, 50);
 
 	mbox->pack_start(m_mainMenu, false, true, 0);
 	mbox->pack_start(m_mainToolbar, false, true, 0);
@@ -112,6 +122,8 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	swPatients->set_shadow_type(SHADOW_ETCHED_OUT);
 	swVisits->set_shadow_type(SHADOW_ETCHED_OUT);
 
+	m_lblsugestions.set_use_markup();
+	//m_lblsugestions.set_line_wrap();
 
 	set_title(title);
 	set_default_size(720,500);
@@ -137,11 +149,13 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	m_treePatients.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_treePatients_selected));
 	m_entryPatients.signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_txtSearch_changed));
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
+	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
 
 	add(*mbox);
 	binfo->show_all();
 	show_all_children();
 	m_frpinfo.hide();
+	swVisits->hide();
 }
 
 /* Helpers */
@@ -307,8 +321,6 @@ void  MainWindow::on_treePatients_selected()
 		m_lblpheight.set_text(ustring("<b>Altura:</b> <i>") + tmp + (ustring)"</i>");
 		m_lblpsex.set_text(ustring("<b>Sexo:</b> ") + (p.get_sex()? "Masculino" : "Feminino") + (ustring)"<i></i>");
 
-		m_frpinfo.show_all();
-
 		m_lblpname.set_use_markup();
 		m_lblpname.set_alignment(0.0f, 0.5f);
 		m_lblpage.set_use_markup();
@@ -319,23 +331,45 @@ void  MainWindow::on_treePatients_selected()
 		m_lblpheight.set_alignment(0.1f, 0.5f);
 		m_lblpsex.set_use_markup();
 		m_lblpsex.set_alignment(0.1f, 0.5f);
+
+		m_lblsugestions.hide();
+		m_frpinfo.show_all();
+		m_treeVisits.get_parent()->show();
+	} else {
+		m_lblsugestions.show();
+		m_frpinfo.hide();
+		m_treeVisits.get_parent()->hide();
 	}
 }
 
 void MainWindow::on_txtSearch_changed()
 {
-	try {
-		ustring tmp;
-		m_db.open();
-		m_modelPatients->clear();
-		if(m_entryPatientStatus)
-			m_db.get_patients(NULL);
-		else {
-			tmp = m_entryPatients.get_text();
-			m_db.get_patients(&tmp);
-		}
-		m_db.close();
-	} catch(SqlConnectionException& ex) {
+	m_timerSearch.reset();
+	m_timerSearch.start();
+}
 
+bool MainWindow::handler_timeout_search()
+{
+	if(m_timerSearch.elapsed() > SEARCH_TIMEOUT) {
+		try {
+			ustring tmp;
+			m_db.open();
+			m_modelPatients->clear();
+			if(m_entryPatientStatus)
+				m_db.get_patients(NULL);
+			else {
+				tmp = m_entryPatients.get_text();
+				m_db.get_patients(&tmp);
+			}
+			m_db.close();
+
+			m_timerSearch.stop();
+			m_timerSearch.reset();
+
+		} catch(SqlConnectionException& ex) {
+
+		}
 	}
+
+	return true;
 }
