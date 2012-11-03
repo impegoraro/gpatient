@@ -9,7 +9,9 @@
 	#include <config.h>
 #endif
 #include <iostream>
+#include <cstdio>
 
+#include "exceptions/sql-connection.h"
 #include "main-window.h"
 #include "patient-window.h"
 #include "db/dbhandler.h"
@@ -20,15 +22,22 @@ using namespace Glib;
 using namespace Gtk;
 
 MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), m_db(dbpath),
-		m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),
-		m_mHelp("_Ajuda", true), m_mhAbout(Stock::ABOUT),
-		m_lblPatients("<b>_Pacientes</b>", true),
-		m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
-		m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true)
+	m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),
+	m_mHelp("_Ajuda", true), m_mhAbout(Stock::ABOUT),
+	m_lblPatients("<b>_Pacientes</b>", true),
+	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
+	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true),
+	m_frpinfo("<b>Identificação</b>")
 {
 	Box *mbox = manage(new VBox()), *pbox1 = manage(new VBox()), *pbox2 = manage(new HBox());
 	ScrolledWindow *swPatients = manage(new ScrolledWindow()), *swVisits = manage(new ScrolledWindow());
 	m_modelPatients = ListStore::create(m_lpCols);
+	Box *binfo, *pbox3;
+	Table *tbinfo;
+
+	binfo = manage(new VBox(true, 2));
+	tbinfo = manage(new Table(5, 2, false));
+	pbox3 = manage(new VBox(false, 5));
 
 	m_mFile.set_submenu(m_filemenu);
 	m_filemenu.append(*manage(new SeparatorMenuItem()));
@@ -44,16 +53,25 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	m_mainToolbar.add(m_mtbEdit);
 	m_mainToolbar.add(m_mtbRemove);
 
+	m_frpinfo.add(*binfo);
+	binfo->pack_start(*tbinfo, true, true, 10);
+	tbinfo->attach(m_lblpname, 0, 4, 0, 1, FILL | SHRINK | EXPAND, FILL, 10, 0);
+	tbinfo->attach(m_lblpage, 0, 1, 1, 2, FILL | SHRINK | EXPAND, FILL, 10, 0);
+	tbinfo->attach(m_lblpbloodtype, 1, 2, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
+	tbinfo->attach(m_lblpheight, 2, 3, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
+	tbinfo->attach(m_lblpsex, 3, 4, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
+	tbinfo->set_row_spacings(6);
+
 	swPatients->add(m_treePatients);
 	pbox2->pack_start(m_lblPatients, false, true, 4);
 	pbox2->pack_start(m_entryPatients, true, true, 0);
-	pbox1->pack_start(*pbox2, false, true, 0);
+	pbox1->pack_start(*pbox2, false, true, 4);
 	pbox1->pack_start(*swPatients, true, true, 2);
 
 	swVisits->add(m_treeVisits);
 
-	m_paned1.pack1(*pbox1, false, true);
-	m_paned1.pack2(*swVisits);
+	pbox3->pack_start(m_frpinfo, false, true, 1);
+	pbox3->pack_start(*swVisits, true, true, 2);
 
 	mbox->pack_start(m_mainMenu, false, true, 0);
 	mbox->pack_start(m_mainToolbar, false, true, 0);
@@ -62,6 +80,11 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	swPatients->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	swVisits->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
+
+	m_paned1.pack1(*pbox1, false, true);
+	m_paned1.pack2(*pbox3);
+
+	((Label*)m_frpinfo.get_label_widget())->set_use_markup();
 	m_lblPatients.set_use_markup();
 	m_lblPatients.set_alignment(0.00f, 0.5f);
 
@@ -111,18 +134,13 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	m_entryPatients.signal_focus_in_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusIn));
 	m_entryPatients.signal_focus_out_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusOut));
 	m_mhAbout.signal_activate().connect(sigc::mem_fun(*this, &MainWindow::on_mhAbout_activate));
+	m_treePatients.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_treePatients_selected));
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
 
-#ifdef WIN32
-	cout<< "appending theme... "<< ((ustring)PACKAGE_NAME).lowercase()<< endl;
-	RefPtr<IconTheme> it =  IconTheme::get_default();
-	it->append_search_path("/home/ilan/Desktop/herbanaria/data/icons/hicolor");
-#endif
-
-
-
 	add(*mbox);
+	binfo->show_all();
 	show_all_children();
+	m_frpinfo.hide();
 }
 
 /* Helpers */
@@ -187,11 +205,10 @@ void MainWindow::on_btnToolRemove_clicked()
 {
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator iter = sel->get_selected();
-	ListPatientsCols cols;
 
 	if(*iter) {
 		m_db.open();
-		if(m_db.person_remove((*iter)[cols.m_col_id]))
+		if(m_db.person_remove((*iter)[m_lpCols.m_col_id]))
 			m_modelPatients->erase(iter);
 		else {
 			MessageDialog dlg((string)"Não foi possível remover o paciente selecionado", false, MESSAGE_ERROR, BUTTONS_OK, true);
@@ -251,6 +268,55 @@ void MainWindow::on_mhAbout_activate(void)
 	about.set_copyright("(C) 2012 Ilan Pegoraro");
 	about.set_authors(authors);
 
-
 	about.run();
+}
+
+void  MainWindow::on_treePatients_selected()
+{
+	Person p;
+	Date today;
+	guint16 age;
+	char tmp[6];
+	bool close= true;
+	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
+	TreeModel::iterator row = sel->get_selected();
+
+	today.set_time_current();
+
+	if(*row) {
+		try{
+			m_db.open();
+		} catch(SqlConnectionOpenedException& ex) {
+			close = false;
+		}
+
+		m_db.get_person((*row)[m_lpCols.m_col_id], p);
+		if(close)
+			m_db.close();
+		m_lblpname.set_text(ustring("<b>Paciente:</b> <i>") + p.get_name() + "</i>");
+		age = today.subtract_years(p.get_birthday().get_year()).get_year();
+
+		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
+			age--;
+
+		sprintf(tmp, "%hu", age);
+		m_lblpage.set_text(ustring("<b>Idade:</b> <i>") + tmp + (ustring)"</i>");
+		m_lblpbloodtype.set_text("<b>Tipo de Sangue:</b> <i>" + p.get_blood_type_string() + "</i>");
+		sprintf(tmp, "%.2f", p.get_height());
+		m_lblpheight.set_text(ustring("<b>Altura:</b> <i>") + tmp + (ustring)"</i>");
+		m_lblpsex.set_text(ustring("<b>Sexo:</b> ") + (p.get_sex()? "Masculino" : "Feminino") + (ustring)"<i></i>");
+
+		m_frpinfo.show_all();
+
+		m_lblpname.set_use_markup();
+		m_lblpname.set_alignment(0.0f, 0.5f);
+		m_lblpage.set_use_markup();
+		m_lblpage.set_alignment(0.0f, 0.5f);
+		m_lblpbloodtype.set_use_markup();
+		m_lblpbloodtype.set_alignment(0.1f, 0.5f);
+		m_lblpheight.set_use_markup();
+		m_lblpheight.set_alignment(0.1f, 0.5f);
+		m_lblpsex.set_use_markup();
+		m_lblpsex.set_alignment(0.1f, 0.5f);
+	}
 }

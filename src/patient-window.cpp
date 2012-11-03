@@ -31,7 +31,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblName("_Nome:", true), m_lblHeight("_Altura:", true),
 	m_lblBlood("_Tipo de Sangue:", true), m_lblSex("_Sexo:", true),
 	m_txtHeight(*manage(new Adjustment(1.0, 0.0, 3.0, 0.01, 0.05)), 0.1, 2),
-	m_grpSex(), m_rbMale(m_grpSex, "_Masculino", true), m_rbFemale(m_grpSex, "_Femenino", true),
+	m_grpSex(), m_rbMale(m_grpSex, "_Masculino", true), m_rbFemale(m_grpSex, "_Feminino", true),
 	m_lblBirthday("_Data de Nascimento:", true), m_lblBirthplace("_Local de Nascimento:", true),
 	m_lblNacionality("Na_cionalidade:", true), m_lblProfession("_Profissão:", true),
 	m_lblTaxNumber("Nº _Identificação Fiscal:", true), m_lblMaritalStatus("Es_tado Civil:", true),

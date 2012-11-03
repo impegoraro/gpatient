@@ -72,6 +72,7 @@ public:
 	const Glib::ustring& get_birthplace() const;
 	void set_birthplace(const Glib::ustring& birthplace);
 	BloodType get_blood_type() const;
+	Glib::ustring get_blood_type_string() const;
 	void set_blood_type(BloodType bloodtype);
 	void set_blood_type(unsigned int val);
 	guint32 get_cellphone() const;

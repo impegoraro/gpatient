@@ -5,13 +5,18 @@
  *      Author: ilan
  */
 
-#include "util.h"
+#include <string>
+#include <stdexcept>
+
+#include <glibmm.h>
+
+// C standard headers
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
-#include <string>
 
-#include <glibmm.h>
+// Application  dependant
+#include "util.h"
 
 using namespace Glib;
 

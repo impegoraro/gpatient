@@ -52,6 +52,10 @@ Person::BloodType Person::get_blood_type() const {
 	return m_bloodtype;
 }
 
+ustring Person::get_blood_type_string() const {
+	return Person::get_blood_type_string(m_bloodtype);
+}
+
 void Person::set_blood_type(Person::BloodType bloodtype) {
 	m_bloodtype = bloodtype;
 }

@@ -53,6 +53,15 @@ protected:
 
 	Glib::RefPtr<Gtk::ListStore> m_modelPatients;
 
+	// Selected patient information
+	Gtk::Frame m_frpinfo;
+	Gtk::Label m_lblpname;
+	Gtk::Label m_lblpbloodtype;
+	Gtk::Label m_lblpheight;
+	Gtk::Label m_lblpage;
+	Gtk::Label m_lblpsex;
+
+
 	DBHandler m_db;
 	bool m_entryPatientStatus;
 public:
@@ -62,6 +71,7 @@ public:
 	/* Helper Functions */
 	void hlpr_append_patient(guint32 id, const Glib::ustring& name);
 
+protected:
 	/* Signal Handlers */
 	void on_btnToolAdd_clicked(void);
 	void on_btnToolEdit_clicked(void);
@@ -71,6 +81,8 @@ public:
 
 	bool on_entryPatient_focusIn(GdkEventFocus *focus);
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
+
+	void on_treePatients_selected();
 
 	void on_mhAbout_activate(void);
 };

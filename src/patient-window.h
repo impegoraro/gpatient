@@ -20,7 +20,7 @@ public:
 		this->m_allow_alphanumeric = allow;
 	}
 protected:
-	bool m_allow_alphanumeric = false;
+	bool m_allow_alphanumeric;
 	virtual void on_insert_text(const Glib::ustring& text, int *position);
 };
 
@@ -29,7 +29,7 @@ class DateEntry : public Gtk::Entry
 public:
 	void set_allow_alphanumeric(bool allow=true)
 	{
-		this->m_allow_alphanumeric = allow;
+		this->m_allow_alphanumeric;
 	}
 protected:
 	bool m_allow_alphanumeric = false;
