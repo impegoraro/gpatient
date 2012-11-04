@@ -15,6 +15,9 @@
 class NumericEntry : public Gtk::Entry
 {
 public:
+	NumericEntry() : m_allow_alphanumeric(false)
+	{
+	}
 	void set_allow_alphanumeric(bool allow=true)
 	{
 		this->m_allow_alphanumeric = allow;
@@ -27,12 +30,15 @@ protected:
 class DateEntry : public Gtk::Entry
 {
 public:
+	DateEntry() : m_allow_alphanumeric(false)
+	{
+	}
 	void set_allow_alphanumeric(bool allow=true)
 	{
 		this->m_allow_alphanumeric;
 	}
 protected:
-	bool m_allow_alphanumeric = false;
+	bool m_allow_alphanumeric;
 	virtual void on_insert_text(const Glib::ustring& text, int *position);
 };
 

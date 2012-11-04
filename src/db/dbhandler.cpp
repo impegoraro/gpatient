@@ -8,9 +8,12 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <exception>
+#include <stdexcept>
+#include <sstream>
+
 #include <cstring>
 #include <cstdlib>
-#include <sstream>
 
 #include "util.h"
 #include "dbhandler.h"
