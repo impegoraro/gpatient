@@ -43,9 +43,10 @@ protected:
 	guint32 m_taxNumber;
 	guint32 m_phone;
 	guint32 m_cellphone;
+	guint16 m_zip1;
+	guint16 m_zip2;
 	float m_height;
 	bool m_sex;
-	char m_zip[9];
 	Glib::ustring m_name;
 	Glib::ustring m_birthplace;
 	Glib::ustring m_nationality;
@@ -100,8 +101,9 @@ public:
 	void set_sex(bool sex);
 	guint32 get_tax_number() const;
 	void set_tax_number(guint32 taxNumber);
-	void set_zip(const char *zip1, const char* zip2);
-	const char* get_zip() const;
+	void set_zip(guint16 zip1, guint16 zip2);
+	void get_zip(guint16 &zip1, guint16 &zip2) const;
+	std::string get_zip() const;
 
 	bool validate(void) const;
 

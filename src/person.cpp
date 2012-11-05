@@ -12,16 +12,14 @@ using namespace std;
 using namespace Glib;
 
 Person::Person() : m_id(0), m_height(1.0), m_bloodtype(BT_A), m_sex(true), m_taxNumber(0),
-	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER)
+	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER), m_zip1(0), m_zip2(0)
 {
-	memset(m_zip, 0, 9);
 }
 
 Person::Person(guint32 id) :
 	m_id(id), m_height(1.0), m_bloodtype(BT_A), m_sex(true), m_taxNumber(0),
-	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER)
+	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER), m_zip1(0), m_zip2(0)
 {
-	memset(m_zip, 0, 9);
 }
 
 const Glib::ustring& Person::get_address() const {
@@ -176,26 +174,30 @@ void Person::set_tax_number(guint32 taxNumber) {
 	m_taxNumber = taxNumber;
 }
 
-void Person::set_zip(const char *zip1, const char* zip2)
+void Person::set_zip(guint16 zip1, guint16 zip2)
 {
-	memset(m_zip, 0, 9);
-	if(zip1 != NULL && strlen(zip1) == 4 && zip2 != NULL && strlen(zip2) == 3) {
-		//strncpy(m_zip, zip1, 4);
-		//strcat(m_zip, "-");
-		//strncpy(m_zip + 5, zip2, 3);
-		sprintf(m_zip, "%s-%s", zip1, zip2);
-	}
+	m_zip1 = zip1;
+	m_zip2 = zip2;
 }
 
-const char* Person::get_zip() const {
-	return m_zip;
+string Person::get_zip() const {
+	stringstream ss(stringstream::in);
+
+	ss<< m_zip1<< "-"<< m_zip2;
+	return ss.str();
+}
+
+void Person::get_zip(guint16 &zip1, guint16 &zip2) const
+{
+	zip1 = m_zip1;
+	zip2 = m_zip2;
 }
 
 bool Person::validate(void) const
 {
 	return(m_name.length() > 0 && (m_height >= 0.0 && m_height <= 3.0) && m_birthday.valid() && m_birthplace.length() > 0 && \
 			m_nationality.length() > 0 && m_profession.length() > 0 && m_address.length() > 0 && m_locality.length() > 0 && \
-			m_email.length() && m_taxNumber > 0 && m_phone > 0 && m_cellphone > 0 && strlen(m_zip) > 0);
+			m_email.length() && m_taxNumber > 0 && m_phone > 0 && m_cellphone > 0);
 }
 
 ustring Person::get_blood_type_string(int val)

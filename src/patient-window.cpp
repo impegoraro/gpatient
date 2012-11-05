@@ -226,41 +226,33 @@ guint32 PatientWindow::get_id(void) const
 
 void PatientWindow::set_person(const Person& p)
 {
-	char *str, *zip2;
+	char *str;
+	guint16 zip1, zip2;
+	char zip[5];
 
 	m_id = p.get_id();
 	m_txtName.set_text(p.get_name());
 	m_txtHeight.set_value(p.get_height());
 	m_rbFemale.set_active(!p.get_sex());
-	str = strdup(p.get_zip());
-	zip2 = strchr(str, '-');
-	if(zip2 != NULL) {
-		*zip2 = '\0';
-		zip2++;
-		m_txtZip1.set_text(str);
-		m_txtZip2.set_text(zip2);
-	}
-	free(str);
+	p.get_zip(zip1, zip2);
+	m_txtZip1.set_text(zip1);
+	m_txtZip2.set_text(zip2);
 	m_txtNacionality.set_text(p.get_nationality());
 	str = (char*)calloc(sizeof(char), 11);
 	sprintf(str, "%u/%u/%u", p.get_birthday().get_day(), p.get_birthday().get_month(), p.get_birthday().get_year());
 	m_txtBirthday.set_text(str);
-
+	free(str);
 	m_txtBirthplace.set_text(p.get_birthplace());
 	m_txtProfession.set_text(p.get_profession());
 	m_cmbBlood.set_active(p.get_blood_type() - 1);
 	m_txtAddress.set_text(p.get_address());
 	m_cmbMaritalStatus.set_active(p.get_marital_status() - 1);
 	m_txtLocation.set_text(p.get_locality());
-	sprintf(str, "%u", p.get_phone());
-	m_txtPhone.set_text((ustring)str);
-	sprintf(str, "%u", p.get_cellphone());
-	m_txtCellphone.set_text((ustring)str);
+	m_txtPhone.set_text(p.get_phone());
+	m_txtCellphone.set_text(p.get_cellphone());
 	m_txtEmail.set_text(p.get_email());
 	m_txtReferer.set_text(p.get_referer());
-	sprintf(str, "%u", p.get_tax_number());
-	m_txtTaxNumber.set_text((ustring)str);
-	free(str);
+	m_txtTaxNumber.set_text(p.get_tax_number());
 	m_cellphoneStatus = m_phoneStatus=false;
 	helper_entry_set_state(m_txtPhone, false);
 	helper_entry_set_state(m_txtCellphone, false);
@@ -271,7 +263,7 @@ void PatientWindow::get_person(Person& p) const
 	p.set_name(m_txtName.get_text());
 	p.set_height((float)m_txtHeight.get_value());
 	p.set_sex(m_rbMale.get_active());
-	p.set_zip(m_txtZip1.get_text().c_str(), m_txtZip2.get_text().c_str());
+	p.set_zip((guint16) atoi(m_txtZip1.get_text().c_str()), (guint16) atoi(m_txtZip2.get_text().c_str()));
 	p.set_nationality(m_txtNacionality.get_text());
 	p.set_birthday(Util::parse_date((string) m_txtBirthday.get_text()));
 	p.set_birthplace(m_txtBirthplace.get_text());

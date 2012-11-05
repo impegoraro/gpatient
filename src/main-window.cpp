@@ -23,7 +23,7 @@ using namespace Gtk;
 
 
 // File Constant
-#define SEARCH_TIMEOUT 1.7568
+#define SEARCH_TIMEOUT 0.325
 
 MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), m_db(dbpath),
 	m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),

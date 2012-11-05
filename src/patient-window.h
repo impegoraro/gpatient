@@ -22,6 +22,14 @@ public:
 	{
 		this->m_allow_alphanumeric = allow;
 	}
+	void inline set_text(const Glib::ustring& text)
+	{
+		Gtk::Entry::set_text(text);
+	}
+	void set_text(gint32 val)
+	{
+		Gtk::Entry::set_text(Glib::ustring::compose((Glib::ustring)"%1", val));
+	}
 protected:
 	bool m_allow_alphanumeric;
 	virtual void on_insert_text(const Glib::ustring& text, int *position);
