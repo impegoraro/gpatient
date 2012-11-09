@@ -68,6 +68,7 @@ protected:
 
 	DBHandler m_db;
 	bool m_entryPatientStatus;
+	bool m_fireSearch;
 public:
 
 	MainWindow(const Glib::ustring& title, const Glib::ustring& dbpath);
@@ -77,6 +78,8 @@ public:
 
 protected:
 	/* Signal Handlers */
+	virtual bool on_delete_event(GdkEventAny *);
+
 	void on_btnToolAdd_clicked(void);
 	void on_btnToolEdit_clicked(void);
 	void on_btnToolRemove_clicked(void);
@@ -89,9 +92,12 @@ protected:
 	void on_treePatients_selected();
 	void on_txtSearch_changed();
 
+	void on_db_person_edited(const Person& p);
+
 	void on_mhAbout_activate(void);
 
 	bool handler_timeout_search();
+
 };
 
 #endif

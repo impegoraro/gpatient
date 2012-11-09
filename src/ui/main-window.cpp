@@ -100,7 +100,8 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 
 	m_paned1.get_child1()->set_size_request(220, -1);
 
-	m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
+	/*TODO: find a way to change the style when the text is for help and not the user text.*/
+	//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
 	m_entryPatients.set_text("Procurar...");
 	m_entryPatients.set_icon_from_stock(Stock::FIND);
 
@@ -140,6 +141,7 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	col->set_resizable();
 
 	m_db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
+	m_db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
 	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
 	m_mtbRemove.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolRemove_clicked));
@@ -249,7 +251,8 @@ bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
 {
 	if(m_entryPatientStatus) {
 		m_entryPatientStatus = false;
-		m_entryPatients.unset_text(STATE_NORMAL);
+		/*TODO: find a way to change the style when the text is for help and not the user text.*/
+		//m_entryPatients.unset_text(STATE_NORMAL);
 		m_entryPatients.set_text("");
 	}
 
@@ -260,7 +263,8 @@ bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 {
 	if(!m_entryPatientStatus && m_entryPatients.get_text_length() == 0) {
 		m_entryPatientStatus = true;
-		m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
+		/*TODO: find a way to change the style when the text is for help and not the user text.*/
+		//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
 		m_entryPatients.set_text("Procurar...");
 	}
 
@@ -309,7 +313,7 @@ void  MainWindow::on_treePatients_selected()
 		if(close)
 			m_db.close();
 		m_lblpname.set_text(ustring("<b>Paciente:</b> <i>") + p.get_name() + "</i>");
-		age = today.subtract_years(p.get_birthday().get_year()).get_year();
+		age = today.get_year() - p.get_birthday().get_year();
 
 		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
 			age--;
@@ -372,4 +376,46 @@ bool MainWindow::handler_timeout_search()
 	}
 
 	return true;
+}
+
+void MainWindow::on_db_person_edited(const Person &p)
+{
+	Date today;
+	int age;
+	char tmp[10];
+
+	today.set_time_current();
+
+	m_lblpname.set_text(ustring("<b>Paciente:</b> <i>") + p.get_name() + "</i>");
+	age = today.get_year() - p.get_birthday().get_year();
+
+	if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
+		age--;
+
+	sprintf(tmp, "%hu", age);
+	m_lblpage.set_text(ustring("<b>Idade:</b> <i>") + tmp + (ustring)"</i>");
+	m_lblpbloodtype.set_text("<b>Tipo de Sangue:</b> <i>" + p.get_blood_type_string() + "</i>");
+	sprintf(tmp, "%.2f", p.get_height());
+	m_lblpheight.set_text(ustring("<b>Altura:</b> <i>") + tmp + (ustring)"</i>");
+	m_lblpsex.set_text(ustring("<b>Sexo:</b> ") + (p.get_sex()? "Masculino" : "Feminino") + (ustring)"<i></i>");
+
+	m_lblpname.set_use_markup();
+	m_lblpname.set_alignment(0.0f, 0.5f);
+	m_lblpage.set_use_markup();
+	m_lblpage.set_alignment(0.0f, 0.5f);
+	m_lblpbloodtype.set_use_markup();
+	m_lblpbloodtype.set_alignment(0.1f, 0.5f);
+	m_lblpheight.set_use_markup();
+	m_lblpheight.set_alignment(0.1f, 0.5f);
+	m_lblpsex.set_use_markup();
+	m_lblpsex.set_alignment(0.1f, 0.5f);
+
+	m_lblsugestions.hide();
+	m_frpinfo.show_all();
+	m_treeVisits.get_parent()->show();
+}
+
+bool MainWindow::on_delete_event(GdkEventAny * event)
+{
+	return false;
 }

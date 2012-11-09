@@ -20,7 +20,8 @@ using namespace Gtk;
 
 int main(int argc, char** argv)
 {
-	Gtk::Main kit(argc, argv);
+	RefPtr<Application> app = Application::create(argc, argv, "org.herbanaria.base");
+
 	ustring dbpath;
 	dbpath = get_home_dir();
 	dbpath += "/." + (ustring)PACKAGE_NAME + (ustring)"/" + ((ustring)PACKAGE_NAME) + ".sqlite";
@@ -41,7 +42,7 @@ int main(int argc, char** argv)
 
 	mwin.show();
 
-	kit.run(mwin);
+	app->run(mwin);
 
 	return 0;
 }

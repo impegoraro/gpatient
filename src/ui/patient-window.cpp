@@ -34,7 +34,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblTitle("<big><b>Ficha de inscrição de novo paciente</b></big>"),
 	m_lblName("_Nome:", true), m_lblHeight("_Altura:", true),
 	m_lblBlood("_Tipo de Sangue:", true), m_lblSex("_Sexo:", true),
-	m_txtHeight(*manage(new Adjustment(1.0, 0.0, 3.0, 0.01, 0.05)), 0.1, 2),
+	m_txtHeight(Adjustment::create(1.0, 0.0, 3.0, 0.01, 0.05), 0.1, 2),
 	m_grpSex(), m_rbMale(m_grpSex, "_Masculino", true), m_rbFemale(m_grpSex, "_Feminino", true),
 	m_lblBirthday("_Data de Nascimento:", true), m_lblBirthplace("_Local de Nascimento:", true),
 	m_lblNacionality("Na_cionalidade:", true), m_lblProfession("_Profissão:", true),
@@ -43,24 +43,16 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblZip("-"), m_lblContact("_Contactos:", true), m_lblReferer("_Enviado por:", true),
 	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false), m_wincal(*this)
 {
-	Box *box1, *box2, *innerContacts, *innerPersonal;
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
 	Frame *frContacts = manage(new Frame("<b>Morada e Contacto</b>"));
-	Box *boxPhones = manage(new HBox(true, 2));
 	Table *tbPersonal = manage(new Table(9, 3, false));
-	Table *tbContacts = manage(new Table(5, 5, false));
+	Grid *tbContacts = manage(new Grid());
+	Grid *mGrid = manage(new Grid());
 
-	box1 = manage(new VBox(false, 4));
-	box2 = manage(new HBox(true, 4));
 
-	innerPersonal = manage(new HBox(true, 4));
-	innerContacts = manage(new HBox(true, 4));
-
-	innerPersonal->pack_start(*tbPersonal, true, true, 1);
-	innerContacts->pack_start(*tbContacts, true, true, 1);
-	frPersonal->add(*innerPersonal);
-	frContacts->add(*innerContacts);
-
+	frPersonal->add(*tbPersonal);
+	frContacts->add(*tbContacts);
+	frContacts->set_size_request(100,-1);
 	tbPersonal->attach(m_lblName, 0, 1, 0, 1, FILL | SHRINK, FILL, 2, 0);
 	tbPersonal->attach(m_txtName, 1, 3, 0, 1, FILL | SHRINK | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblHeight, 0, 1, 1, 2, FILL | SHRINK, FILL, 2, 0);
@@ -69,7 +61,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbPersonal->attach(m_rbMale, 1, 2, 2, 3, FILL | SHRINK, FILL, 0, 0);
 	tbPersonal->attach(m_rbFemale, 2, 3, 2, 3, FILL | SHRINK, FILL, 2, 0);
 	tbPersonal->attach(m_lblNacionality, 0, 1, 3, 4, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_txtNacionality, 1, 3, 3, 4, FILL | SHRINK | EXPAND, FILL, 2, 0);
+	tbPersonal->attach(m_txtNationality, 1, 3, 3, 4, FILL | SHRINK | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblBirthday, 0, 1, 4, 5, FILL | SHRINK, FILL, 2, 0);
 	tbPersonal->attach(m_txtBirthday, 1, 3, 4, 5, FILL | SHRINK | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblBirthplace, 0, 1, 5, 6, FILL | SHRINK, FILL, 2, 0);
@@ -83,28 +75,34 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbPersonal->attach(m_lblMaritalStatus, 0, 1, 9, 10, FILL | SHRINK, FILL, 2, 0);
 	tbPersonal->attach(m_cmbMaritalStatus, 1, 3, 9, 10, FILL | SHRINK | EXPAND, FILL, 2, 0);
 
-	boxPhones->pack_start(m_txtPhone, true, true, 1);
-	boxPhones->pack_start(m_txtCellphone, true, true, 1);
-	tbContacts->attach(m_lblAddress, 0, 1, 0, 1, FILL | SHRINK, FILL, 2, 0);
-	tbContacts->attach(m_txtAddress, 1, 5, 0, 1, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbContacts->attach(m_lblLocation, 0, 1, 1, 2, FILL | SHRINK, FILL, 2, 0);
-	tbContacts->attach(m_txtLocation, 1, 2, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbContacts->attach(m_txtZip1, 2, 3, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbContacts->attach(m_lblZip, 3, 4, 1, 2, FILL, FILL, 0, 0);
-	tbContacts->attach(m_txtZip2, 4, 5, 1, 2, FILL | EXPAND | EXPAND, FILL, 0, 0);
-	tbContacts->attach(m_lblContact, 0, 1, 2, 3, FILL | SHRINK, FILL, 2, 0);
-	tbContacts->attach(*boxPhones, 1, 5, 2, 3, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbContacts->attach(m_lblEmail, 0, 1, 3, 4, FILL | SHRINK, FILL, 2, 0);
-	tbContacts->attach(m_txtEmail, 1, 5, 3, 4, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbContacts->attach(m_lblReferer, 0, 1, 4, 5, FILL | EXPAND | SHRINK, FILL, 2, 0);
-	tbContacts->attach(m_txtReferer, 1, 5, 4, 5, FILL | SHRINK | EXPAND, FILL, 0, 0);
+	tbContacts->attach(m_lblAddress, 0, 0, 1, 1);
+	tbContacts->attach(m_txtAddress, 1, 0, 2, 1);
+	tbContacts->attach(m_lblLocation, 0, 2, 1, 1);
+	tbContacts->attach(m_txtLocation, 1, 2, 1, 1);
+	tbContacts->attach_next_to(m_txtZip1, m_txtLocation, Gtk::PositionType::POS_RIGHT, 1, 1);
+	tbContacts->attach_next_to(m_lblZip, m_txtZip1, Gtk::PositionType::POS_RIGHT, 1, 1);
+	tbContacts->attach_next_to(m_txtZip2, m_lblZip, Gtk::PositionType::POS_RIGHT, 1, 1);
+	tbContacts->attach(m_lblContact, 0, 3, 1, 1);
+	tbContacts->attach(m_txtPhone, 1, 3, 1, 1);
+	tbContacts->attach(m_txtCellphone, 2, 3, 1, 1);
+	tbContacts->attach(m_lblEmail, 0, 4, 1, 1);
+	tbContacts->attach(m_txtEmail, 1, 4, 1, 1);
+	tbContacts->attach(m_lblReferer, 0, 5, 1, 1);
+	tbContacts->attach(m_txtReferer, 1, 5, 1, 1);
 
-	box1->pack_start(m_lblTitle, false, true, 8);
-	box1->pack_start(*box2, true, true, 2);
+	tbContacts->set_row_spacing(10);
 
-	box2->pack_start(*frPersonal, true, true, 2);
-	box2->pack_start(*frContacts, true, true, 2);
+	m_lblTitle.set_margin_left(15);
+	m_lblTitle.set_margin_bottom(15);
+	mGrid->attach(m_lblTitle, 0, 1, 1, 1);
+	mGrid->attach(*frPersonal, 0, 2, 1, 1);
+	mGrid->attach(*frContacts, 1, 2, 1, 1);
 
+	frPersonal->set_margin_left(5);
+	frContacts->set_margin_left(5);
+	frContacts->set_margin_right(5);
+	get_vbox()->pack_start(*mGrid);
+	get_vbox()->set_homogeneous(false);
 
 	/* TODO: Remove deprecated code... Using it for the sake of windows compatibility */
 	m_cmbBlood.append("A"); m_cmbBlood.append("A+"); m_cmbBlood.append("A-");
@@ -132,7 +130,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblSex.set_alignment(1.0f, 0.5f);
 	m_lblSex.set_mnemonic_widget(m_rbMale);
 	m_lblNacionality.set_alignment(1.0f, 0.5f);
-	m_lblNacionality.set_mnemonic_widget(m_txtNacionality);
+	m_lblNacionality.set_mnemonic_widget(m_txtNationality);
 	m_lblBirthday.set_alignment(1.0f, 0.5f);
 	m_lblBirthday.set_mnemonic_widget(m_txtBirthday);
 	m_lblBirthplace.set_alignment(1.0f, 0.5f);
@@ -161,27 +159,24 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblReferer.set_use_markup();
 	m_lblReferer.set_mnemonic_widget(m_txtReferer);
 	m_lblZip.set_padding(0, 0);
-	box1->show_all();
 
 	tbPersonal->set_row_spacings(5);
-	tbContacts->set_row_spacings(5);
+	//tbContacts->set_row_spacings(5);
 	m_txtName.set_max_length(70);
 	m_txtAddress.set_max_length(100);
-	m_txtNacionality.set_max_length(30);
+	m_txtNationality.set_max_length(30);
 	m_txtBirthday.set_max_length(10);
 	m_txtBirthplace.set_max_length(30);
 	m_txtProfession.set_max_length(30);
 	m_txtLocation.set_max_length(50);
 	m_txtTaxNumber.set_max_length(9);
-	m_txtPhone.set_size_request(75, -1);
 	m_txtPhone.set_max_length(9);
 	m_txtReferer.set_max_length(70);
 	m_txtEmail.set_max_length(255);
 	m_txtCellphone.set_max_length(9);
-	m_txtCellphone.set_size_request(75, -1);
-	m_txtZip1.set_size_request(44, -1);
+	m_txtZip1.set_size_request(30, -1);
 	m_txtZip1.set_max_length(4);
-	m_txtZip2.set_size_request(32, -1);
+	m_txtZip2.set_size_request(30, -1);
 	m_txtZip2.set_max_length(3);
 	m_txtBirthday.set_editable(false);
 	frPersonal->set_shadow_type(ShadowType::SHADOW_OUT);
@@ -194,7 +189,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 
 	m_txtName.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtName));
 	m_txtAddress.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtAddress));
-	m_txtNacionality.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtNacionality));
+	m_txtNationality.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtNationality));
 	m_txtLocation.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtLocation));
 	m_txtBirthplace.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtBirthplace));
 	m_txtProfession.signal_focus_out_event().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::on_focusOut_trim), &m_txtProfession));
@@ -208,7 +203,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 
 	set_skip_pager_hint();
 	set_skip_taskbar_hint();
-	get_vbox()->pack_start(*box1);
 
 	// Set differences
 	if(type == PW_TYPE_ADD) {
@@ -218,9 +212,11 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 		m_lblTitle.set_text("<b><big>Ficha do paciente</big></b>");
 		m_lblTitle.set_use_markup();
 	}
+
 	add_button(Stock::CANCEL, RESPONSE_CANCEL);
 	//set_size_request(638,375);
 	set_resizable(false);
+	mGrid->show_all();
 }
 
 guint32 PatientWindow::get_id(void) const
@@ -241,7 +237,7 @@ void PatientWindow::set_person(const Person& p)
 	p.get_zip(zip1, zip2);
 	m_txtZip1.set_text(zip1);
 	m_txtZip2.set_text(zip2);
-	m_txtNacionality.set_text(p.get_nationality());
+	m_txtNationality.set_text(p.get_nationality());
 	str = (char*)calloc(sizeof(char), 11);
 	sprintf(str, "%u/%u/%u", p.get_birthday().get_day(), p.get_birthday().get_month(), p.get_birthday().get_year());
 	m_txtBirthday.set_text(str);
@@ -268,7 +264,7 @@ void PatientWindow::get_person(Person& p) const
 	p.set_height((float)m_txtHeight.get_value());
 	p.set_sex(m_rbMale.get_active());
 	p.set_zip((guint16) atoi(m_txtZip1.get_text().c_str()), (guint16) atoi(m_txtZip2.get_text().c_str()));
-	p.set_nationality(m_txtNacionality.get_text());
+	p.set_nationality(m_txtNationality.get_text());
 	p.set_birthday(Util::parse_date((string) m_txtBirthday.get_text()));
 	p.set_birthplace(m_txtBirthplace.get_text());
 	p.set_profession(m_txtProfession.get_text());
@@ -331,9 +327,10 @@ static void inline helper_entry_set_state(NumericEntry& entry, bool state)
 {
 	if(state) {
 		entry.set_max_length(14);
-		entry.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
+		/*TODO: find a way to change the style when the text is for help and not the user text.*/
+		//entry.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
 	} else {
-		entry.unset_text(STATE_NORMAL);
+		//entry.unset_text(STATE_NORMAL);
 		entry.set_max_length(9);
 	}
 }
@@ -346,10 +343,21 @@ bool PatientWindow::on_focusOut_trim(GdkEventFocus *event, Entry* entry)
 	return true;
 }
 
-bool PatientWindow::on_delete_event(GdkEventAny *event)
+void PatientWindow::on_response(int response_id)
 {
-	std::cout<< "on delete event"<<std::endl;
-	return true;
+	if(response_id  != RESPONSE_ACCEPT || (response_id == RESPONSE_ACCEPT && m_txtName.get_text_length() > 0 && m_txtNationality.get_text_length() > 0 && m_txtBirthday.get_text_length() > 0 &&
+			m_txtBirthplace.get_text_length() > 0 && m_txtTaxNumber.get_text_length() > 0 && m_txtAddress.get_text_length() > 0 && m_txtLocation.get_text_length() > 0 &&
+			m_txtZip1.get_text_length() > 0 && m_txtZip2.get_text_length() > 0 && m_txtCellphone.get_text_length() > 0 && m_txtPhone.get_text_length() > 0 &&
+			m_txtEmail.get_text_length() > 0)) {
+		Dialog::on_response(response_id);
+	} else {
+		MessageDialog msgbox("Não é possível adicionar o novo paciente.", true, MESSAGE_ERROR, BUTTONS_OK, true);
+
+		msgbox.set_title("Validação dos dados");
+		msgbox.set_secondary_text("Todos os campos são de preenchimento obrigatório, com a excepção do campo <i>Enviado Por</i>.", true);
+
+		msgbox.run();
+	}
 }
 
 bool PatientWindow::on_focusIn_show_calendar(GdkEventFocus *focus)

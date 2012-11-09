@@ -44,7 +44,7 @@ protected:
 	Gtk::Label m_lblBirthplace;
 	Gtk::Entry m_txtBirthplace;
 	Gtk::Label m_lblNacionality;
-	Gtk::Entry m_txtNacionality;
+	Gtk::Entry m_txtNationality;
 	Gtk::Label m_lblProfession;
 	Gtk::Entry m_txtProfession;
 	Gtk::Label m_lblTaxNumber;
@@ -82,7 +82,6 @@ public:
 
 
 protected:
-	bool on_delete_event(GdkEventAny *);
 	bool on_PhoneFocusIn(GdkEventFocus *focus);
 	bool on_PhoneFocusOut(GdkEventFocus *focus);
 	bool on_CellphoneFocusIn(GdkEventFocus *focus);
@@ -91,6 +90,8 @@ protected:
 	bool on_focusIn_show_calendar(GdkEventFocus *focus);
 
 	bool on_focusOut_trim(GdkEventFocus*, Gtk::Entry*);
+
+	virtual void on_response(int);
 };
 
 

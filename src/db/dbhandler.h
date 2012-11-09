@@ -23,6 +23,7 @@ protected:
 	sqlite3 *m_db;
 
 	sigc::signal<void, guint32, const Glib::ustring&> m_signal_person_added;
+	sigc::signal<void, const Person&> m_signal_person_edit;
 public:
 	// PersonID, Person Name
 
@@ -42,6 +43,7 @@ public:
 	void close(void);
 
 	sigc::signal<void, guint32, const Glib::ustring&>& signal_person_added();
+	sigc::signal<void, const Person&> signal_person_edited();
 };
 
 #endif /* DBHANDLER_H_ */

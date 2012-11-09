@@ -262,7 +262,7 @@ int DBHandler::person_update(const Person& p) const
 			}
 
 			// End the transaction... either by issuing a rollback or commit.
-			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
+			if((res = (sqlite3_prepare_v2(m_db, qFinish.c_str(), qFinish.size(), &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE))) {
 				//Error could start transaction...
 				if(stmtB != NULL)
 					sqlite3_finalize(stmtB); // clean up
@@ -272,6 +272,9 @@ int DBHandler::person_update(const Person& p) const
 			//cleanup
 			sqlite3_finalize(stmtB);
 			sqlite3_finalize(stmtE);
+
+			if(!shouldRollback && !res)
+				m_signal_person_edit(p);
 		} else {
 			std::cout<< "Error (" << res <<") while updating..."<< std::endl<< "'" << query <<"'"<<endl;
 		}
@@ -424,4 +427,9 @@ void DBHandler::get_patients(const ustring *name) const
 sigc::signal<void, guint32, const ustring&>& DBHandler::signal_person_added()
 {
 	return m_signal_person_added;
+}
+
+sigc::signal<void, const Person&> DBHandler::signal_person_edited()
+{
+	return m_signal_person_edit;
 }

@@ -14,7 +14,7 @@ using namespace Gtk;
 using namespace Glib;
 
 /* Calendar Window */
-Widgets::CalendarWindow::CalendarWindow(Window& win) : Dialog("", false, false), m_wDate(NULL)
+Widgets::CalendarWindow::CalendarWindow(Window& win) : Dialog("", false), m_wDate(NULL)
 {
 	get_vbox()->pack_start(m_cal, true, true);
 	set_decorated(false);
