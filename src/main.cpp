@@ -12,7 +12,7 @@
 #include <gtkmm.h>
 #include <iostream>
 
-#include "main-window.h"
+#include "ui/main-window.h"
 
 using namespace std;
 using namespace Glib;

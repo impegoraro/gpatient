@@ -14,12 +14,16 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "widgets/widgets.h"
+
 #include "patient-window.h"
 #include "util.h"
 
 using namespace std;
 using namespace Glib;
 using namespace Gtk;
+using namespace Widgets;
+
 
 static bool helper_entry_focusIn(NumericEntry& entry, bool& value);
 static bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text);
@@ -334,34 +338,6 @@ static void inline helper_entry_set_state(NumericEntry& entry, bool state)
 	}
 }
 
-void NumericEntry::on_insert_text(const Glib::ustring& text, int *position)
-{
-	bool allow(true);
-
-	for(int i=0; i < text.length(); i++) {
-		if(text.c_str()[i] < '0' || text.c_str()[i] > '9' ) {
-			allow = false;
-			break;
-		}
-	}
-	if(allow || m_allow_alphanumeric)
-		Gtk::Entry::on_insert_text(text, position);
-}
-
-void DateEntry::on_insert_text(const Glib::ustring& text, int *position)
-{
-	bool allow(true);
-
-	for(int i=0; i < text.length(); i++) {
-		if(text.c_str()[i] < '0' || text.c_str()[i] > '9' ) {
-			allow = false;
-			break;
-		}
-	}
-	if(allow || m_allow_alphanumeric)
-		Gtk::Entry::on_insert_text(text, position);
-}
-
 bool PatientWindow::on_focusOut_trim(GdkEventFocus *event, Entry* entry)
 {
 	ustring str(entry->get_text());
@@ -383,55 +359,5 @@ bool PatientWindow::on_focusIn_show_calendar(GdkEventFocus *focus)
 	get_window()->get_position(x, y);
 	m_wincal.popup(m_txtBirthday, x, y);
 	m_txtBirthplace.grab_focus();
-	return true;
-}
-
-/* Calendar Window */
-CalendarWindow::CalendarWindow(Window& win) : Dialog("", false, false), m_wDate(NULL)
-{
-	get_vbox()->pack_start(m_cal, true, true);
-	set_decorated(false);
-	m_cal.signal_day_selected_double_click().connect(sigc::mem_fun(*this, &CalendarWindow::on_selected_day));
-}
-
-void CalendarWindow::selected_date(Date& date) const
-{
-	m_cal.get_date(date);
-}
-
-void CalendarWindow::popup(Entry& widget, unsigned int x, unsigned int y)
-{
-	int tmpx, tmpy;
-	m_wDate = &widget;
-	Date tmp;
-
-	widget.get_window()->get_position(tmpx, tmpy);
-	move(x + tmpx, tmpy + y + widget.get_height());
-
-	if(m_wDate->get_text().length() > 0) {
-		tmp = Util::parse_date((string)m_wDate->get_text());
-		m_cal.select_month(tmp.get_month()-1, tmp.get_year());
-		m_cal.select_day(tmp.get_day());
-	}
-	m_cal.show();
-	run();
-}
-
-void CalendarWindow::on_selected_day(void)
-{
-	Date tmp;
-	m_cal.get_date(tmp);
-	m_wDate->set_text(tmp.format_string((ustring)"%d/%m/%Y"));
-	response(RESPONSE_ACCEPT);
-	hide();
-}
-
-bool CalendarWindow::on_focus_out_event(GdkEventFocus *focus)
-{
-	Date tmp;
-	m_cal.get_date(tmp);
-	m_wDate->set_text(tmp.format_string((ustring)"%d/%m/%Y"));
-	response(RESPONSE_ACCEPT);
-	hide();
 	return true;
 }

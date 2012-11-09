@@ -10,8 +10,8 @@
 
 #include <gtkmm.h>
 
-#include "person.h"
-#include "db/dbhandler.h"
+#include "../person.h"
+#include "../db/dbhandler.h"
 
 class MainWindow : public Gtk::Window
 {

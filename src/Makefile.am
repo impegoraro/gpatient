@@ -1,6 +1,6 @@
 bin_PROGRAMS = herbanaria
 
-AM_CPPFLAGS=$(DEPS_CFLAGS) -std=c++11
+AM_CPPFLAGS=$(DEPS_CFLAGS) -std=c++0x
 herbanaria_LDADD=$(DEPS_LIBS)
 
 herbanaria_SOURCES = util.h util.cpp \
@@ -8,8 +8,11 @@ herbanaria_SOURCES = util.h util.cpp \
                      configuration/section.h configuration/section.cpp \
                      configuration/configuration.h configuration/configuration.cpp \
                      exceptions/sql-connection.h exceptions/sql-connection.cpp \
-                     patient-window.h patient-window.cpp \
+                     ui/widgets/widgets.h ui/widgets/numeric-entry.h ui/widgets/numeric-entry.cpp \
+                     ui/widgets/date-entry.h ui/widgets/date-entry.cpp \
+                     ui/widgets/calendar-window.h ui/widgets/calendar-window.cpp \
+                     ui/patient-window.h ui/patient-window.cpp \
+					 ui/main-window.h ui/main-window.cpp \
                      db/dbhandler.h db/dbhandler.cpp \
                      person.h person.cpp \
-                     main-window.h main-window.cpp \
                      main.cpp

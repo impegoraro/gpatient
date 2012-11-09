@@ -9,61 +9,8 @@
 #define PATIENT_WINDOW_H_
 
 #include <gtkmm.h>
-
-#include "person.h"
-
-class NumericEntry : public Gtk::Entry
-{
-public:
-	NumericEntry() : m_allow_alphanumeric(false)
-	{
-	}
-	void set_allow_alphanumeric(bool allow=true)
-	{
-		this->m_allow_alphanumeric = allow;
-	}
-	void inline set_text(const Glib::ustring& text)
-	{
-		Gtk::Entry::set_text(text);
-	}
-	void set_text(gint32 val)
-	{
-		Gtk::Entry::set_text(Glib::ustring::compose((Glib::ustring)"%1", val));
-	}
-protected:
-	bool m_allow_alphanumeric;
-	virtual void on_insert_text(const Glib::ustring& text, int *position);
-};
-
-class DateEntry : public Gtk::Entry
-{
-public:
-	DateEntry() : m_allow_alphanumeric(false)
-	{
-	}
-	void set_allow_alphanumeric(bool allow=true)
-	{
-		this->m_allow_alphanumeric;
-	}
-protected:
-	bool m_allow_alphanumeric;
-	virtual void on_insert_text(const Glib::ustring& text, int *position);
-};
-
-class CalendarWindow : public Gtk::Dialog
-{
-public:
-	CalendarWindow(Gtk::Window&);
-	void selected_date(Glib::Date&) const;
-	void popup(Gtk::Entry&, unsigned int x, unsigned int y);
-protected:
-	Gtk::Calendar m_cal;
-	Gtk::Entry *m_wDate;
-
-	void on_selected_day(void);
-
-	virtual bool on_focus_out_event(GdkEventFocus *);
-};
+#include "widgets/widgets.h"
+#include "../person.h"
 
 class PatientWindow : public Gtk::Dialog
 {
@@ -101,7 +48,7 @@ protected:
 	Gtk::Label m_lblProfession;
 	Gtk::Entry m_txtProfession;
 	Gtk::Label m_lblTaxNumber;
-	NumericEntry m_txtTaxNumber;
+	Widgets::NumericEntry m_txtTaxNumber;
 	Gtk::Label m_lblMaritalStatus;
 	Gtk::ComboBoxText m_cmbMaritalStatus;
 
@@ -110,11 +57,11 @@ protected:
 	Gtk::Label m_lblLocation;
 	Gtk::Entry m_txtLocation;
 	Gtk::Label m_lblZip;
-	NumericEntry m_txtZip1;
-	NumericEntry m_txtZip2;
+	Widgets::NumericEntry m_txtZip1;
+	Widgets::NumericEntry m_txtZip2;
 	Gtk::Label m_lblContact;
-	NumericEntry m_txtPhone;
-	NumericEntry m_txtCellphone;
+	Widgets::NumericEntry m_txtPhone;
+	Widgets::NumericEntry m_txtCellphone;
 	Gtk::Label m_lblEmail;
 	Gtk::Entry m_txtEmail;
 	Gtk::Label m_lblReferer;
@@ -124,7 +71,7 @@ protected:
 	Gtk::Button m_btnCancel;
 
 	PatientWindowType m_type;
-	CalendarWindow m_wincal;
+	Widgets::CalendarWindow m_wincal;
 
 public:
 
