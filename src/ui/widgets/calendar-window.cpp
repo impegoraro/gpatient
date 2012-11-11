@@ -5,6 +5,7 @@
  *      Author: ilan
  */
 
+#include <iostream>
 #include <string>
 #include "calendar-window.h"
 #include "../../util.h"
@@ -18,6 +19,7 @@ Widgets::CalendarWindow::CalendarWindow(Window& win) : Dialog("", false), m_wDat
 {
 	get_vbox()->pack_start(m_cal, true, true);
 	set_decorated(false);
+
 	m_cal.signal_day_selected_double_click().connect(sigc::mem_fun(*this, &CalendarWindow::on_selected_day));
 }
 
@@ -28,13 +30,11 @@ void Widgets::CalendarWindow::selected_date(Date& date) const
 
 void Widgets::CalendarWindow::popup(Entry& widget, unsigned int x, unsigned int y)
 {
-	int tmpx, tmpy;
 	m_wDate = &widget;
 	Date tmp;
 
-	widget.get_window()->get_position(tmpx, tmpy);
-	move(x + tmpx, tmpy + y + widget.get_height());
-
+	std::cout<< x <<" "<< y<< std::endl;
+	move(x, y);
 	if(m_wDate->get_text().length() > 0) {
 		tmp = Util::parse_date((std::string)m_wDate->get_text());
 		m_cal.select_month(tmp.get_month()-1, tmp.get_year());

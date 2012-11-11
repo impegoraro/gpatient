@@ -366,7 +366,7 @@ bool PatientWindow::on_focusIn_show_calendar(GdkEventFocus *focus)
 	int x, y;
 
 	get_window()->get_position(x, y);
-	m_wincal.popup(m_txtBirthday, x, y);
+	m_wincal.popup(m_txtBirthday, x + 125, y + 200);
 	m_txtBirthplace.grab_focus();
 	return false;
 }

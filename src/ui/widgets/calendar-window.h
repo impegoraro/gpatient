@@ -8,7 +8,10 @@
 #ifndef CALENDARWINDOW_H_
 #define CALENDARWINDOW_H_
 
-#include <gtkmm.h>
+#include <gtkmm/dialog.h>
+#include <gtkmm/window.h>
+#include <gtkmm/calendar.h>
+#include <gtkmm/entry.h>
 
 namespace Widgets
 {
@@ -20,7 +23,7 @@ public:
 	CalendarWindow(Gtk::Window&);
 
 	void selected_date(Glib::Date&) const;
-	void popup(Gtk::Entry&, unsigned int x, unsigned int y);
+	void popup(Gtk::Entry& widget, unsigned int x, unsigned int y);
 
 protected:
 	Gtk::Calendar m_cal;
