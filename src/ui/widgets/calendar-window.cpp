@@ -33,7 +33,6 @@ void Widgets::CalendarWindow::popup(Entry& widget, unsigned int x, unsigned int 
 	m_wDate = &widget;
 	Date tmp;
 
-	std::cout<< x <<" "<< y<< std::endl;
 	move(x, y);
 	if(m_wDate->get_text().length() > 0) {
 		tmp = Util::parse_date((std::string)m_wDate->get_text());
