@@ -25,7 +25,7 @@ using namespace Gtk;
 // File Constant
 #define SEARCH_TIMEOUT 0.325
 
-MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), m_db(dbpath),
+MainWindow::MainWindow(const ustring& title, const ustring& dbpath, RefPtr<Application>& app) : Window(), m_db(dbpath), m_app(app),
 	m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),
 	m_mHelp("_Ajuda", true), m_mhAbout(Stock::ABOUT),
 	m_lblPatients("<b>_Pacientes</b>", true),
@@ -39,6 +39,8 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	m_modelPatients = ListStore::create(m_lpCols);
 	Box *binfo, *pbox3;
 	Table *tbinfo;
+
+	m_pw = new PatientWindow(*this, "Dados do paciente", PatientWindow::PW_TYPE_ADD);
 
 	// Clear search timer...
 	m_timerSearch.stop();
@@ -153,11 +155,21 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath) : Window(), 
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
 	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
 
+	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
+
+	m_app->add_window(*m_pw);
+
 	add(*mbox);
 	binfo->show_all();
 	show_all_children();
 	m_frpinfo.hide();
 	swVisits->hide();
+}
+
+MainWindow::~MainWindow()
+{
+	m_app->remove_window(*m_pw);
+	delete m_pw;
 }
 
 /* Helpers */
@@ -173,21 +185,8 @@ void MainWindow::hlpr_append_patient(guint32 id, const ustring& name)
 
 void MainWindow::on_btnToolAdd_clicked(void)
 {
-	PatientWindow p(*this);
-
-	if(p.run() == RESPONSE_ACCEPT) {
-		int res(0);
-		Person tmp;
-		p.get_person(tmp);
-		m_db.open();
-		try {
-			m_db.person_insert(tmp);
-		} catch(std::invalid_argument& ex) {
-			MessageDialog msg(*this, ex.what(), false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
-			msg.run();
-		}
-		m_db.close();
-	}
+	m_pw->set_window_type(PatientWindow::PW_TYPE_ADD);
+	m_pw->show();
 }
 
 void MainWindow::on_btnToolEdit_clicked(void)
@@ -195,26 +194,17 @@ void MainWindow::on_btnToolEdit_clicked(void)
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator iter = sel->get_selected();
 	ListPatientsCols cols;
-	PatientWindow pw(*this, "Dados do Paciente", PatientWindow::PW_TYPE_EDIT);
 
 	if(*iter) {
 		TreeModel::Row row = *iter;
 		Person p(row[cols.m_col_id]);
 		m_db.open();
 		if(m_db.get_person(row[cols.m_col_id], p)) {
-			pw.set_person(p);
-			if(pw.run() == RESPONSE_ACCEPT) {
-				pw.get_person(p);
-				row[cols.m_col_name] = p.get_name();
-				try {
-					m_db.person_update(p);
-				} catch (std::invalid_argument& ex) {
-					MessageDialog msg(*this, ex.what(), false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
-					msg.run();
-				}
-			}
+			m_db.close();
+			m_pw->set_window_type(PatientWindow::PW_TYPE_EDIT);
+			m_pw->set_person(p);
+			m_pw->show();
 		}
-		m_db.close();
 	}
 }
 
@@ -261,8 +251,13 @@ bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
 
 bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 {
+	RefPtr<CssProvider> css = CssProvider::create();
+
 	if(!m_entryPatientStatus && m_entryPatients.get_text_length() == 0) {
 		m_entryPatientStatus = true;
+		css->load_from_data("GtkEntry{ color: gray;}");
+		m_entryPatients.get_style_context()->add_provider(css, 1);
+
 		/*TODO: find a way to change the style when the text is for help and not the user text.*/
 		//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
 		m_entryPatients.set_text("Procurar...");
@@ -419,3 +414,31 @@ bool MainWindow::on_delete_event(GdkEventAny * event)
 {
 	return false;
 }
+
+void MainWindow::patient_window_add(PatientWindow &pw)
+{
+	Person p;
+
+	pw.get_person(p);
+	m_db.open();
+	try {
+		if(pw.get_window_type() == PatientWindow::PW_TYPE_ADD)
+			m_db.person_insert(p);
+		else {
+			m_db.person_update(p);
+			RefPtr<TreeSelection> sel = m_treePatients.get_selection();
+			TreeModel::iterator iter = sel->get_selected();
+			ListPatientsCols cols;
+
+			if(*iter) {
+				TreeModel::Row row = *iter;
+				row[cols.m_col_name] = p.get_name();
+			}
+		}
+	} catch(std::invalid_argument& ex) {
+		MessageDialog msg(*this, ex.what(), false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+		msg.run();
+	}
+	m_db.close();
+}
+

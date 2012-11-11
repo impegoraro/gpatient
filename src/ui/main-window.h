@@ -11,6 +11,7 @@
 #include <gtkmm.h>
 
 #include "../person.h"
+#include "patient-window.h"
 #include "../db/dbhandler.h"
 
 class MainWindow : public Gtk::Window
@@ -69,10 +70,13 @@ protected:
 	DBHandler m_db;
 	bool m_entryPatientStatus;
 	bool m_fireSearch;
+	Glib::RefPtr<Gtk::Application> m_app;
+
+	PatientWindow *m_pw;
 public:
 
-	MainWindow(const Glib::ustring& title, const Glib::ustring& dbpath);
-
+	MainWindow(const Glib::ustring& title, const Glib::ustring& dbpath, Glib::RefPtr<Gtk::Application>& app);
+	virtual ~MainWindow();
 	/* Helper Functions */
 	void hlpr_append_patient(guint32 id, const Glib::ustring& name);
 
@@ -83,7 +87,6 @@ protected:
 	void on_btnToolAdd_clicked(void);
 	void on_btnToolEdit_clicked(void);
 	void on_btnToolRemove_clicked(void);
-
 	void on_window_show(void);
 
 	bool on_entryPatient_focusIn(GdkEventFocus *focus);
@@ -91,13 +94,11 @@ protected:
 
 	void on_treePatients_selected();
 	void on_txtSearch_changed();
-
 	void on_db_person_edited(const Person& p);
-
 	void on_mhAbout_activate(void);
-
 	bool handler_timeout_search();
 
+	void patient_window_add(PatientWindow &);
 };
 
 #endif

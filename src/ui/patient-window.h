@@ -12,7 +12,7 @@
 #include "widgets/widgets.h"
 #include "../person.h"
 
-class PatientWindow : public Gtk::Dialog
+class PatientWindow : public Gtk::Window
 {
 public:
 	enum PatientWindowType
@@ -73,6 +73,7 @@ protected:
 	PatientWindowType m_type;
 	Widgets::CalendarWindow m_wincal;
 
+	sigc::signal<void, PatientWindow &> m_signal_add;
 public:
 
 	PatientWindow(Gtk::Window& parent, const std::string& title = "Dados do Paciente",PatientWindowType type = PW_TYPE_ADD);
@@ -80,6 +81,14 @@ public:
 	void get_person(Person&) const;
 	guint32 get_id(void) const;
 
+
+	void set_window_type(PatientWindow::PatientWindowType);
+	PatientWindow::PatientWindowType get_window_type();
+
+	sigc::signal<void, PatientWindow &>& signal_add();
+
+	void clean();
+	int run();
 
 protected:
 	bool on_PhoneFocusIn(GdkEventFocus *focus);
@@ -91,7 +100,9 @@ protected:
 
 	bool on_focusOut_trim(GdkEventFocus*, Gtk::Entry*);
 
-	virtual void on_response(int);
+	void activate_close(bool);
+
+	virtual bool on_delete_event(GdkEventAny *);
 };
 
 

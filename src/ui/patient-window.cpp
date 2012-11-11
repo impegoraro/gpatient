@@ -30,7 +30,7 @@ static bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text);
 static void inline helper_entry_set_state(NumericEntry& entry, bool state = true);
 
 PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, PatientWindowType type) :
-	Dialog((ustring)title, parent, true), m_type(type),
+	Window(WINDOW_TOPLEVEL), m_type(type),
 	m_lblTitle("<big><b>Ficha de inscrição de novo paciente</b></big>"),
 	m_lblName("_Nome:", true), m_lblHeight("_Altura:", true),
 	m_lblBlood("_Tipo de Sangue:", true), m_lblSex("_Sexo:", true),
@@ -41,14 +41,19 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblTaxNumber("Nº _Identificação Fiscal:", true), m_lblMaritalStatus("Es_tado Civil:", true),
 	m_lblAddress("_Morada:", true), m_lblLocation("_Localidade:", true),
 	m_lblZip("-"), m_lblContact("_Contactos:", true), m_lblReferer("_Enviado por:", true),
-	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false), m_wincal(*this)
+	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false), m_wincal(*this),
+	m_btnAccept(type == PW_TYPE_ADD? Stock::ADD:Stock::EDIT), m_btnCancel(Stock::CANCEL)
 {
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
 	Frame *frContacts = manage(new Frame("<b>Morada e Contacto</b>"));
 	Table *tbPersonal = manage(new Table(9, 3, false));
+	Box *bZip = manage(new HBox(false, 0));
 	Grid *tbContacts = manage(new Grid());
 	Grid *mGrid = manage(new Grid());
+	ButtonBox *btnBox = manage(new ButtonBox());
 
+	set_title((ustring)title);
+	set_modal();
 
 	frPersonal->add(*tbPersonal);
 	frContacts->add(*tbContacts);
@@ -75,13 +80,15 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbPersonal->attach(m_lblMaritalStatus, 0, 1, 9, 10, FILL | SHRINK, FILL, 2, 0);
 	tbPersonal->attach(m_cmbMaritalStatus, 1, 3, 9, 10, FILL | SHRINK | EXPAND, FILL, 2, 0);
 
+	bZip->pack_start(m_txtZip1, false, true, 0);
+	bZip->pack_start(m_lblZip, false, true, 0);
+	bZip->pack_start(m_txtZip2, false, true, 0);
+
 	tbContacts->attach(m_lblAddress, 0, 0, 1, 1);
-	tbContacts->attach(m_txtAddress, 1, 0, 2, 1);
+	tbContacts->attach(m_txtAddress, 1, 0, 1, 1);
 	tbContacts->attach(m_lblLocation, 0, 2, 1, 1);
 	tbContacts->attach(m_txtLocation, 1, 2, 1, 1);
-	tbContacts->attach_next_to(m_txtZip1, m_txtLocation, Gtk::PositionType::POS_RIGHT, 1, 1);
-	tbContacts->attach_next_to(m_lblZip, m_txtZip1, Gtk::PositionType::POS_RIGHT, 1, 1);
-	tbContacts->attach_next_to(m_txtZip2, m_lblZip, Gtk::PositionType::POS_RIGHT, 1, 1);
+	tbContacts->attach_next_to(*bZip, m_txtLocation, Gtk::PositionType::POS_RIGHT, 1, 1);
 	tbContacts->attach(m_lblContact, 0, 3, 1, 1);
 	tbContacts->attach(m_txtPhone, 1, 3, 1, 1);
 	tbContacts->attach(m_txtCellphone, 2, 3, 1, 1);
@@ -90,19 +97,19 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbContacts->attach(m_lblReferer, 0, 5, 1, 1);
 	tbContacts->attach(m_txtReferer, 1, 5, 1, 1);
 
-	tbContacts->set_row_spacing(10);
+	btnBox->add(m_btnAccept);
+	btnBox->add(m_btnCancel);
 
-	m_lblTitle.set_margin_left(15);
-	m_lblTitle.set_margin_bottom(15);
 	mGrid->attach(m_lblTitle, 0, 1, 1, 1);
 	mGrid->attach(*frPersonal, 0, 2, 1, 1);
 	mGrid->attach(*frContacts, 1, 2, 1, 1);
+	mGrid->attach_next_to(*btnBox, *frContacts, PositionType::POS_BOTTOM, 1, 1);
 
 	frPersonal->set_margin_left(5);
 	frContacts->set_margin_left(5);
 	frContacts->set_margin_right(5);
-	get_vbox()->pack_start(*mGrid);
-	get_vbox()->set_homogeneous(false);
+
+	add(*mGrid);
 
 	/* TODO: Remove deprecated code... Using it for the sake of windows compatibility */
 	m_cmbBlood.append("A"); m_cmbBlood.append("A+"); m_cmbBlood.append("A-");
@@ -118,6 +125,14 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_cmbMaritalStatus.append("Outro...");
 	m_cmbMaritalStatus.set_active(2);
 
+	tbPersonal->set_col_spacings(2);
+	tbContacts->set_row_spacing(10);
+	tbContacts->set_column_spacing(2);
+
+	btnBox->set_layout(BUTTONBOX_END);
+
+	m_lblTitle.set_margin_left(15);
+	m_lblTitle.set_margin_bottom(15);
 	m_lblTitle.set_alignment(0.00f, 0.5f);
 	m_lblTitle.set_use_markup();
 	m_lblName.set_alignment(1.0f, 0.5f);
@@ -174,15 +189,19 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_txtReferer.set_max_length(70);
 	m_txtEmail.set_max_length(255);
 	m_txtCellphone.set_max_length(9);
-	m_txtZip1.set_size_request(30, -1);
 	m_txtZip1.set_max_length(4);
-	m_txtZip2.set_size_request(30, -1);
+	m_txtZip1.set_hexpand(false);
+	m_txtZip1.set_width_chars(4);
 	m_txtZip2.set_max_length(3);
+	m_txtZip2.set_width_chars(3);
+	m_txtZip2.set_hexpand(false);
 	m_txtBirthday.set_editable(false);
 	frPersonal->set_shadow_type(ShadowType::SHADOW_OUT);
 	frContacts->set_shadow_type(ShadowType::SHADOW_OUT);
 	((Label*) frPersonal->get_label_widget())->set_use_markup();
 	((Label*) frContacts->get_label_widget())->set_use_markup();
+
+
 
 	helper_entry_focusOut(m_txtPhone, m_phoneStatus, (char*)"Telefone...");
 	helper_entry_focusOut(m_txtCellphone, m_cellphoneStatus, (char*)"Telemóvel...");
@@ -200,20 +219,18 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_txtCellphone.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_CellphoneFocusIn));
 	m_txtCellphone.signal_focus_out_event().connect(sigc::mem_fun(*this, &PatientWindow::on_CellphoneFocusOut));
 	m_txtBirthday.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_focusIn_show_calendar));
+	m_btnCancel.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::activate_close), true));
+	m_btnAccept.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::activate_close), false));
 
 	set_skip_pager_hint();
 	set_skip_taskbar_hint();
 
 	// Set differences
-	if(type == PW_TYPE_ADD) {
-		add_button(Stock::ADD, RESPONSE_ACCEPT);
-	} else {
-		add_button(Stock::EDIT, RESPONSE_ACCEPT);
+	if(type == PW_TYPE_EDIT) {
 		m_lblTitle.set_text("<b><big>Ficha do paciente</big></b>");
 		m_lblTitle.set_use_markup();
 	}
 
-	add_button(Stock::CANCEL, RESPONSE_CANCEL);
 	//set_size_request(638,375);
 	set_resizable(false);
 	mGrid->show_all();
@@ -253,13 +270,14 @@ void PatientWindow::set_person(const Person& p)
 	m_txtEmail.set_text(p.get_email());
 	m_txtReferer.set_text(p.get_referer());
 	m_txtTaxNumber.set_text(p.get_tax_number());
-	m_cellphoneStatus = m_phoneStatus=false;
+	m_cellphoneStatus = m_phoneStatus = false;
 	helper_entry_set_state(m_txtPhone, false);
 	helper_entry_set_state(m_txtCellphone, false);
 }
 
 void PatientWindow::get_person(Person& p) const
 {
+	p.set_id(m_id);
 	p.set_name(m_txtName.get_text());
 	p.set_height((float)m_txtHeight.get_value());
 	p.set_sex(m_rbMale.get_active());
@@ -307,7 +325,7 @@ bool helper_entry_focusIn(NumericEntry& entry, bool& value)
 		value = false;
 	}
 
-	return true;
+	return false;
 }
 
 bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text)
@@ -320,7 +338,7 @@ bool helper_entry_focusOut(NumericEntry& entry, bool& value, char *text)
 		value = true;
 	}
 
-	return true;
+	return false;
 }
 
 static void inline helper_entry_set_state(NumericEntry& entry, bool state)
@@ -340,24 +358,7 @@ bool PatientWindow::on_focusOut_trim(GdkEventFocus *event, Entry* entry)
 	ustring str(entry->get_text());
 
 	entry->set_text(Util::string_trim(str));
-	return true;
-}
-
-void PatientWindow::on_response(int response_id)
-{
-	if(response_id  != RESPONSE_ACCEPT || (response_id == RESPONSE_ACCEPT && m_txtName.get_text_length() > 0 && m_txtNationality.get_text_length() > 0 && m_txtBirthday.get_text_length() > 0 &&
-			m_txtBirthplace.get_text_length() > 0 && m_txtTaxNumber.get_text_length() > 0 && m_txtAddress.get_text_length() > 0 && m_txtLocation.get_text_length() > 0 &&
-			m_txtZip1.get_text_length() > 0 && m_txtZip2.get_text_length() > 0 && m_txtCellphone.get_text_length() > 0 && m_txtPhone.get_text_length() > 0 &&
-			m_txtEmail.get_text_length() > 0)) {
-		Dialog::on_response(response_id);
-	} else {
-		MessageDialog msgbox("Não é possível adicionar o novo paciente.", true, MESSAGE_ERROR, BUTTONS_OK, true);
-
-		msgbox.set_title("Validação dos dados");
-		msgbox.set_secondary_text("Todos os campos são de preenchimento obrigatório, com a excepção do campo <i>Enviado Por</i>.", true);
-
-		msgbox.run();
-	}
+	return false;
 }
 
 bool PatientWindow::on_focusIn_show_calendar(GdkEventFocus *focus)
@@ -367,5 +368,104 @@ bool PatientWindow::on_focusIn_show_calendar(GdkEventFocus *focus)
 	get_window()->get_position(x, y);
 	m_wincal.popup(m_txtBirthday, x, y);
 	m_txtBirthplace.grab_focus();
+	return false;
+}
+
+bool PatientWindow::on_delete_event(GdkEventAny *event)
+{
+	hide();
+	clean();
 	return true;
+}
+
+void PatientWindow::clean()
+{
+	m_id = 0;
+	m_txtName.set_text("");
+	m_txtHeight.set_value(1.00f);
+	m_rbMale.set_active();
+	m_txtZip1.set_text("");
+	m_txtZip2.set_text("");
+	m_txtNationality.set_text("");
+	m_txtBirthday.set_text("");
+	m_txtBirthplace.set_text("");
+	m_txtProfession.set_text("");
+	m_cmbBlood.set_active(0);
+	m_txtAddress.set_text("");
+	m_cmbMaritalStatus.set_active(2);
+	m_txtLocation.set_text("");
+	m_cellphoneStatus = m_phoneStatus = false;
+	m_txtPhone.set_text("");
+	m_txtCellphone.set_text("");
+	helper_entry_focusOut(m_txtPhone, m_phoneStatus, (char*)"Telefone...");
+	helper_entry_focusOut(m_txtCellphone, m_cellphoneStatus, (char*)"Telemóvel...");
+	m_txtEmail.set_text("");
+	m_txtReferer.set_text("");
+	m_txtTaxNumber.set_text("");
+}
+
+sigc::signal<void, PatientWindow &>& PatientWindow::signal_add()
+{
+	return m_signal_add;
+}
+
+void PatientWindow::activate_close(bool val)
+{
+	if(val){
+		clean();
+		hide();
+	} else {
+		if(m_txtName.get_text_length() > 0 && m_txtNationality.get_text_length() > 0 && m_txtBirthday.get_text_length() > 0 && m_txtProfession.get_text_length() > 0 &&
+				m_txtBirthplace.get_text_length() > 0 && m_txtTaxNumber.get_text_length() > 0 && m_txtAddress.get_text_length() > 0 && m_txtLocation.get_text_length() > 0 &&
+				m_txtZip1.get_text_length() > 0 && m_txtZip2.get_text_length() > 0 && !m_cellphoneStatus && !m_phoneStatus && m_txtEmail.get_text_length() > 0) {
+			m_signal_add(*this);
+			hide();
+			clean();
+		} else {
+			MessageDialog msgbox("Não é possível adicionar o novo paciente.", true, MESSAGE_ERROR, BUTTONS_OK, true);
+
+			msgbox.set_title("Validação dos dados");
+			msgbox.set_secondary_text("Todos os campos são de preenchimento obrigatório, com a excepção do campo <i>Enviado Por</i>.", true);
+
+			msgbox.run();
+		}
+	}
+}
+
+void PatientWindow::set_window_type(PatientWindow::PatientWindowType type)
+{
+	if(m_type == type) return;  //Do nothing if the same type
+
+	Image *img = dynamic_cast<Image*>(m_btnAccept.get_image());
+	if(img != NULL)
+		delete img;
+
+	m_type = type;
+	switch(m_type) {
+		case PW_TYPE_EDIT: {
+			//Image img(Stock::EDIT, Gtk::ICON_SIZE_BUTTON);
+			img = new Image(Stock::EDIT, Gtk::ICON_SIZE_BUTTON);;
+			//img->set(Stock::EDIT, Gtk::ICON_SIZE_BUTTON);
+			m_btnAccept.set_image(*img);
+			m_lblTitle.set_text("<b><big>Ficha do paciente</big></b>");
+			m_btnAccept.set_label("_Edit");
+			break;
+		} default: {
+			//Image img(Stock::ADD, Gtk::ICON_SIZE_BUTTON);
+			img = new Image(Stock::ADD, Gtk::ICON_SIZE_BUTTON);
+			//img->set(Stock::ADD, Gtk::ICON_SIZE_BUTTON);
+			m_btnAccept.set_image(*img);
+
+			m_lblTitle.set_text("<big><b>Ficha de inscrição de novo paciente</b></big>");
+			m_btnAccept.set_label("_Add");
+			break;
+		}
+	}
+	m_lblTitle.set_use_markup();
+	m_btnAccept.set_use_underline();
+}
+
+PatientWindow::PatientWindowType PatientWindow::get_window_type()
+{
+	return m_type;
 }
