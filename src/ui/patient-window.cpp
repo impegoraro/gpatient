@@ -201,7 +201,18 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	((Label*) frPersonal->get_label_widget())->set_use_markup();
 	((Label*) frContacts->get_label_widget())->set_use_markup();
 
+	tbPersonal->set_margin_top(4);
+	tbPersonal->set_margin_left(2);
+	tbPersonal->set_margin_right(2);
+	tbContacts->set_margin_top(4);
+	tbContacts->set_margin_left(2);
+	tbContacts->set_margin_right(2);
 
+
+	mGrid->set_column_spacing(5);
+	btnBox->set_margin_top(3);
+	btnBox->set_margin_bottom(5);
+	btnBox->set_margin_right(5);
 
 	helper_entry_focusOut(m_txtPhone, m_phoneStatus, (char*)"Telefone...");
 	helper_entry_focusOut(m_txtCellphone, m_cellphoneStatus, (char*)"Telemóvel...");

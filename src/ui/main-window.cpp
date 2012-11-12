@@ -74,7 +74,7 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath, RefPtr<Appli
 	tbinfo->set_row_spacings(6);
 
 	swPatients->add(m_treePatients);
-	pbox2->pack_start(m_lblPatients, false, true, 4);
+	//pbox2->pack_start(m_lblPatients, false, true, 4);
 	pbox2->pack_start(m_entryPatients, true, true, 0);
 	pbox1->pack_start(*pbox2, false, true, 4);
 	pbox1->pack_start(*swPatients, true, true, 2);
@@ -104,7 +104,7 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath, RefPtr<Appli
 
 	/*TODO: find a way to change the style when the text is for help and not the user text.*/
 	//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
-	m_entryPatients.set_text("Procurar...");
+	m_entryPatients.set_text("Procurar paciente...");
 	m_entryPatients.set_icon_from_stock(Stock::FIND);
 
 	m_mtbAdd.set_stock_id(Stock::ADD);
@@ -154,8 +154,13 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath, RefPtr<Appli
 	m_entryPatients.signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_txtSearch_changed));
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
 	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
-
 	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
+
+	m_frpinfo.set_margin_left(5);
+	m_frpinfo.set_margin_right(5);
+	m_frpinfo.set_margin_bottom(2);
+	m_entryPatients.set_margin_left(2);
+	swPatients->set_margin_left(2);
 
 	m_app->add_window(*m_pw);
 
@@ -260,7 +265,7 @@ bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 
 		/*TODO: find a way to change the style when the text is for help and not the user text.*/
 		//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
-		m_entryPatients.set_text("Procurar...");
+		m_entryPatients.set_text("Procurar paciente...");
 	}
 
 	return true;
