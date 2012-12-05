@@ -154,10 +154,15 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath, RefPtr<Appli
 	m_entryPatients.signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_txtSearch_changed));
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
 	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
-
 	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
 
 	m_app->add_window(*m_pw);
+
+	m_frpinfo.set_margin_left(6);
+	m_frpinfo.set_margin_right(6);
+	binfo->set_margin_left(2);
+	binfo->set_margin_right(2);
+	binfo->set_margin_top(4);
 
 	add(*mbox);
 	binfo->show_all();
@@ -442,3 +447,8 @@ void MainWindow::patient_window_add(PatientWindow &pw)
 	m_db.close();
 }
 
+
+void MainWindow::filter_patient_by_name(ustring& filter) const
+{
+	//RefPtr<Regex> pRegex = Regex::Create(".+" + filter + ".+");
+}

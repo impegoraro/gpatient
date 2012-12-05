@@ -99,6 +99,8 @@ protected:
 	bool handler_timeout_search();
 
 	void patient_window_add(PatientWindow &);
+
+	void filter_patient_by_name(Glib::ustring&) const;
 };
 
 #endif

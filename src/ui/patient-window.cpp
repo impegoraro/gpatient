@@ -47,7 +47,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
 	Frame *frContacts = manage(new Frame("<b>Morada e Contacto</b>"));
 	Table *tbPersonal = manage(new Table(9, 3, false));
-	Box *bZip = manage(new HBox(false, 0));
+	Box *bZip = manage(new HBox(false, 0)), *bPhones = manage(new HBox(true, 0));
 	Grid *tbContacts = manage(new Grid());
 	Grid *mGrid = manage(new Grid());
 	ButtonBox *btnBox = manage(new ButtonBox());
@@ -84,18 +84,22 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	bZip->pack_start(m_lblZip, false, true, 0);
 	bZip->pack_start(m_txtZip2, false, true, 0);
 
-	tbContacts->attach(m_lblAddress, 0, 0, 1, 1);
-	tbContacts->attach(m_txtAddress, 1, 0, 1, 1);
+	bPhones->pack_start(m_txtPhone, true, true, 0);
+	bPhones->pack_start(m_txtCellphone, true, true, 0);
+
+	tbContacts->attach(m_lblAddress, 0, 0, 1, 2);
+	tbContacts->attach(m_txtAddress, 1, 0, 2, 1);
 	tbContacts->attach(m_lblLocation, 0, 2, 1, 1);
 	tbContacts->attach(m_txtLocation, 1, 2, 1, 1);
 	tbContacts->attach_next_to(*bZip, m_txtLocation, Gtk::PositionType::POS_RIGHT, 1, 1);
 	tbContacts->attach(m_lblContact, 0, 3, 1, 1);
-	tbContacts->attach(m_txtPhone, 1, 3, 1, 1);
-	tbContacts->attach(m_txtCellphone, 2, 3, 1, 1);
+	//tbContacts->attach(m_txtPhone, 1, 3, 1, 1);
+	//tbContacts->attach(m_txtCellphone, 2, 3, 1, 1);
+	tbContacts->attach(*bPhones, 1, 3, 1, 1);
 	tbContacts->attach(m_lblEmail, 0, 4, 1, 1);
-	tbContacts->attach(m_txtEmail, 1, 4, 1, 1);
+	tbContacts->attach(m_txtEmail, 1, 4, 2, 1);
 	tbContacts->attach(m_lblReferer, 0, 5, 1, 1);
-	tbContacts->attach(m_txtReferer, 1, 5, 1, 1);
+	tbContacts->attach(m_txtReferer, 1, 5, 2, 1);
 
 	btnBox->add(m_btnAccept);
 	btnBox->add(m_btnCancel);
@@ -105,9 +109,24 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	mGrid->attach(*frContacts, 1, 2, 1, 1);
 	mGrid->attach_next_to(*btnBox, *frContacts, PositionType::POS_BOTTOM, 1, 1);
 
-	frPersonal->set_margin_left(5);
+	// Set paddings
+
+	m_lblTitle.set_margin_top(5);
+
+	tbPersonal->set_margin_left(3);
+	tbPersonal->set_margin_right(3);
+	tbPersonal->set_margin_top(5);
+	tbContacts->set_margin_left(3);
+	tbContacts->set_margin_right(3);
+	tbContacts->set_margin_top(5);
+
+	frPersonal->set_margin_left(10);
 	frContacts->set_margin_left(5);
-	frContacts->set_margin_right(5);
+	frContacts->set_margin_right(10);
+
+
+	btnBox->set_margin_bottom(5);
+	btnBox->set_margin_right(10);
 
 	add(*mGrid);
 
@@ -175,8 +194,8 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblReferer.set_mnemonic_widget(m_txtReferer);
 	m_lblZip.set_padding(0, 0);
 
-	tbPersonal->set_row_spacings(5);
-	//tbContacts->set_row_spacings(5);
+	tbPersonal->set_row_spacings(10);
+	//tbContacts->set_row_spacings(10);
 	m_txtName.set_max_length(70);
 	m_txtAddress.set_max_length(100);
 	m_txtNationality.set_max_length(30);
@@ -186,9 +205,11 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_txtLocation.set_max_length(50);
 	m_txtTaxNumber.set_max_length(9);
 	m_txtPhone.set_max_length(9);
+	m_txtPhone.set_width_chars(13);
 	m_txtReferer.set_max_length(70);
 	m_txtEmail.set_max_length(255);
 	m_txtCellphone.set_max_length(9);
+	m_txtCellphone.set_width_chars(13);
 	m_txtZip1.set_max_length(4);
 	m_txtZip1.set_hexpand(false);
 	m_txtZip1.set_width_chars(4);
@@ -200,7 +221,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	frContacts->set_shadow_type(ShadowType::SHADOW_OUT);
 	((Label*) frPersonal->get_label_widget())->set_use_markup();
 	((Label*) frContacts->get_label_widget())->set_use_markup();
-
 
 
 	helper_entry_focusOut(m_txtPhone, m_phoneStatus, (char*)"Telefone...");

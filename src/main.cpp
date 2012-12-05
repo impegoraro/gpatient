@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 		dlg.run();
 		exit(1);
 	}
-	MainWindow mwin("Hebanária - Gestão", dbpath, app);
+	MainWindow mwin("Herbanária - Gestão", dbpath, app);
 
 	mwin.show();
 
