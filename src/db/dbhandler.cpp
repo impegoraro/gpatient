@@ -108,10 +108,10 @@ int DBHandler::person_insert(const Person& p) const
 
 		string qBegin = "BEGIN IMMEDIATE TRANSACTION;";
 		string query = "INSERT INTO Person( " \
-						"Name, Address, Zip, Location, Sex, Height, Birthday, " \
+						"Name, Address, Zip1, Zip2, Location, Sex, Height, Birthday, " \
 						"Birthplace, Nationality, Profession, TaxNumber, Referer, " \
 						"Email, RefMaritalStatusID, RefBloodTypeID) " \
-						"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+						"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 		string qPhones = "INSERT INTO Contact(ContactNumber, RefPersonID, RefNumberTypeID, RefCountryCode) VALUES(?,?,?,?)";
 		string qFinish = "COMMIT TRANSACTION;";
 
@@ -129,24 +129,26 @@ int DBHandler::person_insert(const Person& p) const
 			guint16 zip1, zip2;
 			guint32 phones[2] = {p.get_phone(), p.get_cellphone()};
 
+			p.get_zip(zip1, zip2);	
 			sqlite3_bind_text(stmt, 1, p.get_name().c_str(), p.get_name().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 2, p.get_address().c_str(), p.get_address().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 3, p.get_zip().c_str(), p.get_zip().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 4, p.get_locality().c_str(), p.get_locality().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 5, p.get_sex() ? 1:0);
-			sqlite3_bind_double(stmt, 6, p.get_height());
-			sqlite3_bind_text(stmt, 7, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 8, p.get_birthplace().c_str(), p.get_birthplace().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 9, p.get_nationality().c_str(), p.get_nationality().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 10, p.get_profession().c_str(), p.get_profession().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 11, p.get_tax_number());
+			sqlite3_bind_int(stmt, 3, zip1);
+			sqlite3_bind_int(stmt, 4, zip2);
+			sqlite3_bind_text(stmt, 5, p.get_locality().c_str(), p.get_locality().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 6, p.get_sex() ? 1:0);
+			sqlite3_bind_double(stmt, 7, p.get_height());
+			sqlite3_bind_text(stmt, 8, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, p.get_birthplace().c_str(), p.get_birthplace().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, p.get_nationality().c_str(), p.get_nationality().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 11, p.get_profession().c_str(), p.get_profession().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 12, p.get_tax_number());
 			if(p.get_referer().length()>0)
-				sqlite3_bind_text(stmt, 12, p.get_referer().c_str(), p.get_referer().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 13, p.get_referer().c_str(), p.get_referer().bytes(), SQLITE_TRANSIENT);
 			else
-				sqlite3_bind_text(stmt, 12, NULL, -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 13, p.get_email().c_str(), p.get_email().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 14, p.get_marital_status());
-			sqlite3_bind_int(stmt, 15, p.get_blood_type());
+				sqlite3_bind_text(stmt, 13, NULL, -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 14, p.get_email().c_str(), p.get_email().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 15, p.get_marital_status());
+			sqlite3_bind_int(stmt, 16, p.get_blood_type());
 
 			if(sqlite3_step(stmt) == SQLITE_DONE) {
 				res = 1;
@@ -197,6 +199,7 @@ int DBHandler::person_insert(const Person& p) const
 			sqlite3_finalize(stmtE);
 		} else {
 			std::cout<< "Error (" << res <<") while inserting..."<< std::endl<< "'" << query <<"'"<<endl;
+			sqlite3_finalize(stmtB);
 		}
 	} else
 		throw (SqlConnectionClosedException());
@@ -219,7 +222,7 @@ int DBHandler::person_update(const Person& p) const
 
 		string qBegin = "BEGIN IMMEDIATE TRANSACTION;";
 		string query = "UPDATE Person " \
-						"SET Name = ?, Address = ?, Zip = ?, Location = ?, Sex = ?, Height = ?, Birthday = ?, " \
+						"SET Name = ?, Address = ?, Zip1 = ?, Zip2 = ?, Location = ?, Sex = ?, Height = ?, Birthday = ?, " \
 						"Birthplace = ?, Nationality = ?, Profession = ?, TaxNumber = ?, Referer = ?, " \
 						"Email = ?, RefMaritalStatusID = ?, RefBloodTypeID = ? WHERE PersonID = ?;' ";
 		string qPhones = "UPDATE Contact SET ContactNumber = ? WHERE RefPersonID = ? AND RefNumberTypeID = ?;";
@@ -236,27 +239,31 @@ int DBHandler::person_update(const Person& p) const
 
 		if((res = sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
 			guint32 phones[2] = {p.get_phone(), p.get_cellphone()};
+			guint16 zip1, zip2;
 
+			p.get_zip(zip1, zip2);
+			
 			sqlite3_bind_text(stmt, 1, p.get_name().c_str(), p.get_name().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 2, p.get_address().c_str(), p.get_address().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 3, p.get_zip().c_str(), p.get_zip().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 4, p.get_locality().c_str(), p.get_locality().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 5, p.get_sex() ? 1:0);
-			sqlite3_bind_double(stmt, 6, p.get_height());
-			sqlite3_bind_text(stmt, 7, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 8, p.get_birthplace().c_str(), p.get_birthplace().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 9, p.get_nationality().c_str(), p.get_nationality().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 10, p.get_profession().c_str(), p.get_profession().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 11, p.get_tax_number());
+			sqlite3_bind_int(stmt, 3, zip1);
+			sqlite3_bind_int(stmt, 4, zip2);
+			sqlite3_bind_text(stmt, 5, p.get_locality().c_str(), p.get_locality().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 6, p.get_sex() ? 1:0);
+			sqlite3_bind_double(stmt, 7, p.get_height());
+			sqlite3_bind_text(stmt, 8, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, p.get_birthplace().c_str(), p.get_birthplace().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, p.get_nationality().c_str(), p.get_nationality().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 11, p.get_profession().c_str(), p.get_profession().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 12, p.get_tax_number());
 			if(p.get_referer().length()>0)
-				sqlite3_bind_text(stmt, 12, p.get_referer().c_str(), p.get_referer().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 13, p.get_referer().c_str(), p.get_referer().bytes(), SQLITE_TRANSIENT);
 			else
-				sqlite3_bind_text(stmt, 12, NULL, -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 13, p.get_email().c_str(), p.get_email().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 14, p.get_marital_status());
-			sqlite3_bind_int(stmt, 15, p.get_blood_type());
+				sqlite3_bind_text(stmt, 13, NULL, -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 14, p.get_email().c_str(), p.get_email().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 15, p.get_marital_status());
+			sqlite3_bind_int(stmt, 16, p.get_blood_type());
 
-			sqlite3_bind_int(stmt, 16, p.get_id());
+			sqlite3_bind_int(stmt, 17, p.get_id());
 
 			if(sqlite3_step(stmt) == SQLITE_DONE)
 				res = 1;
@@ -333,6 +340,7 @@ int DBHandler::person_update(const Person& p) const
 				m_signal_person_edit(p);
 		} else {
 			std::cout<< "Error (" << res <<") while updating..."<< std::endl<< "'" << query <<"'"<<endl;
+			sqlite3_finalize(stmtB);
 		}
 	} else
 		throw (SqlConnectionClosedException());
@@ -347,11 +355,12 @@ bool DBHandler::get_person(const guint32 id, Person& p) const
 	ustring tmp;
 
 	if(m_db != NULL) {
-		string query = "SELECT Name, Address, Zip, Location, Sex, Height, Birthday, Birthplace, Nationality, " \
+		string query = "SELECT Name, Address, Zip1, Zip2, Location, Sex, Height, Birthday, Birthplace, Nationality, " \
 					"Profession, TaxNumber, Referer, Email, RefBloodTypeID, RefMaritalStatusID FROM Person WHERE PersonID=?";
 
 		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
 			int val(SQLITE_ROW);
+			guint16 zip1, zip2;
 			sqlite3_bind_int(stmt, 1, id);
 
 			while(val == SQLITE_ROW) {
@@ -361,21 +370,22 @@ bool DBHandler::get_person(const guint32 id, Person& p) const
 					p.set_id(id);
 					p.set_name(ustring((const char*)sqlite3_column_text(stmt, 0)));
 					p.set_address(ustring((const char*)sqlite3_column_text(stmt, 1)));
-					tmp = ustring((const char *)sqlite3_column_text(stmt, 2));
-					p.set_zip(tmp);
-					p.set_locality(ustring((const char*)sqlite3_column_text(stmt, 3)));
-					p.set_sex((bool)sqlite3_column_int(stmt, 4));
-					p.set_height((float)sqlite3_column_double(stmt, 5));
-					p.set_birthday(Util::parse_date(string((const char*)sqlite3_column_text(stmt, 6))));
-					p.set_birthplace(ustring((const char*)sqlite3_column_text(stmt, 7)));
-					p.set_nationality(ustring((const char*)sqlite3_column_text(stmt, 8)));
-					p.set_profession(ustring((const char*)sqlite3_column_text(stmt, 9)));
-					p.set_tax_number((guint32)sqlite3_column_int(stmt, 10));
-					if(sqlite3_column_text(stmt, 11) != NULL)
-						p.set_referer(ustring((const char*)sqlite3_column_text(stmt, 11)));
-					p.set_email(ustring((const char *)sqlite3_column_text(stmt, 12)));
-					p.set_blood_type(sqlite3_column_int(stmt, 13));
-					p.set_marital_status(sqlite3_column_int(stmt, 14));
+					zip1 = sqlite3_column_int(stmt, 2);
+					zip2 = sqlite3_column_int(stmt, 3);
+					p.set_zip(zip1, zip2);
+					p.set_locality(ustring((const char*)sqlite3_column_text(stmt, 4)));
+					p.set_sex((bool)sqlite3_column_int(stmt, 5));
+					p.set_height((float)sqlite3_column_double(stmt, 6));
+					p.set_birthday(Util::parse_date(string((const char*)sqlite3_column_text(stmt, 7))));
+					p.set_birthplace(ustring((const char*)sqlite3_column_text(stmt, 8)));
+					p.set_nationality(ustring((const char*)sqlite3_column_text(stmt, 9)));
+					p.set_profession(ustring((const char*)sqlite3_column_text(stmt, 10)));
+					p.set_tax_number((guint32)sqlite3_column_int(stmt, 11));
+					if(sqlite3_column_text(stmt, 12) != NULL)
+						p.set_referer(ustring((const char*)sqlite3_column_text(stmt, 12)));
+					p.set_email(ustring((const char *)sqlite3_column_text(stmt, 13)));
+					p.set_blood_type(sqlite3_column_int(stmt, 14));
+					p.set_marital_status(sqlite3_column_int(stmt, 15));
 					break;
 				}
 				case SQLITE_DONE: {

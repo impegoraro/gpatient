@@ -101,6 +101,7 @@ public:
 	void set_sex(bool sex);
 	guint32 get_tax_number() const;
 	void set_tax_number(guint32 taxNumber);
+	void set_zip(guint16 zip1, guint16 zip2);
 	void set_zip(Glib::ustring& zip);
 	void get_zip(guint16 &zip1, guint16 &zip2) const;
 	Glib::ustring get_zip() const;

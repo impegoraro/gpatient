@@ -17,4 +17,6 @@ missing
 .settings
 config.h
 stamp-h1
+.anjuta/
+.anjuta_sym_db.db
 

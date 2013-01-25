@@ -1,3 +1,4 @@
+
 /*
  * person.cpp
  *
@@ -131,7 +132,7 @@ const Glib::ustring& Person::get_name() const {
 }
 
 void Person::set_name(const Glib::ustring& name) {
-	m_name = name.casefold();
+	m_name = name;
 }
 
 guint32 Person::get_phone() const {
@@ -183,6 +184,12 @@ void Person::set_zip(Glib::ustring& zip)
 	ss<< zip.raw();
 
 	ss>> m_zip1>> c>> m_zip2;
+}
+
+void Person::set_zip(guint16 zip1, guint16 zip2)
+{
+	m_zip1 = zip1;
+	m_zip2 = zip2;
 }
 
 ustring Person::get_zip() const 
