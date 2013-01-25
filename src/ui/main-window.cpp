@@ -25,8 +25,8 @@ using namespace Gtk;
 // File Constant
 #define SEARCH_TIMEOUT 0.325
 
-MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(), m_app(app),
-	m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),
+MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(WINDOW_TOPLEVEL),
+	m_app(app), m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),
 	m_mHelp("_Ajuda", true), m_mhAbout(Stock::ABOUT),
 	m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
@@ -34,7 +34,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_frpinfo("<b>Identificação</b>"),
 	m_lblsugestions("<span size=\"xx-large\">Para começar selecione um paciente da lista</span>")
 {
-	Box *mbox = manage(new VBox()), *pbox1 = manage(new VBox()), *pbox2 = manage(new HBox());
+	Box *mbox = manage(new VBox()), *pbox1 = manage(new HBox(false, 0));
 	ScrolledWindow *swPatients = manage(new ScrolledWindow()), *swVisits = manage(new ScrolledWindow());
 	m_modelPatients = ListStore::create(m_lpCols);
 	Box *binfo, *pbox3;
@@ -75,33 +75,28 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	tbinfo->set_row_spacings(6);
 
 	swPatients->add(m_treePatients);
-	//pbox2->pack_start(m_lblPatients, false, true, 4);
-	pbox2->pack_start(m_entryPatients, true, true, 0);
-	pbox1->pack_start(*pbox2, false, true, 4);
-	pbox1->pack_start(*swPatients, true, true, 2);
-
 	swVisits->add(m_treeVisits);
-
+	//pbox1->pack_start(m_entryPatients, false, true, 4);
+	//pbox1->pack_start(*swPatients, true, true, 2);
+	
 	pbox3->pack_start(m_frpinfo, false, true, 1);
 	pbox3->pack_start(*swVisits, true, true, 2);
 	pbox3->pack_start(m_lblsugestions, true, true, 50);
 
+	pbox1->pack_start(m_entryPatients, PACK_EXPAND_PADDING);
+	
 	mbox->pack_start(m_mainMenu, false, true, 0);
 	mbox->pack_start(m_mainToolbar, false, true, 0);
-	mbox->pack_start(m_paned1);
+	//mbox->pack_start(m_entryPatients, false, true, 0);
+	mbox->pack_start(*pbox1, PACK_SHRINK);
+	mbox->pack_start(*swPatients, true, true, 0);
 
 	swPatients->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	swVisits->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-
-	m_paned1.pack1(*pbox1, false, true);
-	m_paned1.pack2(*pbox3);
-
 	((Label*)m_frpinfo.get_label_widget())->set_use_markup();
 	m_lblPatients.set_use_markup();
 	m_lblPatients.set_alignment(0.00f, 0.5f);
-
-	m_paned1.get_child1()->set_size_request(220, -1);
 
 	/*TODO: find a way to change the style when the text is for help and not the user text.*/
 	//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
@@ -146,7 +141,6 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_treeFilter = TreeModelFilter::create(m_modelPatients);
 	
 	m_treePatients.set_model (m_treeFilter);
-	//m_treePatients.set_model(m_modelPatients);
 	m_treeFilter->set_visible_func(sigc::mem_fun(*this, &MainWindow::filter_patient_by_name));
 	
 	db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
@@ -163,31 +157,30 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
 	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
 
-	m_frpinfo.set_margin_left(5);
-	m_frpinfo.set_margin_right(5);
-	m_frpinfo.set_margin_bottom(2);
-	m_entryPatients.set_margin_left(2);
-	swPatients->set_margin_left(2);
+
+	/************************************
+	 *    Setting up some properties    *
+	 ***********************************/
+	m_entryPatients.set_width_chars(40);
+	m_entryPatients.set_margin_top(2);
+	m_entryPatients.set_margin_bottom(6);
+	m_entryPatients.set_margin_left(100);
+	m_entryPatients.set_margin_right(100);
+	swPatients->set_margin_left(5);
+	swPatients->set_margin_right(5);
+	swPatients->set_margin_top(5);
+	swPatients->set_margin_bottom(5);
 
 	m_app->add_window(*m_pw);
 
-	m_frpinfo.set_margin_left(6);
-	m_frpinfo.set_margin_right(6);
-	binfo->set_margin_left(2);
-	binfo->set_margin_right(2);
-	binfo->set_margin_top(4);
-
 	add(*mbox);
-	binfo->show_all();
 	show_all_children();
-	m_frpinfo.hide();
-	swVisits->hide();
 }
 
 MainWindow::~MainWindow()
 {
-	m_app->remove_window(*m_pw);
-	delete m_pw;
+	/*m_app->remove_window(*m_pw);
+	delete m_pw;*/
 }
 
 /* Helpers */

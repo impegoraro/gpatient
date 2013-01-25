@@ -20,14 +20,14 @@ class CalendarWindow : public Gtk::Dialog
 {
 
 public:
-	CalendarWindow(Gtk::Window&);
+	CalendarWindow(Gtk::Window&, Gtk::Widget&);
 
 	void selected_date(Glib::Date&) const;
-	void popup(Gtk::Entry& widget, unsigned int x, unsigned int y);
+	void popup(unsigned int x, unsigned int y);
 
 protected:
 	Gtk::Calendar m_cal;
-	Gtk::Entry *m_wDate;
+	Gtk::Widget *m_wDate;
 
 	void on_selected_day(void);
 

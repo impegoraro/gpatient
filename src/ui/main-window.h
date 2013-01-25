@@ -22,7 +22,10 @@ protected:
 	public:
 
 		ListPatientsCols()
-		{ add(m_col_id); add(m_col_name); }
+		{
+			add(m_col_id);
+			add(m_col_name);
+		}
 
 		Gtk::TreeModelColumn<unsigned int> m_col_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
@@ -37,12 +40,11 @@ protected:
 	Gtk::MenuItem m_mHelp;
 	Gtk::ImageMenuItem m_mhAbout;
 
-
 	Gtk::Toolbar m_mainToolbar;
 	Gtk::ToolButton m_mtbAdd;
 	Gtk::ToolButton m_mtbEdit;
 	Gtk::ToolButton m_mtbRemove;
-	Gtk::Paned m_paned1;
+
 	Gtk::Label m_lblPatients;
 	Gtk::Entry m_entryPatients;
 	Gtk::TreeView m_treePatients;

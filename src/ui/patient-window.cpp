@@ -41,7 +41,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblTaxNumber("Nº _Identificação Fiscal:", true), m_lblMaritalStatus("Es_tado Civil:", true),
 	m_lblAddress("_Morada:", true), m_lblLocation("_Localidade:", true),
 	m_lblZip("-"), m_lblContact("_Contactos:", true), m_lblReferer("_Enviado por:", true),
-	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false), m_wincal(*this),
+	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false), m_wincal(*this, m_txtBirthday),
 	m_btnAccept(type == PW_TYPE_ADD? Stock::ADD:Stock::EDIT), m_btnCancel(Stock::CANCEL)
 {
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
@@ -53,6 +53,8 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	ButtonBox *btnBox = manage(new ButtonBox());
 
 	set_title((ustring)title);
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
+	set_transient_for(parent);
 	set_modal();
 
 	frPersonal->add(*tbPersonal);
@@ -401,7 +403,7 @@ bool PatientWindow::on_focusIn_show_calendar(GdkEventFocus *focus)
 	int x, y;
 
 	get_window()->get_position(x, y);
-	m_wincal.popup(m_txtBirthday, x + 125, y + 200);
+	m_wincal.popup(x + 125, y + 200);
 	m_txtBirthplace.grab_focus();
 	return false;
 }
