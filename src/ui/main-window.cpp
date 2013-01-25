@@ -25,7 +25,7 @@ using namespace Gtk;
 // File Constant
 #define SEARCH_TIMEOUT 0.325
 
-MainWindow::MainWindow(const ustring& title, const ustring& dbpath, RefPtr<Application>& app) : Window(), m_db(dbpath), m_app(app),
+MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(), m_app(app),
 	m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),
 	m_mHelp("_Ajuda", true), m_mhAbout(Stock::ABOUT),
 	m_lblPatients("<b>_Pacientes</b>", true),
@@ -39,7 +39,8 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath, RefPtr<Appli
 	m_modelPatients = ListStore::create(m_lpCols);
 	Box *binfo, *pbox3;
 	Table *tbinfo;
-
+	DBHandler db = DBHandler::get_instance();
+	
 	m_pw = new PatientWindow(*this, "Dados do paciente", PatientWindow::PW_TYPE_ADD);
 
 	// Clear search timer...
@@ -135,15 +136,21 @@ MainWindow::MainWindow(const ustring& title, const ustring& dbpath, RefPtr<Appli
 	/* Setting up columns in list patients */
 	TreeViewColumn *col;
 
-	m_treePatients.set_model(m_modelPatients);
 	col = m_treePatients.get_column(m_treePatients.append_column("id", m_lpCols.m_col_id)-1);
 	col->set_visible(false);
 	col = m_treePatients.get_column(m_treePatients.append_column("Nome", m_lpCols.m_col_name)-1);
 	col->set_expand();
 	col->set_resizable();
 
-	m_db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
-	m_db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
+	// set up the filter
+	m_treeFilter = TreeModelFilter::create(m_modelPatients);
+	
+	m_treePatients.set_model (m_treeFilter);
+	//m_treePatients.set_model(m_modelPatients);
+	m_treeFilter->set_visible_func(sigc::mem_fun(*this, &MainWindow::filter_patient_by_name));
+	
+	db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
+	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
 	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
 	m_mtbRemove.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolRemove_clicked));
@@ -186,6 +193,7 @@ MainWindow::~MainWindow()
 /* Helpers */
 void MainWindow::hlpr_append_patient(guint32 id, const ustring& name)
 {
+	//m_treePatients.unset_model();
 	TreeModel::Row row = *(m_modelPatients->append());
 
 	row[m_lpCols.m_col_id] = id;
@@ -194,87 +202,20 @@ void MainWindow::hlpr_append_patient(guint32 id, const ustring& name)
 
 /* Signal Handlers */
 
-void MainWindow::on_btnToolAdd_clicked(void)
+bool MainWindow::on_delete_event(GdkEventAny * event)
 {
-	m_pw->set_window_type(PatientWindow::PW_TYPE_ADD);
-	m_pw->show();
-}
-
-void MainWindow::on_btnToolEdit_clicked(void)
-{
-	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
-	TreeModel::iterator iter = sel->get_selected();
-	ListPatientsCols cols;
-
-	if(*iter) {
-		TreeModel::Row row = *iter;
-		Person p(row[cols.m_col_id]);
-		m_db.open();
-		if(m_db.get_person(row[cols.m_col_id], p)) {
-			m_db.close();
-			m_pw->set_window_type(PatientWindow::PW_TYPE_EDIT);
-			m_pw->set_person(p);
-			m_pw->show();
-		}
-	}
-}
-
-void MainWindow::on_btnToolRemove_clicked()
-{
-	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
-	TreeModel::iterator iter = sel->get_selected();
-
-	if(*iter) {
-		m_db.open();
-		if(m_db.person_remove((*iter)[m_lpCols.m_col_id]))
-			m_modelPatients->erase(iter);
-		else {
-			MessageDialog dlg((string)"Não foi possível remover o paciente selecionado", false, MESSAGE_ERROR, BUTTONS_OK, true);
-			dlg.run();
-		}
-		m_db.close();
-	} else {
-		MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
-		dlg.run();
-	}
+	return false;
 }
 
 void MainWindow::on_window_show(void)
 {
-	if(m_db.open()) {
-		m_db.get_patients(NULL);
-		m_db.close();
+	DBHandler db = DBHandler::get_instance();
+
+	if(db.open()) {
+		db.get_patients(NULL);
+		db.close();
 	} else
 		cout<< "Error while opening the database..."<< endl;
-}
-
-bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
-{
-	if(m_entryPatientStatus) {
-		m_entryPatientStatus = false;
-		/*TODO: find a way to change the style when the text is for help and not the user text.*/
-		//m_entryPatients.unset_text(STATE_NORMAL);
-		m_entryPatients.set_text("");
-	}
-
-	return true;
-}
-
-bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
-{
-	RefPtr<CssProvider> css = CssProvider::create();
-
-	if(!m_entryPatientStatus && m_entryPatients.get_text_length() == 0) {
-		m_entryPatientStatus = true;
-		css->load_from_data("GtkEntry{ color: gray;}");
-		m_entryPatients.get_style_context()->add_provider(css, 1);
-
-		/*TODO: find a way to change the style when the text is for help and not the user text.*/
-		//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
-		m_entryPatients.set_text("Procurar paciente...");
-	}
-
-	return true;
 }
 
 void MainWindow::on_mhAbout_activate(void)
@@ -296,6 +237,54 @@ void MainWindow::on_mhAbout_activate(void)
 	about.run();
 }
 
+
+void MainWindow::on_btnToolAdd_clicked(void)
+{
+	m_pw->set_window_type(PatientWindow::PW_TYPE_ADD);
+	m_pw->show();
+}
+
+void MainWindow::on_btnToolEdit_clicked(void)
+{
+	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
+	TreeModel::iterator iter = sel->get_selected();
+	ListPatientsCols cols;
+	DBHandler db = DBHandler::get_instance();
+
+	if(*iter) {
+		TreeModel::Row row = *iter;
+		Person p(row[cols.m_col_id]);
+		db.open();
+		if(db.get_person(row[cols.m_col_id], p)) {
+			db.close();
+			m_pw->set_window_type(PatientWindow::PW_TYPE_EDIT);
+			m_pw->set_person(p);
+			m_pw->show();
+		}
+	}
+}
+
+void MainWindow::on_btnToolRemove_clicked()
+{
+	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
+	TreeModel::iterator iter = sel->get_selected();
+	DBHandler db = DBHandler::get_instance();
+
+	if(*iter) {
+		db.open();
+		if(db.person_remove((*iter)[m_lpCols.m_col_id]))
+			m_modelPatients->erase(iter);
+		else {
+			MessageDialog dlg((string)"Não foi possível remover o paciente selecionado", false, MESSAGE_ERROR, BUTTONS_OK, true);
+			dlg.run();
+		}
+		db.close();
+	} else {
+		MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
+		dlg.run();
+	}
+}
+
 void  MainWindow::on_treePatients_selected()
 {
 	Person p;
@@ -305,19 +294,25 @@ void  MainWindow::on_treePatients_selected()
 	bool close= true;
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator row = sel->get_selected();
+	DBHandler db = DBHandler::get_instance();
 
 	today.set_time_current();
 
+	if(!row) {
+		cout<< "Iterator is not valid"<< endl;
+		return;
+	}
+	
 	if(*row) {
 		try{
-			m_db.open();
+			db.open();
 		} catch(SqlConnectionOpenedException& ex) {
 			close = false;
 		}
 
-		m_db.get_person((*row)[m_lpCols.m_col_id], p);
+		db.get_person((*row)[m_lpCols.m_col_id], p);
 		if(close)
-			m_db.close();
+			db.close();
 		m_lblpname.set_text(ustring("<b>Paciente:</b> <i>") + p.get_name() + "</i>");
 		age = today.get_year() - p.get_birthday().get_year();
 
@@ -350,38 +345,6 @@ void  MainWindow::on_treePatients_selected()
 		m_frpinfo.hide();
 		m_treeVisits.get_parent()->hide();
 	}
-}
-
-void MainWindow::on_txtSearch_changed()
-{
-	m_timerSearch.reset();
-	m_timerSearch.start();
-}
-
-bool MainWindow::handler_timeout_search()
-{
-	if(m_timerSearch.elapsed() > SEARCH_TIMEOUT) {
-		try {
-			ustring tmp;
-			m_db.open();
-			m_modelPatients->clear();
-			if(m_entryPatientStatus)
-				m_db.get_patients(NULL);
-			else {
-				tmp = m_entryPatients.get_text();
-				m_db.get_patients(&tmp);
-			}
-			m_db.close();
-
-			m_timerSearch.stop();
-			m_timerSearch.reset();
-
-		} catch(SqlConnectionException& ex) {
-
-		}
-	}
-
-	return true;
 }
 
 void MainWindow::on_db_person_edited(const Person &p)
@@ -421,22 +384,18 @@ void MainWindow::on_db_person_edited(const Person &p)
 	m_treeVisits.get_parent()->show();
 }
 
-bool MainWindow::on_delete_event(GdkEventAny * event)
-{
-	return false;
-}
-
 void MainWindow::patient_window_add(PatientWindow &pw)
 {
 	Person p;
+	DBHandler db = DBHandler::get_instance();
 
 	pw.get_person(p);
-	m_db.open();
+	db.open();
 	try {
 		if(pw.get_window_type() == PatientWindow::PW_TYPE_ADD)
-			m_db.person_insert(p);
+			db.person_insert(p);
 		else {
-			m_db.person_update(p);
+			db.person_update(p);
 			RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 			TreeModel::iterator iter = sel->get_selected();
 			ListPatientsCols cols;
@@ -450,11 +409,67 @@ void MainWindow::patient_window_add(PatientWindow &pw)
 		MessageDialog msg(*this, ex.what(), false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
 		msg.run();
 	}
-	m_db.close();
+	db.close();
 }
 
-
-void MainWindow::filter_patient_by_name(ustring& filter) const
+void MainWindow::on_txtSearch_changed()
 {
-	//RefPtr<Regex> pRegex = Regex::Create(".+" + filter + ".+");
+	m_timerSearch.reset();
+	m_timerSearch.start();
 }
+
+bool MainWindow::handler_timeout_search()
+{
+	if(m_timerSearch.elapsed() > SEARCH_TIMEOUT) {
+		RefPtr<TreeModelFilter> filter = RefPtr<TreeModelFilter>::cast_dynamic (m_treePatients.get_model());
+
+		filter->refilter();
+		
+		m_timerSearch.stop();
+		m_timerSearch.reset();
+	}
+
+	return true;
+}
+
+bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
+{
+	if(m_entryPatientStatus) {
+		m_entryPatientStatus = false;
+		/*TODO: find a way to change the style when the text is for help and not the user text.*/
+		//m_entryPatients.unset_text(STATE_NORMAL);
+		m_entryPatients.set_text("");
+	}
+
+	return true;
+}
+
+bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
+{
+	RefPtr<CssProvider> css = CssProvider::create();
+
+	if(!m_entryPatientStatus && m_entryPatients.get_text_length() == 0) {
+		m_entryPatientStatus = true;
+		css->load_from_data("GtkEntry{ color: gray;}");
+		m_entryPatients.get_style_context()->add_provider(css, 1);
+
+		/*TODO: find a way to change the style when the text is for help and not the user text.*/
+		//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
+		m_entryPatients.set_text("Procurar paciente...");
+	}
+
+	return true;
+}
+
+bool MainWindow::filter_patient_by_name(const TreeModel::const_iterator& iter)
+{
+	//RefPtr<Regex> pRegex = Regex::create(".*" + m_entryPatients.get_text() + ".*");
+	ustring item = (*iter)[m_lpCols.m_col_name];
+
+	//std::cout<< "Refiltering..."<< std::endl;
+	if(m_entryPatientStatus || Regex::match_simple(".*" + m_entryPatients.get_text() + ".*", item))
+		return true;
+	else
+		return false;
+}
+

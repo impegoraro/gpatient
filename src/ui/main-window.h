@@ -53,6 +53,7 @@ protected:
 
 	ListPatientsCols m_lpCols;
 
+	Glib::RefPtr<Gtk::TreeModelFilter> m_treeFilter;
 	Glib::RefPtr<Gtk::ListStore> m_modelPatients;
 
 	// Selected patient information
@@ -62,12 +63,11 @@ protected:
 	Gtk::Label m_lblpheight;
 	Gtk::Label m_lblpage;
 	Gtk::Label m_lblpsex;
-
+	
 	//Glib::SignalTimeout m_searchTimeout;
 	sigc::connection m_connSearch;
 	Glib::Timer m_timerSearch;
 
-	DBHandler m_db;
 	bool m_entryPatientStatus;
 	bool m_fireSearch;
 	Glib::RefPtr<Gtk::Application> m_app;
@@ -75,7 +75,7 @@ protected:
 	PatientWindow *m_pw;
 public:
 
-	MainWindow(const Glib::ustring& title, const Glib::ustring& dbpath, Glib::RefPtr<Gtk::Application>& app);
+	MainWindow(const Glib::ustring& title, Glib::RefPtr<Gtk::Application>& app);
 	virtual ~MainWindow();
 	/* Helper Functions */
 	void hlpr_append_patient(guint32 id, const Glib::ustring& name);
@@ -100,7 +100,7 @@ protected:
 
 	void patient_window_add(PatientWindow &);
 
-	void filter_patient_by_name(Glib::ustring&) const;
+	bool filter_patient_by_name(const Gtk::TreeModel::const_iterator&);
 };
 
 #endif

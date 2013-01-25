@@ -13,6 +13,7 @@
 #include <iostream>
 
 #include "ui/main-window.h"
+#include "db/dbhandler.h"
 
 using namespace Gtk;
 using namespace std;
@@ -43,8 +44,8 @@ int main(int argc, char** argv)
 		dlg.run();
 		exit(1);
 	}
-	
-	MainWindow mwin("Hebanária - Gestão", dbpath, app);
+	DBHandler::get_instance((string)dbpath);
+	MainWindow mwin("Herbanária - Gestão", app);
 	app->add_window(mwin);
 	mwin.show();
 

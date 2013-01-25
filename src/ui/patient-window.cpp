@@ -309,11 +309,14 @@ void PatientWindow::set_person(const Person& p)
 
 void PatientWindow::get_person(Person& p) const
 {
+	ustring tmp;
 	p.set_id(m_id);
 	p.set_name(m_txtName.get_text());
 	p.set_height((float)m_txtHeight.get_value());
 	p.set_sex(m_rbMale.get_active());
-	p.set_zip((guint16) atoi(m_txtZip1.get_text().c_str()), (guint16) atoi(m_txtZip2.get_text().c_str()));
+	//p.set_zip((guint16) atoi(m_txtZip1.get_text().c_str()), (guint16) atoi(m_txtZip2.get_text().c_str()));
+	tmp = m_txtZip1.get_text() + "-" + m_txtZip2.get_text();
+	p.set_zip(tmp);
 	p.set_nationality(m_txtNationality.get_text());
 	p.set_birthday(Util::parse_date((string) m_txtBirthday.get_text()));
 	p.set_birthplace(m_txtBirthplace.get_text());

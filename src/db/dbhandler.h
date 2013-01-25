@@ -14,6 +14,9 @@
 
 #include "../person.h"
 
+/*
+ * This class is a singleton to the proxy that interacts with the database.
+ */
 class DBHandler
 {
 protected:
@@ -22,16 +25,23 @@ protected:
 
 	sqlite3 *m_db;
 
-	sigc::signal<void, guint32, const Glib::ustring&> m_signal_person_added;
-	sigc::signal<void, const Person&> m_signal_person_edit;
-public:
-	// PersonID, Person Name
-
+	// singleton instance
+	static DBHandler *m_handle;
 
 	DBHandler(const std::string& dbname, bool use_fk_constraint = true);
 
-	int person_insert(const Person& p) const;
-	int person_update(const Person& p) const;
+	inline bool user_has_contact(const Person& p) const;
+
+	sigc::signal<void, guint32, const Glib::ustring&> m_signal_person_added;
+	sigc::signal<void, const Person&> m_signal_person_edit;
+public:
+
+	static DBHandler& get_instance(const std::string& dbpath);
+	static DBHandler& get_instance();
+	static void finalize(void);
+
+	int  person_insert(const Person& p) const;
+	int  person_update(const Person& p) const;
 	bool person_remove(unsigned int id) const;
 
 	void get_patients(const Glib::ustring *name) const;

@@ -12,13 +12,13 @@ using namespace std;
 using namespace Glib;
 
 Person::Person() : m_id(0), m_height(1.0), m_bloodtype(BT_A), m_sex(true), m_taxNumber(0),
-	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER), m_zip1(0), m_zip2(0)
+	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER)
 {
 }
 
 Person::Person(guint32 id) :
 	m_id(id), m_height(1.0), m_bloodtype(BT_A), m_sex(true), m_taxNumber(0),
-	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER), m_zip1(0), m_zip2(0)
+	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER)
 {
 }
 
@@ -131,7 +131,7 @@ const Glib::ustring& Person::get_name() const {
 }
 
 void Person::set_name(const Glib::ustring& name) {
-	m_name = name;
+	m_name = name.casefold();
 }
 
 guint32 Person::get_phone() const {
@@ -174,17 +174,25 @@ void Person::set_tax_number(guint32 taxNumber) {
 	m_taxNumber = taxNumber;
 }
 
-void Person::set_zip(guint16 zip1, guint16 zip2)
+void Person::set_zip(Glib::ustring& zip)
 {
-	m_zip1 = zip1;
-	m_zip2 = zip2;
+	//size_type i = zip.find('-');
+	std::stringstream ss;
+	char c;
+
+	ss<< zip.raw();
+
+	ss>> m_zip1>> c>> m_zip2;
 }
 
-string Person::get_zip() const {
-	stringstream ss(stringstream::in);
+ustring Person::get_zip() const 
+{
+	/*std::ostringstream os;
 
-	ss<< m_zip1<< "-"<< m_zip2;
-	return ss.str();
+	os<< m_zip1 << '-' << m_zip2;
+	return (ustring)os.str();*/
+
+	return ustring::compose("%1-%2", m_zip1, m_zip2);
 }
 
 void Person::get_zip(guint16 &zip1, guint16 &zip2) const
