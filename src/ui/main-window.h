@@ -31,20 +31,16 @@ protected:
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
 	};
 
-	Gtk::MenuBar m_mainMenu;
-	Gtk::Menu m_filemenu;
-	Gtk::MenuItem m_mFile;
-	Gtk::ImageMenuItem m_mfQuit;
-
-	Gtk::Menu m_helpmenu;
-	Gtk::MenuItem m_mHelp;
-	Gtk::ImageMenuItem m_mhAbout;
-
+	Glib::RefPtr<Gtk::UIManager> m_uiman;
+	Glib::RefPtr<Gtk::ActionGroup> m_actionGroup;
+	
 	Gtk::Toolbar m_mainToolbar;
 	Gtk::ToolButton m_mtbAdd;
 	Gtk::ToolButton m_mtbEdit;
 	Gtk::ToolButton m_mtbRemove;
 
+	Gtk::Notebook m_nb;
+	
 	Gtk::Label m_lblPatients;
 	Gtk::Entry m_entryPatients;
 	Gtk::TreeView m_treePatients;
@@ -65,6 +61,8 @@ protected:
 	Gtk::Label m_lblpheight;
 	Gtk::Label m_lblpage;
 	Gtk::Label m_lblpsex;
+	Gtk::LinkButton m_btnShPatient;
+
 	
 	//Glib::SignalTimeout m_searchTimeout;
 	sigc::connection m_connSearch;
@@ -94,6 +92,7 @@ protected:
 	bool on_entryPatient_focusIn(GdkEventFocus *focus);
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
 
+	void on_treePatients_activated(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 	void on_treePatients_selected();
 	void on_txtSearch_changed();
 	void on_db_person_edited(const Person& p);

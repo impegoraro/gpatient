@@ -46,8 +46,9 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 {
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
 	Frame *frContacts = manage(new Frame("<b>Morada e Contacto</b>"));
-	Table *tbPersonal = manage(new Table(9, 3, false));
+	//Table *tbPersonal = manage(new Table(9, 3, false));
 	Box *bZip = manage(new HBox(false, 0)), *bPhones = manage(new HBox(true, 0));
+	Grid *tbPersonal = manage(new Grid());
 	Grid *tbContacts = manage(new Grid());
 	Grid *mGrid = manage(new Grid());
 	ButtonBox *btnBox = manage(new ButtonBox());
@@ -56,11 +57,12 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_transient_for(parent);
 	set_modal();
-
+	
 	frPersonal->add(*tbPersonal);
 	frContacts->add(*tbContacts);
 	frContacts->set_size_request(100,-1);
-	tbPersonal->attach(m_lblName, 0, 1, 0, 1, FILL | SHRINK, FILL, 2, 0);
+
+	/*tbPersonal->attach(m_lblName, 0, 1, 0, 1, FILL | SHRINK, FILL, 2, 0);
 	tbPersonal->attach(m_txtName, 1, 3, 0, 1, FILL | SHRINK | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblHeight, 0, 1, 1, 2, FILL | SHRINK, FILL, 2, 0);
 	tbPersonal->attach(m_txtHeight, 1, 3, 1, 2, FILL | SHRINK | EXPAND, FILL, 2, 0);
@@ -81,6 +83,28 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbPersonal->attach(m_txtTaxNumber, 1, 3, 8, 9, FILL | SHRINK | EXPAND, FILL, 2, 0);
 	tbPersonal->attach(m_lblMaritalStatus, 0, 1, 9, 10, FILL | SHRINK, FILL, 2, 0);
 	tbPersonal->attach(m_cmbMaritalStatus, 1, 3, 9, 10, FILL | SHRINK | EXPAND, FILL, 2, 0);
+	*/
+	tbPersonal->attach(m_lblName, 0, 0, 1, 1);
+	tbPersonal->attach_next_to(m_txtName, m_lblName, POS_RIGHT, 3, 1);
+	tbPersonal->attach(m_lblHeight, 0, 1, 1, 1);
+	tbPersonal->attach_next_to(m_txtHeight, m_lblHeight, POS_RIGHT, 3, 1);
+	tbPersonal->attach(m_lblSex, 0, 2, 1, 1);
+	tbPersonal->attach_next_to(m_rbMale, m_lblSex, POS_RIGHT, 1, 1);
+	tbPersonal->attach_next_to(m_rbFemale, m_rbMale, POS_RIGHT, 1, 1);
+	tbPersonal->attach(m_lblNacionality, 0, 3, 1, 1);
+	tbPersonal->attach_next_to(m_txtNationality, m_lblNacionality, POS_RIGHT, 3, 1);
+	tbPersonal->attach(m_lblBirthday, 0, 4, 1, 1);
+	tbPersonal->attach_next_to(m_txtBirthday, m_lblBirthday, POS_RIGHT, 3, 1);
+	tbPersonal->attach(m_lblBirthplace, 0, 5, 1, 1);
+	tbPersonal->attach_next_to(m_txtBirthplace, m_lblBirthplace, POS_RIGHT, 3, 1);
+	tbPersonal->attach(m_lblProfession, 0, 6, 1, 1);
+	tbPersonal->attach_next_to(m_txtProfession, m_lblProfession, POS_RIGHT, 3, 1);
+	tbPersonal->attach(m_lblBlood, 0, 7, 1, 1);
+	tbPersonal->attach_next_to(m_cmbBlood, m_lblBlood, POS_RIGHT, 3, 1);
+	tbPersonal->attach(m_lblTaxNumber, 0, 8, 1, 1);
+	tbPersonal->attach_next_to(m_txtTaxNumber, m_lblTaxNumber, POS_RIGHT, 3, 1);
+	tbPersonal->attach(m_lblMaritalStatus, 0, 9, 1, 1);
+	tbPersonal->attach_next_to(m_cmbMaritalStatus, m_lblMaritalStatus, POS_RIGHT, 3, 1);
 
 	bZip->pack_start(m_txtZip1, false, true, 0);
 	bZip->pack_start(m_lblZip, false, true, 0);
@@ -112,7 +136,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	mGrid->attach_next_to(*btnBox, *frContacts, PositionType::POS_BOTTOM, 1, 1);
 
 	// Set paddings
-
+	
 	m_lblTitle.set_margin_top(5);
 
 	tbPersonal->set_margin_left(3);
@@ -125,7 +149,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	frPersonal->set_margin_left(10);
 	frContacts->set_margin_left(5);
 	frContacts->set_margin_right(10);
-
 
 	btnBox->set_margin_bottom(5);
 	btnBox->set_margin_right(10);
@@ -146,12 +169,14 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_cmbMaritalStatus.append("Outro...");
 	m_cmbMaritalStatus.set_active(2);
 
-	tbPersonal->set_col_spacings(2);
-	tbContacts->set_row_spacing(10);
+	tbPersonal->set_row_spacing(8);
+	tbPersonal->set_column_spacing(2);
+	tbContacts->set_row_spacing(8);
 	tbContacts->set_column_spacing(2);
 
 	btnBox->set_layout(BUTTONBOX_END);
 
+	m_lblTaxNumber.set_margin_left(4);
 	m_lblTitle.set_margin_left(15);
 	m_lblTitle.set_margin_bottom(15);
 	m_lblTitle.set_alignment(0.00f, 0.5f);
@@ -196,8 +221,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblReferer.set_mnemonic_widget(m_txtReferer);
 	m_lblZip.set_padding(0, 0);
 
-	tbPersonal->set_row_spacings(10);
-	//tbContacts->set_row_spacings(10);
 	m_txtName.set_max_length(70);
 	m_txtAddress.set_max_length(100);
 	m_txtNationality.set_max_length(30);

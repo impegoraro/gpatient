@@ -26,21 +26,31 @@ using namespace Gtk;
 #define SEARCH_TIMEOUT 0.325
 
 MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(WINDOW_TOPLEVEL),
-	m_app(app), m_mFile("_Ficheiro",true ), m_mfQuit(Stock::QUIT),
-	m_mHelp("_Ajuda", true), m_mhAbout(Stock::ABOUT),
+	m_app(app),
 	m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
 	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true),
 	m_frpinfo("<b>Identificação</b>"),
-	m_lblsugestions("<span size=\"xx-large\">Para começar selecione um paciente da lista</span>")
+	m_lblsugestions("<span size=\"xx-large\">Para começar selecione um paciente da lista</span>"),
+	m_btnShPatient("", "Ficha clinica")
 {
-	Box *mbox = manage(new VBox()), *pbox1 = manage(new HBox(false, 0));
+	Box *mbox = manage(new VBox()), *pbox1 = manage(new HBox(false, 0)), *pbox2 = manage(new VBox(false, 0));
 	ScrolledWindow *swPatients = manage(new ScrolledWindow()), *swVisits = manage(new ScrolledWindow());
 	m_modelPatients = ListStore::create(m_lpCols);
 	Box *binfo, *pbox3;
 	Table *tbinfo;
 	DBHandler db = DBHandler::get_instance();
-	
+	Widget * pwidget;
+	ustring menu =  "<ui>" \
+					 "<menubar name='MenuBar'>" \
+					 "<menu name='File' action='MenuFile'>" \
+					 "<menuitem name='Quit' action='MenuQuit' />" \
+					 "</menu> " \
+					 "<menu name='Help' action='MenuHelp'>" \
+					 "<menuitem name='About' action='MenuAbout'/>" \
+					 "</menu>" \
+					 "</menubar>" \
+					 "</ui>";
 	m_pw = new PatientWindow(*this, "Dados do paciente", PatientWindow::PW_TYPE_ADD);
 
 	// Clear search timer...
@@ -51,19 +61,44 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	tbinfo = manage(new Table(5, 2, false));
 	pbox3 = manage(new VBox(false, 5));
 
-	m_mFile.set_submenu(m_filemenu);
-	m_filemenu.append(*manage(new SeparatorMenuItem()));
-	m_filemenu.append(m_mfQuit);
+	/*******************************
+	 *      Creating The Menu      *
+	 ******************************/
+	m_uiman = UIManager::create();
+	m_actionGroup = ActionGroup::create();
 
-	m_mHelp.set_submenu(m_helpmenu);
-	m_helpmenu.append(m_mhAbout);
+	m_actionGroup->add(Action::create("MenuFile", "_Ficheiro"));
+	m_actionGroup->add(Action::create("MenuQuit", Gtk::Stock::QUIT), 
+	                      sigc::ptr_fun(&Main::quit));
+	m_actionGroup->add(Action::create("MenuHelp", "_Ajuda"));
+	m_actionGroup->add(Action::create("MenuAbout", Stock::ABOUT), sigc::mem_fun(*this, &MainWindow::on_mhAbout_activate));
 
-	m_mainMenu.append(m_mFile);
-	m_mainMenu.append(m_mHelp);
+	m_uiman->insert_action_group(m_actionGroup);
+	m_uiman->add_ui_from_string(menu);
+	pwidget = m_uiman->get_widget("/MenuBar");
 
+	add_accel_group(m_uiman->get_accel_group());
+	
 	m_mainToolbar.add(m_mtbAdd);
 	m_mainToolbar.add(m_mtbEdit);
 	m_mainToolbar.add(m_mtbRemove);
+
+	swPatients->add(m_treePatients);
+	swVisits->add(m_treeVisits);
+
+	/*******************************
+	 *       Noteboook Page 1      *
+	 ******************************/
+	pbox2->pack_start(*pbox1, PACK_SHRINK);
+	pbox2->pack_start(*swPatients, true, true, 0);
+	pbox1->pack_start(m_entryPatients, PACK_EXPAND_PADDING);
+
+	m_nb.append_page(*pbox2);
+
+
+	/*******************************
+	 *       Noteboook Page 2      *
+	 ******************************/
 
 	m_frpinfo.add(*binfo);
 	binfo->pack_start(*tbinfo, true, true, 10);
@@ -72,24 +107,53 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	tbinfo->attach(m_lblpbloodtype, 1, 2, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
 	tbinfo->attach(m_lblpheight, 2, 3, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
 	tbinfo->attach(m_lblpsex, 3, 4, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
+	tbinfo->attach(m_btnShPatient, 0, 4, 2, 3, FILL | SHRINK | EXPAND, FILL, 0, 0);
 	tbinfo->set_row_spacings(6);
 
-	swPatients->add(m_treePatients);
-	swVisits->add(m_treeVisits);
-	//pbox1->pack_start(m_entryPatients, false, true, 4);
-	//pbox1->pack_start(*swPatients, true, true, 2);
+	m_nb.append_page(m_frpinfo);
 	
-	pbox3->pack_start(m_frpinfo, false, true, 1);
-	pbox3->pack_start(*swVisits, true, true, 2);
-	pbox3->pack_start(m_lblsugestions, true, true, 50);
+	mbox->pack_start(*pwidget, PACK_SHRINK);
+	mbox->pack_start(m_mainToolbar, PACK_SHRINK);
+	mbox->pack_start(m_nb, true, true, 0);
+	
 
-	pbox1->pack_start(m_entryPatients, PACK_EXPAND_PADDING);
+	/*pbox3->pack_start(m_frpinfo, false, true, 1);
+	pbox3->pack_start(*swVisits, true, true, 2);
+	pbox3->pack_start(m_lblsugestions, true, true, 50);*/
+
+	/* Setting up columns in list patients */
+	TreeViewColumn *col;
+
+	col = m_treePatients.get_column(m_treePatients.append_column("id", m_lpCols.m_col_id)-1);
+	col->set_visible(false);
+	col = m_treePatients.get_column(m_treePatients.append_column("Nome", m_lpCols.m_col_name)-1);
+	col->set_expand();
+	col->set_resizable();
+
+	// set up the filter
+	m_treeFilter = TreeModelFilter::create(m_modelPatients);
 	
-	mbox->pack_start(m_mainMenu, false, true, 0);
-	mbox->pack_start(m_mainToolbar, false, true, 0);
-	//mbox->pack_start(m_entryPatients, false, true, 0);
-	mbox->pack_start(*pbox1, PACK_SHRINK);
-	mbox->pack_start(*swPatients, true, true, 0);
+	m_treePatients.set_model (m_treeFilter);
+	m_treeFilter->set_visible_func(sigc::mem_fun(*this, &MainWindow::filter_patient_by_name));
+	
+	db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
+	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
+	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
+	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
+	m_mtbRemove.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolRemove_clicked));
+	m_entryPatients.signal_focus_in_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusIn));
+	m_entryPatients.signal_focus_out_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusOut));
+	//m_treePatients.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_treePatients_selected));
+	m_treePatients.signal_row_activated().connect(sigc::mem_fun(*this, &MainWindow::on_treePatients_activated));
+	m_entryPatients.signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_txtSearch_changed));
+	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
+	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
+	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
+
+
+	/************************************
+	 *    Setting up some properties    *
+	 ***********************************/
 
 	swPatients->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	swVisits->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -127,40 +191,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	set_title(title);
 	set_default_size(720,500);
 	set_icon_name(((ustring)PACKAGE_NAME).lowercase());
-
-	/* Setting up columns in list patients */
-	TreeViewColumn *col;
-
-	col = m_treePatients.get_column(m_treePatients.append_column("id", m_lpCols.m_col_id)-1);
-	col->set_visible(false);
-	col = m_treePatients.get_column(m_treePatients.append_column("Nome", m_lpCols.m_col_name)-1);
-	col->set_expand();
-	col->set_resizable();
-
-	// set up the filter
-	m_treeFilter = TreeModelFilter::create(m_modelPatients);
 	
-	m_treePatients.set_model (m_treeFilter);
-	m_treeFilter->set_visible_func(sigc::mem_fun(*this, &MainWindow::filter_patient_by_name));
-	
-	db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
-	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
-	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
-	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
-	m_mtbRemove.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolRemove_clicked));
-	m_entryPatients.signal_focus_in_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusIn));
-	m_entryPatients.signal_focus_out_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusOut));
-	m_mhAbout.signal_activate().connect(sigc::mem_fun(*this, &MainWindow::on_mhAbout_activate));
-	m_treePatients.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_treePatients_selected));
-	m_entryPatients.signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_txtSearch_changed));
-	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
-	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
-	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
-
-
-	/************************************
-	 *    Setting up some properties    *
-	 ***********************************/
 	m_entryPatients.set_width_chars(40);
 	m_entryPatients.set_margin_top(2);
 	m_entryPatients.set_margin_bottom(6);
@@ -171,6 +202,15 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	swPatients->set_margin_top(5);
 	swPatients->set_margin_bottom(5);
 
+	m_frpinfo.set_margin_top(2);
+	m_frpinfo.set_margin_left(5);
+	m_frpinfo.set_margin_right(5);
+
+	m_btnShPatient.set_tooltip_text("Ver ficha clinica completa do paciente");
+	m_btnShPatient.set_halign(ALIGN_END);
+
+	m_nb.set_show_tabs(false);
+	
 	m_app->add_window(*m_pw);
 
 	add(*mbox);
@@ -278,6 +318,70 @@ void MainWindow::on_btnToolRemove_clicked()
 	}
 }
 
+
+void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeViewColumn* col)
+{
+	Person p;
+	Date today;
+	guint16 age;
+	char tmp[6];
+	bool close= true;
+	TreeModel::iterator row;
+	DBHandler db = DBHandler::get_instance();
+
+	today.set_time_current();
+
+	row = *m_modelPatients->get_iter(path);
+	if(!row) {
+		cout<< "Iterator is not valid"<< endl;
+		return;
+	}
+	
+	if(*row) {
+		try{
+			db.open();
+		} catch(SqlConnectionOpenedException& ex) {
+			close = false;
+		}
+
+		db.get_person((*row)[m_lpCols.m_col_id], p);
+		if(close)
+			db.close();
+		m_lblpname.set_text(ustring("<b>Paciente:</b> <i>") + p.get_name() + "</i>");
+		age = today.get_year() - p.get_birthday().get_year();
+
+		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
+			age--;
+
+		sprintf(tmp, "%hu", age);
+		m_lblpage.set_text(ustring("<b>Idade:</b> <i>") + tmp + (ustring)"</i>");
+		m_lblpbloodtype.set_text("<b>Tipo de Sangue:</b> <i>" + p.get_blood_type_string() + "</i>");
+		sprintf(tmp, "%.2f", p.get_height());
+		m_lblpheight.set_text(ustring("<b>Altura:</b> <i>") + tmp + (ustring)"</i>");
+		m_lblpsex.set_text(ustring("<b>Sexo:</b> ") + (p.get_sex()? "Masculino" : "Feminino") + (ustring)"<i></i>");
+
+		m_lblpname.set_use_markup();
+		m_lblpname.set_alignment(0.0f, 0.5f);
+		m_lblpage.set_use_markup();
+		m_lblpage.set_alignment(0.0f, 0.5f);
+		m_lblpbloodtype.set_use_markup();
+		m_lblpbloodtype.set_alignment(0.1f, 0.5f);
+		m_lblpheight.set_use_markup();
+		m_lblpheight.set_alignment(0.1f, 0.5f);
+		m_lblpsex.set_use_markup();
+		m_lblpsex.set_alignment(0.1f, 0.5f);
+
+		m_lblsugestions.hide();
+		m_frpinfo.show_all();
+		m_treeVisits.get_parent()->show();
+		m_nb.set_current_page(1);
+	} else {
+		m_lblsugestions.show();
+		m_frpinfo.hide();
+		m_treeVisits.get_parent()->hide();
+	}
+}
+
 void  MainWindow::on_treePatients_selected()
 {
 	Person p;
@@ -333,6 +437,7 @@ void  MainWindow::on_treePatients_selected()
 		m_lblsugestions.hide();
 		m_frpinfo.show_all();
 		m_treeVisits.get_parent()->show();
+		m_nb.set_current_page(1);
 	} else {
 		m_lblsugestions.show();
 		m_frpinfo.hide();
@@ -439,12 +544,12 @@ bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
 
 bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 {
-	RefPtr<CssProvider> css = CssProvider::create();
+	//RefPtr<CssProvider> css = CssProvider::create();
 
 	if(!m_entryPatientStatus && m_entryPatients.get_text_length() == 0) {
 		m_entryPatientStatus = true;
-		css->load_from_data("GtkEntry{ color: gray;}");
-		m_entryPatients.get_style_context()->add_provider(css, 1);
+		/*css->load_from_data("GtkEntry{ color: gray;}");
+		m_entryPatients.get_style_context()->add_provider(css, 1);*/
 
 		/*TODO: find a way to change the style when the text is for help and not the user text.*/
 		//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
