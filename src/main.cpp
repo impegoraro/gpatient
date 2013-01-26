@@ -19,10 +19,24 @@ using namespace Gtk;
 using namespace std;
 using namespace Glib;
 
+static RefPtr<Application> app;
+
+void add_window(Window& win)
+{
+	cout<< "adding a new window ("<< win.get_title()<<")"<<endl;
+	app->add_window(win);
+}
+
+void remove_window(Window& win)
+{
+	cout<< "removing window ("<< win.get_title()<<")"<<endl;
+	app->remove_window(win);
+}
+
 int main(int argc, char** argv)
 {
 	Main kit(argc, argv);
-	RefPtr<Application> app = Application::create("org.herbanaria.base");
+	app = Application::create("org.herbanaria.base");
 	ustring dbpath;
 	RefPtr<Gio::File> fdb;
 

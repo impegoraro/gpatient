@@ -18,7 +18,8 @@ public:
 	enum PatientWindowType
 	{
 		PW_TYPE_ADD,
-		PW_TYPE_EDIT
+		PW_TYPE_EDIT,
+		PW_TYPE_VIEW
 	};
 
 protected:
@@ -77,6 +78,7 @@ protected:
 public:
 
 	PatientWindow(Gtk::Window& parent, const std::string& title = "Dados do Paciente",PatientWindowType type = PW_TYPE_ADD);
+	~PatientWindow();
 	void set_person(const Person& p);
 	void get_person(Person&) const;
 	guint32 get_id(void) const;

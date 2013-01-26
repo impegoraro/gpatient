@@ -15,9 +15,9 @@
 #include <iostream>
 
 #include "widgets/widgets.h"
-
 #include "patient-window.h"
 #include "util.h"
+#include "main.h"
 
 using namespace std;
 using namespace Glib;
@@ -41,7 +41,8 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblTaxNumber("Nº _Identificação Fiscal:", true), m_lblMaritalStatus("Es_tado Civil:", true),
 	m_lblAddress("_Morada:", true), m_lblLocation("_Localidade:", true),
 	m_lblZip("-"), m_lblContact("_Contactos:", true), m_lblReferer("_Enviado por:", true),
-	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false), m_wincal(*this, m_txtBirthday),
+	m_lblEmail("_Email:", true), m_cellphoneStatus(false), m_phoneStatus(false), m_dateStatus(false), 
+	m_wincal(*this, m_txtBirthday),
 	m_btnAccept(type == PW_TYPE_ADD? Stock::ADD:Stock::EDIT), m_btnCancel(Stock::CANCEL)
 {
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
@@ -293,6 +294,10 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	mGrid->show_all();
 }
 
+PatientWindow::~PatientWindow()
+{
+}
+
 guint32 PatientWindow::get_id(void) const
 {
 	return m_id;
@@ -475,9 +480,22 @@ void PatientWindow::activate_close(bool val)
 		clean();
 		hide();
 	} else {
+		std::stringstream ss;
+		guint32 phone= 0, cell = 0;
+		
+		if(!m_phoneStatus) {
+			ss<< m_txtPhone.get_text().raw();
+			ss>>phone;
+		}
+		if(!m_cellphoneStatus) {
+			
+			ss<< m_txtCellphone.get_text().raw();
+			ss>>cell;
+		}
+		
 		if(m_txtName.get_text_length() > 0 && m_txtNationality.get_text_length() > 0 && m_txtBirthday.get_text_length() > 0 && m_txtProfession.get_text_length() > 0 &&
 				m_txtBirthplace.get_text_length() > 0 && m_txtTaxNumber.get_text_length() > 0 && m_txtAddress.get_text_length() > 0 && m_txtLocation.get_text_length() > 0 &&
-				m_txtZip1.get_text_length() > 0 && m_txtZip2.get_text_length() > 0 && !m_cellphoneStatus && !m_phoneStatus && m_txtEmail.get_text_length() > 0) {
+				m_txtZip1.get_text_length() > 0 && m_txtZip2.get_text_length() > 0 && phone>0 && cell>0 && m_txtEmail.get_text_length() > 0) {
 			m_signal_add(*this);
 			hide();
 			clean();
@@ -505,11 +523,61 @@ void PatientWindow::set_window_type(PatientWindow::PatientWindowType type)
 		case PW_TYPE_EDIT: {
 			//Image img(Stock::EDIT, Gtk::ICON_SIZE_BUTTON);
 			img = new Image(Stock::EDIT, Gtk::ICON_SIZE_BUTTON);;
-			//img->set(Stock::EDIT, Gtk::ICON_SIZE_BUTTON);
+			img->set(Stock::EDIT, Gtk::ICON_SIZE_BUTTON);
 			m_btnAccept.set_image(*img);
-			m_lblTitle.set_text("<b><big>Ficha do paciente</big></b>");
+			//m_btnAccept.set_text("");
+			m_lblTitle.set_text("<b><big>Ficha clinica do paciente</big></b>");
 			m_btnAccept.set_label("_Edit");
+			m_btnAccept.set_visible(true);
+			m_txtName.set_editable(true);
+			m_txtHeight.set_editable(true);
+			//m_cmbBlood.set_editable(true);
+			//m_rbMale.set_editable(true);
+			//m_rbFemale.set_editable(true);
+			m_txtBirthday.set_editable(true);
+			m_txtBirthplace.set_editable(true);
+			m_txtNationality.set_editable(true);
+			m_txtProfession.set_editable(true);
+			m_txtTaxNumber.set_editable(true);
+			//m_cmbMaritalStatus.set_editable(true);
+			m_txtAddress.set_editable(true);
+			m_txtLocation.set_editable(true);
+			m_txtZip1.set_editable(true);
+			m_txtZip2.set_editable(true);
+			m_txtPhone.set_editable(true);
+			m_txtCellphone.set_editable(true);
+			m_txtReferer.set_editable(true);
+			m_txtEmail.set_editable(true);
+			m_btnCancel.set_label(Stock::CANCEL.id);
+			m_btnCancel.set_use_stock(true);
+			
 			break;
+		case PW_TYPE_VIEW:
+			m_lblTitle.set_text("<b><big>Ficha clinica do paciente</big></b>");
+			m_txtName.set_editable(false);
+			m_txtHeight.set_editable(false);
+			//m_cmbBlood.set_editable(false);
+			//m_rbMale.set_editable(false);
+			//m_rbFemale.set_editable(false);
+			m_txtBirthday.set_editable(false);
+			m_txtBirthplace.set_editable(false);
+			m_txtNationality.set_editable(false);
+			m_txtProfession.set_editable(false);
+			m_txtTaxNumber.set_editable(false);
+			//m_cmbMaritalStatus.set_editable(false);
+			m_txtAddress.set_editable(false);
+			m_txtLocation.set_editable(false);
+			m_txtZip1.set_editable(false);
+			m_txtZip2.set_editable(false);
+			m_txtPhone.set_editable(false);
+			m_txtCellphone.set_editable(false);
+			m_txtReferer.set_editable(false);
+			m_txtEmail.set_editable(false);
+			m_btnAccept.set_visible(false);
+			m_btnCancel.set_label(Stock::CLOSE.id);
+			m_btnCancel.set_use_stock(true);
+
+				break;
 		} default: {
 			//Image img(Stock::ADD, Gtk::ICON_SIZE_BUTTON);
 			img = new Image(Stock::ADD, Gtk::ICON_SIZE_BUTTON);
@@ -518,6 +586,29 @@ void PatientWindow::set_window_type(PatientWindow::PatientWindowType type)
 
 			m_lblTitle.set_text("<big><b>Ficha de inscrição de novo paciente</b></big>");
 			m_btnAccept.set_label("_Add");
+			m_btnAccept.set_visible(true);
+			m_txtName.set_editable(true);
+			m_txtHeight.set_editable(true);
+			//m_cmbBlood.set_editable(true);
+			//m_rbMale.set_editable(true);
+			//m_rbFemale.set_editable(true);
+			m_txtBirthday.set_editable(true);
+			m_txtBirthplace.set_editable(true);
+			m_txtNationality.set_editable(true);
+			m_txtProfession.set_editable(true);
+			m_txtTaxNumber.set_editable(true);
+			//m_cmbMaritalStatus.set_editable(true);
+			m_txtAddress.set_editable(true);
+			m_txtLocation.set_editable(true);
+			m_txtZip1.set_editable(true);
+			m_txtZip2.set_editable(true);
+			m_txtPhone.set_editable(true);
+			m_txtCellphone.set_editable(true);
+			m_txtReferer.set_editable(true);
+			m_txtEmail.set_editable(true);
+			m_btnCancel.set_label(Stock::CANCEL.id);
+			m_btnCancel.set_use_stock(true);
+			
 			break;
 		}
 	}

@@ -149,7 +149,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
 	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
 	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
-
+	m_btnShPatient.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnShPatient_clicked));
 
 	/************************************
 	 *    Setting up some properties    *
@@ -219,8 +219,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 
 MainWindow::~MainWindow()
 {
-	/*m_app->remove_window(*m_pw);
-	delete m_pw;*/
+	m_app->remove_window(*m_pw);
+	//delete m_pw;
 }
 
 /* Helpers */
@@ -275,6 +275,26 @@ void MainWindow::on_btnToolAdd_clicked(void)
 {
 	m_pw->set_window_type(PatientWindow::PW_TYPE_ADD);
 	m_pw->show();
+}
+
+void MainWindow::on_btnShPatient_clicked(void)
+{
+	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
+	TreeModel::iterator iter = sel->get_selected();
+	ListPatientsCols cols;
+	DBHandler db = DBHandler::get_instance();
+
+	if(*iter) {
+		TreeModel::Row row = *iter;
+		Person p(row[cols.m_col_id]);
+		db.open();
+		if(db.get_person(row[cols.m_col_id], p)) {
+			db.close();
+			m_pw->set_window_type(PatientWindow::PW_TYPE_VIEW);
+			m_pw->set_person(p);
+			m_pw->show();
+		}
+	}
 }
 
 void MainWindow::on_btnToolEdit_clicked(void)

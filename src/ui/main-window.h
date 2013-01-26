@@ -84,12 +84,13 @@ protected:
 	/* Signal Handlers */
 	virtual bool on_delete_event(GdkEventAny *);
 
+	void on_btnShPatient_clicked(void);
 	void on_btnToolAdd_clicked(void);
 	void on_btnToolEdit_clicked(void);
 	void on_btnToolRemove_clicked(void);
 	void on_window_show(void);
 
-	bool on_entryPatient_focusIn(GdkEventFocus *focus);
+	bool on_entryPatient_focusIn(GdkEventFocus *focus); 
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
 
 	void on_treePatients_activated(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
