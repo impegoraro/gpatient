@@ -8,8 +8,13 @@
 #ifndef CALENDARWINDOW_H_
 #define CALENDARWINDOW_H_
 
+#include <sigc++/sigc++.h>
+#include <gdkmm/event.h>
 #include <gdkmm/window.h>
 #include <glibmm/date.h>
+#include <gtkmm/uimanager.h>
+#include <gtkmm/actiongroup.h>
+#include <gtkmm/menu.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
@@ -31,6 +36,7 @@ public:
 	void popup(unsigned int x, unsigned int y);
 
 protected:
+	bool shoulClose;
 	Gtk::Calendar m_cal;
 	Gtk::Widget *m_wDate;
 	Gtk::Button m_btnPrevMonth;
@@ -42,7 +48,11 @@ protected:
 	Gtk::Button m_btnNextYear;
 
 	Gtk::SpinButton m_txtYear;
-		
+
+	Glib::RefPtr<Gtk::UIManager> m_uiman;
+	Glib::RefPtr<Gtk::ActionGroup> m_actionGrp;
+
+
 	inline void helper_set_month_year(Glib::Date& dt)
 	{
 		m_btnMonth.set_label(dt.format_string("%B"));
@@ -50,13 +60,14 @@ protected:
 		m_txtYear.set_value(dt.get_year());
 	}
 
-
 	void on_selected_day(void);
 	void change_month(bool);
+	void change_month_to(guint8);
 	void change_year(bool);
 	void select_year(bool);
 	void on_cal_monthChanged();
 	void on_btnYear_changed();
+	bool on_btnMonth_buttonPressed(GdkEventButton* event);
 	virtual bool on_btnYear_focusOut(GdkEventFocus *);
 	virtual bool on_focus_out_event(GdkEventFocus *);
 };

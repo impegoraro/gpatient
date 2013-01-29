@@ -19,9 +19,53 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	Dialog("", false), m_wDate(NULL),
 	m_btnPrevMonth("<"), m_btnMonth(""), m_btnNextMonth(">"),
 	m_btnPrevYear("<"), m_btnYear(""), m_btnNextYear(">"),
-	m_txtYear(Adjustment::create(1990, 1910, 9999), 1)
+	m_txtYear(Adjustment::create(1990, 1910, 9999), 1), shoulClose(true)
 {
 	Grid *pGrid = manage(new Grid());
+
+	ustring ui_info = 
+		"<ui>"
+        "  <popup name='PopupMenu'>"
+        "    <menuitem action='Janeiro'/>"
+        "    <menuitem action='Fevereiro'/>"
+        "    <menuitem action='Marco'/>"
+		"    <menuitem action='Abril'/>"
+		"    <menuitem action='Maio'/>"
+		"    <menuitem action='Junho'/>"
+		"    <menuitem action='Julho'/>"
+		"    <menuitem action='Agosto'/>"
+		"    <menuitem action='Setembro'/>"
+		"    <menuitem action='Outubro'/>"
+		"    <menuitem action='Novembro'/>"
+		"    <menuitem action='Dezembro'/>"
+        "  </popup>"
+        "</ui>";
+
+	m_uiman = UIManager::create();
+	m_actionGrp = ActionGroup::create();
+
+	m_actionGrp->add(Action::create("PopupMenu", "Popup Menu"));
+	m_actionGrp->add(Action::create("Janeiro", "Janeiro"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 0));
+	m_actionGrp->add(Action::create("Fevereiro", "Fevereiro"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 1));
+	m_actionGrp->add(Action::create("Marco", "Marco"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 2));
+	m_actionGrp->add(Action::create("Abril", "Abril"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 3));
+	m_actionGrp->add(Action::create("Maio", "Maio"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 4));
+	m_actionGrp->add(Action::create("Junho", "Junho"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 5));
+	m_actionGrp->add(Action::create("Julho", "Julho"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 6));
+	m_actionGrp->add(Action::create("Agosto", "Agosto"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 7));
+	m_actionGrp->add(Action::create("Setembro", "Setembro"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 8));
+	m_actionGrp->add(Action::create("Outubro", "Outubro"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 9));
+	m_actionGrp->add(Action::create("Novembro", "Novembro"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 10));
+	m_actionGrp->add(Action::create("Dezembro", "Dezembro"), sigc::bind<guint8>(sigc::mem_fun(*this, &CalendarWindow::change_month_to), 11));
+
+
+	m_uiman->insert_action_group(m_actionGrp);
+
+	try {
+		m_uiman->add_ui_from_string(ui_info);
+	} catch (Glib::MarkupError ex) {
+		std::cout<< "Warning: error while parsing calendar poupup menu. Cause: "<< ex.what()<< std::endl;
+	}
 	//set_parent(win);
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_POPUP_MENU);
 		
@@ -45,7 +89,7 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	m_cal.signal_month_changed().connect(sigc::mem_fun(*this, &CalendarWindow::on_cal_monthChanged));
 	m_txtYear.signal_focus_out_event().connect(sigc::mem_fun(*this, &CalendarWindow::on_btnYear_focusOut));
 	m_txtYear.signal_changed().connect(sigc::mem_fun(*this, &CalendarWindow::on_btnYear_changed));
-	
+	m_btnMonth.signal_button_press_event().connect(sigc::mem_fun(*this, &CalendarWindow::on_btnMonth_buttonPressed), false);
 	m_wDate = &widget;
 
 	m_btnPrevMonth.set_relief(RELIEF_NONE);
@@ -70,8 +114,11 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	set_attached_to(widget);
 	m_cal.set_display_options(CALENDAR_SHOW_DAY_NAMES);
 
+
+	m_btnMonth.add_events(Gdk::BUTTON_PRESS_MASK);
 	get_vbox()->pack_start(*pGrid, true, true, 0);
-	
+
+	set_border_width(10);
 	on_cal_monthChanged();
 
 	m_txtYear.set_no_show_all(true);
@@ -115,9 +162,9 @@ bool Widgets::CalendarWindow::on_focus_out_event(GdkEventFocus *focus)
 
 	m_cal.get_date(tmp);
 	((Entry*)m_wDate)->set_text(tmp.format_string((ustring)"%d/%m/%Y"));
-	response(RESPONSE_ACCEPT);
+	/*response(RESPONSE_ACCEPT);
 
-	hide();
+	hide();*/
 
 	return true;
 }
@@ -150,6 +197,15 @@ void Widgets::CalendarWindow::change_year(bool forward)
 
 	m_cal.select_month(dt.get_month()-1, dt.get_year());
 	helper_set_month_year(dt);
+}
+
+void Widgets::CalendarWindow::change_month_to(guint8 month)
+{
+	Date dt;
+
+	m_cal.get_date(dt);
+
+	m_cal.select_month(month % 12, dt.get_year());
 }
 
 void Widgets::CalendarWindow::select_year(bool visibility)
@@ -187,4 +243,20 @@ void Widgets::CalendarWindow::on_cal_monthChanged()
 	m_cal.get_date(dt);
 	if(dt.valid())
 		helper_set_month_year(dt);
+}
+
+bool Widgets::CalendarWindow::on_btnMonth_buttonPressed(GdkEventButton* event)
+{
+	Menu *mp;
+
+	std::cout<< "callback"<<std::endl;	
+	if(event->type == GDK_BUTTON_PRESS) {
+		mp = dynamic_cast<Menu*>(m_uiman->get_widget("/PopupMenu"));
+		if(mp) {
+			mp->popup(event->button, event->time);
+			std::cout<< "showing menu"<<std::endl;
+		}
+		return false;
+	}
+	return false;
 }
