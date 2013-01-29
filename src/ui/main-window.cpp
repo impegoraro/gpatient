@@ -37,8 +37,10 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	Box *mbox = manage(new VBox()), *pbox1 = manage(new HBox(false, 0)), *pbox2 = manage(new VBox(false, 0));
 	ScrolledWindow *swPatients = manage(new ScrolledWindow()), *swVisits = manage(new ScrolledWindow());
 	m_modelPatients = ListStore::create(m_lpCols);
-	Box *binfo, *pbox3;
+	Box *binfo, *pbox3, *pboxp2;
 	Table *tbinfo;
+	//RefPtr<Image> img_goback = Image::create_from_stock(Stock::GO_BACK, ICON_SIZE_SMALL_TOOLBAR);
+	Image *img_goback = manage(new Image());
 	DBHandler db = DBHandler::get_instance();
 	Widget * pwidget;
 	ustring menu =  "<ui>" \
@@ -53,6 +55,13 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 					 "</ui>";
 	m_pw = new PatientWindow(*this, "Dados do paciente", PatientWindow::PW_TYPE_ADD);
 
+    img_goback->set(Stock::GO_BACK, ICON_SIZE_SMALL_TOOLBAR);
+	m_btnBack.set_image(*img_goback);
+	m_btnBack.set_relief(RELIEF_NONE);
+	m_btnBack.set_hexpand(false);
+	m_btnBack.set_halign(ALIGN_START);
+
+	
 	// Clear search timer...
 	m_timerSearch.stop();
 	m_timerSearch.reset();
@@ -60,7 +69,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	binfo = manage(new VBox(true, 2));
 	tbinfo = manage(new Table(5, 2, false));
 	pbox3 = manage(new VBox(false, 5));
-
+	pboxp2 = manage(new VBox(false, 5));
+	
 	/*******************************
 	 *      Creating The Menu      *
 	 ******************************/
@@ -91,6 +101,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	 ******************************/
 	pbox2->pack_start(*pbox1, PACK_SHRINK);
 	pbox2->pack_start(*swPatients, true, true, 0);
+	//pbox2->pack_start(m_lblsugestions, true, true, 0);
 	pbox1->pack_start(m_entryPatients, PACK_EXPAND_PADDING);
 
 	m_nb.append_page(*pbox2);
@@ -110,7 +121,9 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	tbinfo->attach(m_btnShPatient, 0, 4, 2, 3, FILL | SHRINK | EXPAND, FILL, 0, 0);
 	tbinfo->set_row_spacings(6);
 
-	m_nb.append_page(m_frpinfo);
+	pboxp2->pack_start(m_btnBack, false, false, 0);
+	pboxp2->pack_start(m_frpinfo, false, true, 0);
+	m_nb.append_page(*pboxp2);
 	
 	mbox->pack_start(*pwidget, PACK_SHRINK);
 	mbox->pack_start(m_mainToolbar, PACK_SHRINK);
@@ -150,7 +163,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
 	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
 	m_btnShPatient.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnShPatient_clicked));
-
+	m_btnBack.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnBack_clicked));
+	
 	/************************************
 	 *    Setting up some properties    *
 	 ***********************************/
@@ -187,6 +201,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 
 	m_lblsugestions.set_use_markup();
 	//m_lblsugestions.set_line_wrap();
+	m_lblsugestions.set_visible(false);
+	m_lblsugestions.set_no_show_all(true);
 
 	set_title(title);
 	set_default_size(720,500);
@@ -205,7 +221,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_frpinfo.set_margin_top(2);
 	m_frpinfo.set_margin_left(5);
 	m_frpinfo.set_margin_right(5);
-
+	
 	m_btnShPatient.set_tooltip_text("Ver ficha clinica completa do paciente");
 	m_btnShPatient.set_halign(ALIGN_END);
 
@@ -591,3 +607,7 @@ bool MainWindow::filter_patient_by_name(const TreeModel::const_iterator& iter)
 		return false;
 }
 
+void MainWindow::on_btnBack_clicked(void)
+{
+	m_nb.set_current_page(0);
+}

@@ -63,6 +63,7 @@ protected:
 	Gtk::Label m_lblpsex;
 	Gtk::LinkButton m_btnShPatient;
 
+	Gtk::Button m_btnBack;
 	
 	//Glib::SignalTimeout m_searchTimeout;
 	sigc::connection m_connSearch;
@@ -84,6 +85,7 @@ protected:
 	/* Signal Handlers */
 	virtual bool on_delete_event(GdkEventAny *);
 
+	void on_btnBack_clicked(void);
 	void on_btnShPatient_clicked(void);
 	void on_btnToolAdd_clicked(void);
 	void on_btnToolEdit_clicked(void);

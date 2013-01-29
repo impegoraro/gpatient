@@ -480,15 +480,15 @@ void PatientWindow::activate_close(bool val)
 		clean();
 		hide();
 	} else {
-		std::stringstream ss;
-		guint32 phone= 0, cell = 0;
+		guint32 phone = 0, cell = 0;
 		
 		if(!m_phoneStatus) {
+			std::stringstream ss;
 			ss<< m_txtPhone.get_text().raw();
 			ss>>phone;
 		}
 		if(!m_cellphoneStatus) {
-			
+			std::stringstream ss;
 			ss<< m_txtCellphone.get_text().raw();
 			ss>>cell;
 		}
