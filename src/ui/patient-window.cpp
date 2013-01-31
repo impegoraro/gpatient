@@ -97,7 +97,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbContacts->attach(m_txtLocation, 1, 2, 1, 1);
 	tbContacts->attach_next_to(*bZip, m_txtLocation, Gtk::PositionType::POS_RIGHT, 1, 1);
 	tbContacts->attach(m_lblContact, 0, 3, 1, 1);
-	tbContacts->attach(*bPhones, 1, 3, 1, 1);
+	tbContacts->attach(*bPhones, 1, 3, 2, 1);
 	tbContacts->attach(m_lblEmail, 0, 4, 1, 1);
 	tbContacts->attach(m_txtEmail, 1, 4, 2, 1);
 	tbContacts->attach(m_lblReferer, 0, 5, 1, 1);
