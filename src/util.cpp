@@ -39,23 +39,6 @@ Date Util::parse_date(const std::string& strdate)
 		std::string str = Glib::locale_from_utf8(strdate);
 		if(sscanf(str.c_str(), "%hhu/%hu/%hu", &day, &month, &year)==0)
 			printf("Warning Util::parse_date...\n");
-
-		/*char date[11];
-		char *tmp, *tmp2;
-
-		strncpy(date, strdate.c_str(), 10);
-		tmp = strchr(date, '/');
-		if(tmp != NULL) {
-			*tmp++ = '\0';
-			day = atoi(date);
-		}
-		tmp2 = tmp;
-		tmp = strchr(tmp2, '/');
-		if(tmp != NULL) {
-			*tmp++ = '\0';
-			month = atoi(tmp2);
-			year = atoi(tmp);
-		}*/
 	}
 	return Date(day, helper_get_month(month), year);
 }

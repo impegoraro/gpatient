@@ -225,6 +225,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_btnShPatient.set_tooltip_text("Ver ficha clinica completa do paciente");
 	m_btnShPatient.set_halign(ALIGN_END);
 
+	m_entryPatients.override_color(Gdk::RGBA("Grey"), STATE_FLAG_NORMAL);
+	
 	m_nb.set_show_tabs(false);
 	
 	m_app->add_window(*m_pw);
@@ -570,8 +572,7 @@ bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
 {
 	if(m_entryPatientStatus) {
 		m_entryPatientStatus = false;
-		/*TODO: find a way to change the style when the text is for help and not the user text.*/
-		//m_entryPatients.unset_text(STATE_NORMAL);
+		m_entryPatients.override_color(Gdk::RGBA("Black"), STATE_FLAG_NORMAL);
 		m_entryPatients.set_text("");
 	}
 
@@ -580,15 +581,10 @@ bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
 
 bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 {
-	//RefPtr<CssProvider> css = CssProvider::create();
 
 	if(!m_entryPatientStatus && m_entryPatients.get_text_length() == 0) {
 		m_entryPatientStatus = true;
-		/*css->load_from_data("GtkEntry{ color: gray;}");
-		m_entryPatients.get_style_context()->add_provider(css, 1);*/
-
-		/*TODO: find a way to change the style when the text is for help and not the user text.*/
-		//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
+		m_entryPatients.override_color(Gdk::RGBA("Grey"), STATE_FLAG_NORMAL);	
 		m_entryPatients.set_text("Procurar paciente...");
 	}
 
@@ -597,10 +593,8 @@ bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 
 bool MainWindow::filter_patient_by_name(const TreeModel::const_iterator& iter)
 {
-	//RefPtr<Regex> pRegex = Regex::create(".*" + m_entryPatients.get_text() + ".*");
 	ustring item = (*iter)[m_lpCols.m_col_name];
 
-	//std::cout<< "Refiltering..."<< std::endl;
 	if(m_entryPatientStatus || Regex::match_simple(".*" + m_entryPatients.get_text() + ".*", item))
 		return true;
 	else

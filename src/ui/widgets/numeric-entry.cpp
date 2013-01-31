@@ -39,3 +39,16 @@ void Widgets::NumericEntry::on_insert_text(const Glib::ustring& text, int *posit
 	if(allow || m_allow_alphanumeric)
 		Gtk::Entry::on_insert_text(text, position);
 }
+
+gint32 Widgets::NumericEntry::get_value(void) const
+{
+	guint32 val = 0;
+	std::stringstream ss;
+	
+	if(!m_allow_alphanumeric) {
+		ss<< get_text().raw();
+		ss>> val;
+	}
+	
+	return val;
+}

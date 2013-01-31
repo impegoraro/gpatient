@@ -20,7 +20,9 @@ public:
 	void set_allow_alphanumeric(bool allow =  true);
 	void set_text(const Glib::ustring& text);
 	void set_text(gint32 val);
+	gint32 get_value(void) const;
 
+	
 protected:
 	bool m_allow_alphanumeric;
 	virtual void on_insert_text(const Glib::ustring& text, int *position);

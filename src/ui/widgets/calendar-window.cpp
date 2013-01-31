@@ -162,9 +162,6 @@ bool Widgets::CalendarWindow::on_focus_out_event(GdkEventFocus *focus)
 
 	m_cal.get_date(tmp);
 	((Entry*)m_wDate)->set_text(tmp.format_string((ustring)"%d/%m/%Y"));
-	/*response(RESPONSE_ACCEPT);
-
-	hide();*/
 
 	return true;
 }
@@ -174,7 +171,7 @@ void Widgets::CalendarWindow::change_month(bool forward)
 	Date dt;
 
 	m_cal.get_date(dt);
-
+	dt.set_day(1);
 	if(forward)
 		dt.add_months(1);
 	else
@@ -190,6 +187,7 @@ void Widgets::CalendarWindow::change_year(bool forward)
 
 	m_cal.get_date(dt);
 
+	dt.set_day(1);
 	if(forward)
 		dt.add_years(1);
 	else
@@ -204,7 +202,7 @@ void Widgets::CalendarWindow::change_month_to(guint8 month)
 	Date dt;
 
 	m_cal.get_date(dt);
-
+	dt.set_day(1);
 	m_cal.select_month(month % 12, dt.get_year());
 }
 
@@ -248,14 +246,12 @@ void Widgets::CalendarWindow::on_cal_monthChanged()
 bool Widgets::CalendarWindow::on_btnMonth_buttonPressed(GdkEventButton* event)
 {
 	Menu *mp;
-
-	std::cout<< "callback"<<std::endl;	
+	
 	if(event->type == GDK_BUTTON_PRESS) {
 		mp = dynamic_cast<Menu*>(m_uiman->get_widget("/PopupMenu"));
-		if(mp) {
+		if(mp)
 			mp->popup(event->button, event->time);
-			std::cout<< "showing menu"<<std::endl;
-		}
+
 		return false;
 	}
 	return false;

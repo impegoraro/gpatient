@@ -47,7 +47,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 {
 	Frame *frPersonal = manage(new Frame("<b>Dados Pessoais</b>"));
 	Frame *frContacts = manage(new Frame("<b>Morada e Contacto</b>"));
-	//Table *tbPersonal = manage(new Table(9, 3, false));
 	Box *bZip = manage(new HBox(false, 0)), *bPhones = manage(new HBox(true, 0));
 	Grid *tbPersonal = manage(new Grid());
 	Grid *tbContacts = manage(new Grid());
@@ -63,28 +62,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	frContacts->add(*tbContacts);
 	frContacts->set_size_request(100,-1);
 
-	/*tbPersonal->attach(m_lblName, 0, 1, 0, 1, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_txtName, 1, 3, 0, 1, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	tbPersonal->attach(m_lblHeight, 0, 1, 1, 2, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_txtHeight, 1, 3, 1, 2, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	tbPersonal->attach(m_lblSex, 0, 1, 2, 3, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_rbMale, 1, 2, 2, 3, FILL | SHRINK, FILL, 0, 0);
-	tbPersonal->attach(m_rbFemale, 2, 3, 2, 3, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_lblNacionality, 0, 1, 3, 4, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_txtNationality, 1, 3, 3, 4, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	tbPersonal->attach(m_lblBirthday, 0, 1, 4, 5, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_txtBirthday, 1, 3, 4, 5, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	tbPersonal->attach(m_lblBirthplace, 0, 1, 5, 6, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_txtBirthplace, 1, 3, 5, 6, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	tbPersonal->attach(m_lblProfession, 0, 1, 6, 7, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_txtProfession, 1, 3, 6, 7, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	tbPersonal->attach(m_lblBlood, 0, 1, 7, 8, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_cmbBlood, 1, 3, 7, 8, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	tbPersonal->attach(m_lblTaxNumber, 0, 1, 8, 9, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_txtTaxNumber, 1, 3, 8, 9, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	tbPersonal->attach(m_lblMaritalStatus, 0, 1, 9, 10, FILL | SHRINK, FILL, 2, 0);
-	tbPersonal->attach(m_cmbMaritalStatus, 1, 3, 9, 10, FILL | SHRINK | EXPAND, FILL, 2, 0);
-	*/
 	tbPersonal->attach(m_lblName, 0, 0, 1, 1);
 	tbPersonal->attach_next_to(m_txtName, m_lblName, POS_RIGHT, 3, 1);
 	tbPersonal->attach(m_lblHeight, 0, 1, 1, 1);
@@ -120,8 +97,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbContacts->attach(m_txtLocation, 1, 2, 1, 1);
 	tbContacts->attach_next_to(*bZip, m_txtLocation, Gtk::PositionType::POS_RIGHT, 1, 1);
 	tbContacts->attach(m_lblContact, 0, 3, 1, 1);
-	//tbContacts->attach(m_txtPhone, 1, 3, 1, 1);
-	//tbContacts->attach(m_txtCellphone, 2, 3, 1, 1);
 	tbContacts->attach(*bPhones, 1, 3, 1, 1);
 	tbContacts->attach(m_lblEmail, 0, 4, 1, 1);
 	tbContacts->attach(m_txtEmail, 1, 4, 2, 1);
@@ -135,24 +110,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	mGrid->attach(*frPersonal, 0, 2, 1, 1);
 	mGrid->attach(*frContacts, 1, 2, 1, 1);
 	mGrid->attach_next_to(*btnBox, *frContacts, PositionType::POS_BOTTOM, 1, 1);
-
-	// Set paddings
-	
-	m_lblTitle.set_margin_top(5);
-
-	tbPersonal->set_margin_left(3);
-	tbPersonal->set_margin_right(3);
-	tbPersonal->set_margin_top(5);
-	tbContacts->set_margin_left(3);
-	tbContacts->set_margin_right(3);
-	tbContacts->set_margin_top(5);
-
-	frPersonal->set_margin_left(10);
-	frContacts->set_margin_left(5);
-	frContacts->set_margin_right(10);
-
-	btnBox->set_margin_bottom(5);
-	btnBox->set_margin_right(10);
 
 	add(*mGrid);
 
@@ -177,7 +134,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 
 	btnBox->set_layout(BUTTONBOX_END);
 
-	m_lblTaxNumber.set_margin_left(4);
+	m_lblTitle.set_margin_top(5);
 	m_lblTitle.set_margin_left(15);
 	m_lblTitle.set_margin_bottom(15);
 	m_lblTitle.set_alignment(0.00f, 0.5f);
@@ -247,19 +204,25 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	frContacts->set_shadow_type(ShadowType::SHADOW_OUT);
 	((Label*) frPersonal->get_label_widget())->set_use_markup();
 	((Label*) frContacts->get_label_widget())->set_use_markup();
+	
+	m_txtPhone.set_margin_right(5);
+	
+	tbPersonal->set_margin_left(5);
+	tbPersonal->set_margin_right(5);
+	tbPersonal->set_margin_top(5);
+	tbContacts->set_margin_left(5);
+	tbContacts->set_margin_right(5);
+	tbContacts->set_margin_top(5);
 
-	tbPersonal->set_margin_top(4);
-	tbPersonal->set_margin_left(2);
-	tbPersonal->set_margin_right(2);
-	tbContacts->set_margin_top(4);
-	tbContacts->set_margin_left(2);
-	tbContacts->set_margin_right(2);
+	frPersonal->set_margin_left(12);
+	frPersonal->set_margin_left(5);
+	frContacts->set_margin_left(5);
+	frContacts->set_margin_right(10);
 
-
-	mGrid->set_column_spacing(5);
-	btnBox->set_margin_top(3);
-	btnBox->set_margin_bottom(5);
-	btnBox->set_margin_right(5);
+	btnBox->set_spacing(5);
+	btnBox->set_margin_top(5);
+	btnBox->set_margin_bottom(12);
+	btnBox->set_margin_right(10);
 
 	helper_entry_focusOut(m_txtPhone, m_phoneStatus, (char*)"Telefone...");
 	helper_entry_focusOut(m_txtCellphone, m_cellphoneStatus, (char*)"Telemóvel...");
@@ -305,7 +268,6 @@ guint32 PatientWindow::get_id(void) const
 
 void PatientWindow::set_person(const Person& p)
 {
-	char *str;
 	guint16 zip1, zip2;
 	char zip[5];
 
@@ -317,10 +279,7 @@ void PatientWindow::set_person(const Person& p)
 	m_txtZip1.set_text(zip1);
 	m_txtZip2.set_text(zip2);
 	m_txtNationality.set_text(p.get_nationality());
-	str = (char*)calloc(sizeof(char), 11);
-	sprintf(str, "%u/%u/%u", p.get_birthday().get_day(), p.get_birthday().get_month(), p.get_birthday().get_year());
-	m_txtBirthday.set_text(str);
-	free(str);
+	m_txtBirthday.set_text(p.get_birthday().format_string("%d/%m/%Y"));
 	m_txtBirthplace.set_text(p.get_birthplace());
 	m_txtProfession.set_text(p.get_profession());
 	m_cmbBlood.set_active(p.get_blood_type() - 1);
@@ -340,6 +299,8 @@ void PatientWindow::set_person(const Person& p)
 void PatientWindow::get_person(Person& p) const
 {
 	ustring tmp;
+	guint32 val;
+	
 	p.set_id(m_id);
 	p.set_name(m_txtName.get_text());
 	p.set_height((float)m_txtHeight.get_value());
@@ -355,11 +316,12 @@ void PatientWindow::get_person(Person& p) const
 	p.set_address(m_txtAddress.get_text());
 	p.set_marital_status(m_cmbMaritalStatus.get_active_row_number() + 1);
 	p.set_locality(m_txtLocation.get_text());
-	p.set_phone(atoi(m_txtPhone.get_text().c_str()));
-	p.set_cellphone(atoi(m_txtCellphone.get_text().c_str()));
+	val = (guint32)m_txtPhone.get_value();
+	p.set_phone(val);
+	p.set_cellphone((guint32)m_txtCellphone.get_value());
 	p.set_email(m_txtEmail.get_text());
 	p.set_referer(m_txtReferer.get_text());
-	p.set_tax_number(atoi(m_txtTaxNumber.get_text().c_str()));
+	p.set_tax_number((guint32)m_txtTaxNumber.get_value());
 }
 
 bool PatientWindow::on_PhoneFocusIn(GdkEventFocus *focus)
@@ -410,10 +372,9 @@ static void inline helper_entry_set_state(NumericEntry& entry, bool state)
 {
 	if(state) {
 		entry.set_max_length(14);
-		/*TODO: find a way to change the style when the text is for help and not the user text.*/
-		//entry.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
+		entry.override_color(Gdk::RGBA("Grey"), STATE_FLAG_NORMAL);
 	} else {
-		//entry.unset_text(STATE_NORMAL);
+		entry.override_color(Gdk::RGBA("Black"), STATE_FLAG_NORMAL);
 		entry.set_max_length(9);
 	}
 }
