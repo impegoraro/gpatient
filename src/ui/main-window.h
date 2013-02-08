@@ -10,8 +10,9 @@
 
 #include <gtkmm.h>
 
-#include "../person.h"
 #include "patient-window.h"
+#include "view-patient.h"
+#include "../person.h"
 #include "../db/dbhandler.h"
 
 class MainWindow : public Gtk::Window
@@ -73,6 +74,7 @@ protected:
 	bool m_fireSearch;
 	Glib::RefPtr<Gtk::Application> m_app;
 
+	ViewPatientWindow *m_vp;
 	PatientWindow *m_pw;
 public:
 

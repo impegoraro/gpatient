@@ -119,6 +119,12 @@ void Person::set_marital_status(unsigned int val) {
 	m_maritalStatus = array[(val-1) % 5];
 }
 
+ustring Person::get_marital_status_text() const {
+	ustring array[] = {"Casado(a)", "Solteiro(a)", "Divorciado(a)", "Viuvo(a)", "Outro(a)"};
+
+	return array[m_maritalStatus];
+}
+
 void Person::set_nationality(const Glib::ustring& nationality) {
 	m_nationality = nationality;
 }

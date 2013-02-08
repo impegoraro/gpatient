@@ -10,6 +10,7 @@
 #endif
 #include <iostream>
 #include <cstdio>
+#include <exception>
 
 #include "exceptions/sql-connection.h"
 #include "main-window.h"
@@ -26,7 +27,7 @@ using namespace Gtk;
 #define SEARCH_TIMEOUT 0.325
 
 MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(WINDOW_TOPLEVEL),
-	m_app(app),
+	m_app(app), m_vp(NULL),
 	m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
 	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true),
@@ -168,7 +169,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	/************************************
 	 *    Setting up some properties    *
 	 ***********************************/
-
+	m_mainToolbar.get_style_context()->add_class(GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
 	swPatients->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	swVisits->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
@@ -237,6 +238,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 
 MainWindow::~MainWindow()
 {
+	if(m_vp)
+		delete m_vp;
 	m_app->remove_window(*m_pw);
 	//delete m_pw;
 }
@@ -308,9 +311,41 @@ void MainWindow::on_btnShPatient_clicked(void)
 		db.open();
 		if(db.get_person(row[cols.m_col_id], p)) {
 			db.close();
-			m_pw->set_window_type(PatientWindow::PW_TYPE_VIEW);
-			m_pw->set_person(p);
-			m_pw->show();
+
+			if(m_vp == NULL) {
+				MessageDialog msgbox("<b>Não é possível abrir a ficha do paciente</b>", true, MESSAGE_ERROR, BUTTONS_OK, true);
+				msgbox.set_title("Erro na abertura da ficha do paciente");
+				try {
+					m_vp = new ViewPatientWindow(* ((Window*)this));
+
+					m_vp->set_person(p);
+					m_vp->show_all();
+				} catch(FileError& ex) {
+					delete m_vp;
+					m_vp = NULL;
+					msgbox.set_secondary_text(ex.what());
+					msgbox.run();
+				} catch(MarkupError& ex) {
+					delete m_vp;
+					m_vp = NULL;
+					msgbox.set_secondary_text("Erro na estrutura do ficheiro de interface: " + ex.what());
+					msgbox.run();
+				} catch(BuilderError& ex) {
+					delete m_vp;
+					m_vp = NULL;
+					msgbox.set_secondary_text("Erro na construção da interface: " + ex.what());
+					msgbox.run();
+				} catch(exception &ex) {
+					delete m_vp;
+					m_vp = NULL;
+					msgbox.set_secondary_text("O ficheiro de interface está corrupto: um ou mais controles inexistentes." );
+					msgbox.run();
+				}
+			} else { 
+
+				m_vp->set_person(p);
+				m_vp->show_all();
+			}
 		}
 	}
 }

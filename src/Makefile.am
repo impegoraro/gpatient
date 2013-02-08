@@ -13,6 +13,7 @@ herbanaria_SOURCES = util.h util.cpp \
                      ui/widgets/calendar-window.h ui/widgets/calendar-window.cpp \
                      ui/patient-window.h ui/patient-window.cpp \
                      ui/main-window.h ui/main-window.cpp \
+                     ui/view-patient.cpp ui/view-patient.h \
                      db/dbhandler.h db/dbhandler.cpp \
                      person.h person.cpp \
-                     main.cpp main.h
+                     main.cpp main.h 

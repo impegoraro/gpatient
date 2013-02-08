@@ -85,6 +85,7 @@ public:
 	const Glib::ustring& get_locality() const;
 	void set_locality(const Glib::ustring& locality);
 	MaritalStatus get_marital_status() const;
+	Glib::ustring get_marital_status_text() const; 
 	void set_marital_status(MaritalStatus maritalStatus);
 	void set_marital_status(unsigned int val);
 	const Glib::ustring& get_nationality() const;

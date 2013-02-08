@@ -77,13 +77,13 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	tbPersonal->attach_next_to(m_txtBirthplace, m_lblBirthplace, POS_RIGHT, 3, 1);
 	tbPersonal->attach(m_lblProfession, 0, 6, 1, 1);
 	tbPersonal->attach_next_to(m_txtProfession, m_lblProfession, POS_RIGHT, 3, 1);
-	tbPersonal->attach(m_lblBlood, 0, 7, 1, 1);
-	tbPersonal->attach_next_to(m_cmbBlood, m_lblBlood, POS_RIGHT, 3, 1);
-	tbPersonal->attach(m_lblTaxNumber, 0, 8, 1, 1);
+	tbPersonal->attach(m_lblTaxNumber, 0, 7, 1, 1);
 	tbPersonal->attach_next_to(m_txtTaxNumber, m_lblTaxNumber, POS_RIGHT, 3, 1);
-	tbPersonal->attach(m_lblMaritalStatus, 0, 9, 1, 1);
+	tbPersonal->attach(m_lblMaritalStatus, 0, 8, 1, 1);
 	tbPersonal->attach_next_to(m_cmbMaritalStatus, m_lblMaritalStatus, POS_RIGHT, 3, 1);
-
+	tbPersonal->attach(m_lblBlood, 0, 9, 1, 1);
+	tbPersonal->attach_next_to(m_cmbBlood, m_lblBlood, POS_RIGHT, 3, 1);
+	
 	bZip->pack_start(m_txtZip1, false, true, 0);
 	bZip->pack_start(m_lblZip, false, true, 0);
 	bZip->pack_start(m_txtZip2, false, true, 0);
@@ -269,7 +269,6 @@ guint32 PatientWindow::get_id(void) const
 void PatientWindow::set_person(const Person& p)
 {
 	guint16 zip1, zip2;
-	char zip[5];
 
 	m_id = p.get_id();
 	m_txtName.set_text(p.get_name());
