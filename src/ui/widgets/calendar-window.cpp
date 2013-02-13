@@ -17,12 +17,17 @@ using namespace Glib;
 /* Calendar Window */
 Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) : 
 	Dialog("", false), m_wDate(NULL),
-	m_btnPrevMonth("<"), m_btnMonth(""), m_btnNextMonth(">"),
-	m_btnPrevYear("<"), m_btnYear(""), m_btnNextYear(">"),
+	m_btnPrevMonth(""), m_btnMonth(""), m_btnNextMonth(""),
+	m_btnPrevYear(""), m_btnYear(""), m_btnNextYear(""),
 	m_txtYear(Adjustment::create(1990, 1910, 9999), 1), shoulClose(true)
 {
 	Grid *pGrid = manage(new Grid());
-
+	Frame *mainFrame = manage(new Frame(""));
+	Image *imgPrev1 = manage(new Image());
+	Image *imgNext1 = manage(new Image());
+	Image *imgPrev2 = manage(new Image());
+	Image *imgNext2 = manage(new Image());
+	
 	ustring ui_info = 
 		"<ui>"
         "  <popup name='PopupMenu'>"
@@ -41,6 +46,7 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
         "  </popup>"
         "</ui>";
 
+	
 	m_uiman = UIManager::create();
 	m_actionGrp = ActionGroup::create();
 
@@ -100,6 +106,21 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	m_btnYear.set_relief(RELIEF_NONE);
 	m_btnNextYear.set_relief(RELIEF_NONE);
 
+	imgPrev1->set_from_icon_name("go-previous-symbolic", ICON_SIZE_SMALL_TOOLBAR);
+	imgNext1->set_from_icon_name("go-next-symbolic", ICON_SIZE_SMALL_TOOLBAR);
+
+	imgPrev2->set_from_icon_name("go-previous-symbolic", ICON_SIZE_SMALL_TOOLBAR);
+	imgNext2->set_from_icon_name("go-next-symbolic", ICON_SIZE_SMALL_TOOLBAR);
+	
+	m_btnPrevMonth.set_image(*imgPrev1);
+	m_btnNextMonth.set_image(*imgNext1);
+	m_btnPrevMonth.set_always_show_image();
+	m_btnNextMonth.set_always_show_image();
+
+	m_btnPrevYear.set_image(*imgPrev2);
+	m_btnNextYear.set_image(*imgNext2);
+	m_btnPrevYear.set_always_show_image();
+	m_btnNextYear.set_always_show_image();
 
 	m_btnPrevMonth.set_halign(ALIGN_CENTER);
 	m_btnMonth.set_halign(ALIGN_FILL);
@@ -116,9 +137,15 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 
 
 	m_btnMonth.add_events(Gdk::BUTTON_PRESS_MASK);
-	get_vbox()->pack_start(*pGrid, true, true, 0);
 
-	set_border_width(10);
+	pGrid->set_margin_left(4);
+	pGrid->set_margin_right(4);
+	pGrid->set_margin_top(4);
+	pGrid->set_margin_bottom(4);
+	mainFrame->add(*pGrid);
+	get_vbox()->pack_start(*mainFrame, true, true, 0);
+	
+	set_border_width(1);
 	on_cal_monthChanged();
 
 	m_txtYear.set_no_show_all(true);

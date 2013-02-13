@@ -12,6 +12,9 @@
 #include <gdkmm/event.h>
 #include <gdkmm/window.h>
 #include <glibmm/date.h>
+#include <gtkmm/frame.h>
+#include <gdkmm/pixbuf.h>
+#include <gtkmm/icontheme.h>
 #include <gtkmm/uimanager.h>
 #include <gtkmm/actiongroup.h>
 #include <gtkmm/menu.h>
