@@ -214,10 +214,10 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_entryPatients.set_margin_bottom(6);
 	m_entryPatients.set_margin_left(100);
 	m_entryPatients.set_margin_right(100);
-	swPatients->set_margin_left(5);
-	swPatients->set_margin_right(5);
+	swPatients->set_margin_left(1);
+	swPatients->set_margin_right(1);
 	swPatients->set_margin_top(5);
-	swPatients->set_margin_bottom(5);
+	swPatients->set_margin_bottom(1);
 
 	m_frpinfo.set_margin_top(2);
 	m_frpinfo.set_margin_left(5);

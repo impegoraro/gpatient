@@ -15,7 +15,8 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">0</property>
-            <property name="stock">gtk-about</property>
+            <property name="pixel_size">28</property>
+            <property name="icon_name">user-info-symbolic</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -430,7 +431,8 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">0</property>
-            <property name="stock">gtk-edit</property>
+            <property name="pixel_size">28</property>
+            <property name="icon_name">go-home-symbolic</property>
           </object>
           <packing>
             <property name="expand">False</property>
