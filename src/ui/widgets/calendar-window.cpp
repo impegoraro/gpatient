@@ -166,8 +166,8 @@ void Widgets::CalendarWindow::popup(unsigned int x, unsigned int y)
 		m_cal.select_month(tmp.get_month()-1, tmp.get_year());
 		m_cal.select_day(tmp.get_day());
 	}
+
 	response(RESPONSE_ACCEPT);
-	present();
 	show_all();
 	run();
 }

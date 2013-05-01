@@ -14,6 +14,8 @@
 #include "view-patient.h"
 #include "../person.h"
 #include "../db/dbhandler.h"
+#include "visitswindow.h"
+
 
 class MainWindow : public Gtk::Window
 {
@@ -39,7 +41,8 @@ protected:
 	Gtk::ToolButton m_mtbAdd;
 	Gtk::ToolButton m_mtbEdit;
 	Gtk::ToolButton m_mtbRemove;
-
+	Gtk::ToolButton m_mtbAddVisit;
+	
 	Gtk::Notebook m_nb;
 	
 	Gtk::Label m_lblPatients;
@@ -76,6 +79,8 @@ protected:
 
 	ViewPatientWindow *m_vp;
 	PatientWindow *m_pw;
+	VisitsWindow *m_vw;
+	
 public:
 
 	MainWindow(const Glib::ustring& title, Glib::RefPtr<Gtk::Application>& app);
@@ -90,6 +95,7 @@ protected:
 	void on_btnBack_clicked(void);
 	void on_btnShPatient_clicked(void);
 	void on_btnToolAdd_clicked(void);
+	void on_btnToolAddVisit_clicked(void);
 	void on_btnToolEdit_clicked(void);
 	void on_btnToolRemove_clicked(void);
 	void on_window_show(void);

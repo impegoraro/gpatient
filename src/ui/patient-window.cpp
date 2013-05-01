@@ -152,6 +152,8 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblNacionality.set_mnemonic_widget(m_txtNationality);
 	m_lblBirthday.set_alignment(1.0f, 0.5f);
 	m_lblBirthday.set_mnemonic_widget(m_txtBirthday);
+	m_txtBirthday.set_icon_from_icon_name("x-office-calendar-symbolic", ENTRY_ICON_SECONDARY);
+	m_txtBirthday.set_icon_tooltip_text("Escolher data de nascimento", ENTRY_ICON_SECONDARY);
 	m_lblBirthplace.set_alignment(1.0f, 0.5f);
 	m_lblBirthplace.set_mnemonic_widget(m_txtBirthday);
 	m_lblProfession.set_alignment(1.0f, 0.5f);
@@ -239,7 +241,8 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_txtPhone.signal_focus_out_event().connect(sigc::mem_fun(*this, &PatientWindow::on_PhoneFocusOut));
 	m_txtCellphone.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_CellphoneFocusIn));
 	m_txtCellphone.signal_focus_out_event().connect(sigc::mem_fun(*this, &PatientWindow::on_CellphoneFocusOut));
-	m_txtBirthday.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_focusIn_show_calendar));
+	//m_txtBirthday.signal_focus_in_event().connect(sigc::mem_fun(*this, &PatientWindow::on_focusIn_show_calendar));
+	m_txtBirthday.signal_icon_press().connect(sigc::mem_fun(*this, &PatientWindow::on_txtBirthday_iconPress));
 	m_btnCancel.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::activate_close), true));
 	m_btnAccept.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::activate_close), false));
 
@@ -386,14 +389,12 @@ bool PatientWindow::on_focusOut_trim(GdkEventFocus *event, Entry* entry)
 	return false;
 }
 
-bool PatientWindow::on_focusIn_show_calendar(GdkEventFocus *focus)
+void PatientWindow::on_txtBirthday_iconPress(Gtk::EntryIconPosition, const GdkEventButton*)
 {
 	int x, y;
 
 	get_window()->get_position(x, y);
 	m_wincal.popup(x + 125, y + 200);
-	m_txtBirthplace.grab_focus();
-	return false;
 }
 
 bool PatientWindow::on_delete_event(GdkEventAny *event)

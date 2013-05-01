@@ -18,6 +18,7 @@
 #include "db/dbhandler.h"
 #include "person.h"
 
+
 using namespace std;
 using namespace Glib;
 using namespace Gtk;
@@ -27,9 +28,9 @@ using namespace Gtk;
 #define SEARCH_TIMEOUT 0.325
 
 MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(WINDOW_TOPLEVEL),
-	m_app(app), m_vp(NULL),
+	m_app(app), m_vp(NULL), m_vw(NULL),
 	m_lblPatients("<b>_Pacientes</b>", true),
-	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
+	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT), m_mtbAddVisit("Nova Visita"),
 	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true),
 	m_frpinfo("<b>Identificação</b>"),
 	m_lblsugestions("<span size=\"xx-large\">Para começar selecione um paciente da lista</span>"),
@@ -93,7 +94,9 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_mainToolbar.add(m_mtbAdd);
 	m_mainToolbar.add(m_mtbEdit);
 	m_mainToolbar.add(m_mtbRemove);
-
+	m_mainToolbar.add(*manage(new SeparatorToolItem ())); 
+	m_mainToolbar.add(m_mtbAddVisit);
+	
 	swPatients->add(m_treePatients);
 	swVisits->add(m_treeVisits);
 
@@ -153,6 +156,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
 	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
+	m_mtbAddVisit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAddVisit_clicked));
 	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
 	m_mtbRemove.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolRemove_clicked));
 	m_entryPatients.signal_focus_in_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusIn));
@@ -194,7 +198,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_mtbRemove.set_stock_id(Stock::DELETE);
 	//m_mtbRemove.set_is_important();
 	m_mtbRemove.set_use_underline();
-
+	m_mtbAddVisit.set_stock_id(Stock::ADD);
+	
 	m_lblPatients.set_mnemonic_widget(m_entryPatients);
 
 	swPatients->set_shadow_type(SHADOW_ETCHED_OUT);
@@ -241,6 +246,11 @@ MainWindow::~MainWindow()
 	if(m_vp)
 		delete m_vp;
 	m_app->remove_window(*m_pw);
+	if(m_vw) {
+		m_app->remove_window((Window&)*m_vw->get_window());
+		delete m_vw;
+	}
+	
 	//delete m_pw;
 }
 
@@ -296,6 +306,15 @@ void MainWindow::on_btnToolAdd_clicked(void)
 {
 	m_pw->set_window_type(PatientWindow::PW_TYPE_ADD);
 	m_pw->show();
+}
+
+void MainWindow::on_btnToolAddVisit_clicked(void)
+{
+	if(!m_vw) {
+		m_vw = new VisitsWindow();
+		m_app->add_window((Window&)*m_vw->get_window());
+	}
+	m_vw->show();
 }
 
 void MainWindow::on_btnShPatient_clicked(void)

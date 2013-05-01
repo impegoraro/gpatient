@@ -98,7 +98,7 @@ protected:
 	bool on_CellphoneFocusIn(GdkEventFocus *focus);
 	bool on_CellphoneFocusOut(GdkEventFocus *focus);
 
-	bool on_focusIn_show_calendar(GdkEventFocus *focus);
+	void on_txtBirthday_iconPress(Gtk::EntryIconPosition, const GdkEventButton*);
 
 	bool on_focusOut_trim(GdkEventFocus*, Gtk::Entry*);
 

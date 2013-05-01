@@ -1,6 +1,6 @@
 bin_PROGRAMS = herbanaria
 
-AM_CPPFLAGS=$(DEPS_CFLAGS) -std=c++0x
+AM_CPPFLAGS=$(DEPS_CFLAGS) -std=c++0x -O0 -g 
 herbanaria_LDADD=$(DEPS_LIBS)
 
 herbanaria_SOURCES = util.h util.cpp \
@@ -16,4 +16,4 @@ herbanaria_SOURCES = util.h util.cpp \
                      ui/view-patient.cpp ui/view-patient.h \
                      db/dbhandler.h db/dbhandler.cpp \
                      person.h person.cpp \
-                     main.cpp main.h 
+                     main.cpp main.h visitswindow.cc visitswindow.h 
