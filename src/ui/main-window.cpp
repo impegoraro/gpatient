@@ -36,7 +36,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_lblsugestions("<span size=\"xx-large\">Para começar selecione um paciente da lista</span>"),
 	m_btnShPatient("", "Ficha clinica")
 {
-	Box *mbox = manage(new VBox()), *pbox1 = manage(new HBox(false, 0)), *pbox2 = manage(new VBox(false, 0));
+	Box *mbox = manage(new VBox()), *pbox2 = manage(new VBox(false, 0));
 	ScrolledWindow *swPatients = manage(new ScrolledWindow()), *swVisits = manage(new ScrolledWindow());
 	m_modelPatients = ListStore::create(m_lpCols);
 	Box *binfo, *pbox3, *pboxp2;
@@ -96,17 +96,21 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_mainToolbar.add(m_mtbRemove);
 	m_mainToolbar.add(*manage(new SeparatorToolItem ())); 
 	m_mainToolbar.add(m_mtbAddVisit);
+	m_mainToolbar.add(m_mtbExpander);
+	m_mainToolbar.add(m_mtbEntrySearch);
 	
 	swPatients->add(m_treePatients);
 	swVisits->add(m_treeVisits);
+	
+	m_mtbEntrySearch.add(m_entryPatients);
 
 	/*******************************
 	 *       Noteboook Page 1      *
 	 ******************************/
-	pbox2->pack_start(*pbox1, PACK_SHRINK);
+	//pbox2->pack_start(*pbox1, PACK_SHRINK);
 	pbox2->pack_start(*swPatients, true, true, 0);
 	//pbox2->pack_start(m_lblsugestions, true, true, 0);
-	pbox1->pack_start(m_entryPatients, PACK_EXPAND_PADDING);
+	//pbox1->pack_start(m_entryPatients, PACK_EXPAND_PADDING);
 
 	m_nb.append_page(*pbox2);
 
@@ -146,7 +150,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	col = m_treePatients.get_column(m_treePatients.append_column("Nome", m_lpCols.m_col_name)-1);
 	col->set_expand();
 	col->set_resizable();
-
+	col = m_treePatients.get_column(m_treePatients.append_column("Nº ID. Fiscal", m_lpCols.m_col_nif)-1);
+	col->set_resizable();
 	// set up the filter
 	m_treeFilter = TreeModelFilter::create(m_modelPatients);
 	
@@ -180,11 +185,12 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	((Label*)m_frpinfo.get_label_widget())->set_use_markup();
 	m_lblPatients.set_use_markup();
 	m_lblPatients.set_alignment(0.00f, 0.5f);
-
-	/*TODO: find a way to change the style when the text is for help and not the user text.*/
-	//m_entryPatients.modify_text(STATE_NORMAL, Gdk::Color(ustring("Grey")));
-	m_entryPatients.set_text("Procurar paciente...");
-	m_entryPatients.set_icon_from_stock(Stock::FIND);
+	m_btnBack.set_relief(RELIEF_NONE);
+	m_entryPatients.set_placeholder_text ("Procurar paciente...");
+	//m_entryPatients.set_icon_from_stock(Stock::FIND);
+	m_entryPatients.set_icon_from_icon_name("preferences-system-search-symbolic");
+	m_entryPatients.set_icon_sensitive(ENTRY_ICON_PRIMARY, true);
+	m_entryPatients.set_icon_activatable(false);
 
 	m_mtbAdd.set_stock_id(Stock::ADD);
 	m_mtbAdd.set_use_underline();
@@ -196,6 +202,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_mtbRemove.set_has_tooltip();
 	m_mtbRemove.set_tooltip_text("Eliminar o paciente selecionado");
 	m_mtbRemove.set_stock_id(Stock::DELETE);
+	m_mtbExpander.set_expand();
 	//m_mtbRemove.set_is_important();
 	m_mtbRemove.set_use_underline();
 	m_mtbAddVisit.set_stock_id(Stock::ADD);
@@ -214,11 +221,11 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	set_default_size(720,500);
 	set_icon_name(((ustring)PACKAGE_NAME).lowercase());
 	
-	m_entryPatients.set_width_chars(40);
-	m_entryPatients.set_margin_top(2);
-	m_entryPatients.set_margin_bottom(6);
-	m_entryPatients.set_margin_left(100);
-	m_entryPatients.set_margin_right(100);
+	m_entryPatients.set_width_chars(26);
+	//m_entryPatients.set_margin_top(2);
+	//m_entryPatients.set_margin_bottom(6);
+	//m_entryPatients.set_margin_left(100);
+	//m_entryPatients.set_margin_right(100);
 	swPatients->set_margin_left(1);
 	swPatients->set_margin_right(1);
 	swPatients->set_margin_top(5);
@@ -230,8 +237,6 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	
 	m_btnShPatient.set_tooltip_text("Ver ficha clinica completa do paciente");
 	m_btnShPatient.set_halign(ALIGN_END);
-
-	m_entryPatients.override_color(Gdk::RGBA("Grey"), STATE_FLAG_NORMAL);
 	
 	m_nb.set_show_tabs(false);
 	
@@ -255,13 +260,14 @@ MainWindow::~MainWindow()
 }
 
 /* Helpers */
-void MainWindow::hlpr_append_patient(guint32 id, const ustring& name)
+void MainWindow::hlpr_append_patient(guint32 id, const ustring& name, guint32 nif)
 {
 	//m_treePatients.unset_model();
 	TreeModel::Row row = *(m_modelPatients->append());
 
 	row[m_lpCols.m_col_id] = id;
 	row[m_lpCols.m_col_name] = name;
+	row[m_lpCols.m_col_nif] = nif;
 }
 
 /* Signal Handlers */
@@ -311,7 +317,7 @@ void MainWindow::on_btnToolAdd_clicked(void)
 void MainWindow::on_btnToolAddVisit_clicked(void)
 {
 	if(!m_vw) {
-		m_vw = new VisitsWindow();
+		m_vw = new VisitsWindow(10);
 		m_app->add_window((Window&)*m_vw->get_window());
 	}
 	m_vw->show();
@@ -626,8 +632,8 @@ bool MainWindow::on_entryPatient_focusIn(GdkEventFocus *focus)
 {
 	if(m_entryPatientStatus) {
 		m_entryPatientStatus = false;
-		m_entryPatients.override_color(Gdk::RGBA("Black"), STATE_FLAG_NORMAL);
-		m_entryPatients.set_text("");
+	//	m_entryPatients.override_color(Gdk::RGBA("Black"), STATE_FLAG_NORMAL);
+	//	m_entryPatients.set_text("");
 	}
 
 	return true;
@@ -638,8 +644,8 @@ bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 
 	if(!m_entryPatientStatus && m_entryPatients.get_text_length() == 0) {
 		m_entryPatientStatus = true;
-		m_entryPatients.override_color(Gdk::RGBA("Grey"), STATE_FLAG_NORMAL);	
-		m_entryPatients.set_text("Procurar paciente...");
+	//	m_entryPatients.override_color(Gdk::RGBA("Grey"), STATE_FLAG_NORMAL);	
+	//	m_entryPatients.set_text("Procurar paciente...");
 	}
 
 	return true;

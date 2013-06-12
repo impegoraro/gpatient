@@ -106,11 +106,11 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	m_btnYear.set_relief(RELIEF_NONE);
 	m_btnNextYear.set_relief(RELIEF_NONE);
 
-	imgPrev1->set_from_icon_name("go-previous-symbolic", ICON_SIZE_SMALL_TOOLBAR);
-	imgNext1->set_from_icon_name("go-next-symbolic", ICON_SIZE_SMALL_TOOLBAR);
+	imgPrev1->set_from_icon_name("go-previous-symbolic", ICON_SIZE_MENU);
+	imgNext1->set_from_icon_name("go-next-symbolic", ICON_SIZE_MENU);
 
-	imgPrev2->set_from_icon_name("go-previous-symbolic", ICON_SIZE_SMALL_TOOLBAR);
-	imgNext2->set_from_icon_name("go-next-symbolic", ICON_SIZE_SMALL_TOOLBAR);
+	imgPrev2->set_from_icon_name("go-previous-symbolic", ICON_SIZE_MENU);
+	imgNext2->set_from_icon_name("go-next-symbolic", ICON_SIZE_MENU);
 	
 	m_btnPrevMonth.set_image(*imgPrev1);
 	m_btnNextMonth.set_image(*imgNext1);

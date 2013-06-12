@@ -13,7 +13,8 @@
 #include <sqlite3.h>
 
 #include "../person.h"
-
+#include "../visit.h"
+#include "visit-interface.h"
 /*
  * This class is a singleton to the proxy that interacts with the database.
  */
@@ -32,7 +33,7 @@ protected:
 
 	inline bool user_has_contact(const Person& p) const;
 
-	sigc::signal<void, guint32, const Glib::ustring&> m_signal_person_added;
+	sigc::signal<void, guint32, const Glib::ustring&, guint32> m_signal_person_added;
 	sigc::signal<void, const Person&> m_signal_person_edit;
 public:
 
@@ -40,8 +41,9 @@ public:
 	static DBHandler& get_instance();
 	static void finalize(void);
 
-	int  person_insert(const Person& p) const;
-	int  person_update(const Person& p) const;
+	int visit_insert(VisitInterface& visit) const;
+	int person_insert(const Person& p) const;
+	int person_update(const Person& p) const;
 	bool person_remove(unsigned int id) const;
 
 	void get_patients(const Glib::ustring *name) const;
@@ -52,7 +54,7 @@ public:
 	bool open(void);
 	void close(void);
 
-	sigc::signal<void, guint32, const Glib::ustring&>& signal_person_added();
+	sigc::signal<void, guint32, const Glib::ustring&, guint32>& signal_person_added();
 	sigc::signal<void, const Person&> signal_person_edited();
 };
 

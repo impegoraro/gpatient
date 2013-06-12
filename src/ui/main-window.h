@@ -28,10 +28,12 @@ protected:
 		{
 			add(m_col_id);
 			add(m_col_name);
+			add(m_col_nif);
 		}
 
 		Gtk::TreeModelColumn<unsigned int> m_col_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+		Gtk::TreeModelColumn<int> m_col_nif;
 	};
 
 	Glib::RefPtr<Gtk::UIManager> m_uiman;
@@ -41,6 +43,8 @@ protected:
 	Gtk::ToolButton m_mtbAdd;
 	Gtk::ToolButton m_mtbEdit;
 	Gtk::ToolButton m_mtbRemove;
+	Gtk::ToolItem m_mtbExpander;
+	Gtk::ToolItem m_mtbEntrySearch;
 	Gtk::ToolButton m_mtbAddVisit;
 	
 	Gtk::Notebook m_nb;
@@ -86,7 +90,7 @@ public:
 	MainWindow(const Glib::ustring& title, Glib::RefPtr<Gtk::Application>& app);
 	virtual ~MainWindow();
 	/* Helper Functions */
-	void hlpr_append_patient(guint32 id, const Glib::ustring& name);
+	void hlpr_append_patient(guint32 id, const Glib::ustring& name, guint32 nif);
 
 protected:
 	/* Signal Handlers */
