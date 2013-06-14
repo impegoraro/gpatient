@@ -610,9 +610,46 @@ void DBHandler::get_patients(const ustring *name) const
 		throw (SqlConnectionClosedException());
 }
 
+void DBHandler::get_visits(guint32 personID) const
+{
+	/*TODO: throw exception if db is not opened*/
+	ustring query = "SELECT VisitID, Complaint, VisitDate FROM Visits ";
+
+	if(m_db != NULL) {
+		sqlite3_stmt *stmt;
+		
+		query += " WHERE RefPersonID = ? ORDER BY VisitDate ASC;";
+		
+		if(sqlite3_prepare_v2(m_db, query.c_str(), query.bytes(), &stmt, NULL) == SQLITE_OK) {
+			int res;
+
+			sqlite3_bind_int(stmt, 1, personID);
+
+			while(true)
+				if(sqlite3_step(stmt) == SQLITE_ROW) {
+					guint32 id = sqlite3_column_int(stmt, 0);
+					ustring complaint = ustring((char *)sqlite3_column_text(stmt, 1));
+					ustring date = ustring((char *)sqlite3_column_text(stmt, 2));
+
+					m_signal_visit_added.emit(id, complaint, date);
+				} else
+					break; // Nothing else to do.
+			sqlite3_finalize(stmt);
+		} else {
+			cout<< "Error: " << sqlite3_errmsg(m_db) <<endl;
+		}
+	} else
+		throw (SqlConnectionClosedException());
+}
+
 sigc::signal<void, guint32, const ustring&, guint32>& DBHandler::signal_person_added()
 {
 	return m_signal_person_added;
+}
+
+sigc::signal<void, guint32, const ustring&, const ustring&>& DBHandler::signal_visit_added()
+{
+	return m_signal_visit_added;
 }
 
 sigc::signal<void, const Person&> DBHandler::signal_person_edited()

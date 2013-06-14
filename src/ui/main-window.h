@@ -16,6 +16,7 @@
 #include "../db/dbhandler.h"
 #include "visitswindow.h"
 
+#define GLADE_VISITS "src/ui/main-visit.glade"
 
 class MainWindow : public Gtk::Window
 {
@@ -34,6 +35,22 @@ protected:
 		Gtk::TreeModelColumn<unsigned int> m_col_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
 		Gtk::TreeModelColumn<int> m_col_nif;
+	};
+	
+	class ListVisitsCols : public Gtk::TreeModel::ColumnRecord
+	{
+	public:
+
+		ListVisitsCols()
+		{
+			add(m_col_id);
+			add(m_col_complaint);
+			add(m_col_date);
+		}
+
+		Gtk::TreeModelColumn<unsigned int> m_col_id;
+		Gtk::TreeModelColumn<Glib::ustring> m_col_complaint;
+		Gtk::TreeModelColumn<Glib::ustring> m_col_date;
 	};
 
 	Glib::RefPtr<Gtk::UIManager> m_uiman;
@@ -54,24 +71,28 @@ protected:
 	Gtk::TreeView m_treePatients;
 
 	Gtk::Toolbar m_tbVisits;
-	Gtk::TreeView m_treeVisits;
-	Gtk::Label m_lblsugestions;
 
 	ListPatientsCols m_lpCols;
+	ListVisitsCols m_lvCols;
+
+	// Visit widgets
+	Gtk::TreeView *m_treeVisits;
+	Gtk::Button *m_btnBack;
+
+	// Selected patient information
+	Gtk::Label *m_lblPName;
+	Gtk::Label *m_lblPBloodtype;
+	Gtk::Label *m_lblPHeight;
+	Gtk::Label *m_lblPSex;
+	Gtk::Label *m_lblPAge;
+
+	Gtk::Button *m_btnViewPatient;
+	Gtk::Grid *m_gridVisits;
 
 	Glib::RefPtr<Gtk::TreeModelFilter> m_treeFilter;
 	Glib::RefPtr<Gtk::ListStore> m_modelPatients;
+	Glib::RefPtr<Gtk::ListStore> m_modelVisits;
 
-	// Selected patient information
-	Gtk::Frame m_frpinfo;
-	Gtk::Label m_lblpname;
-	Gtk::Label m_lblpbloodtype;
-	Gtk::Label m_lblpheight;
-	Gtk::Label m_lblpage;
-	Gtk::Label m_lblpsex;
-	Gtk::LinkButton m_btnShPatient;
-
-	Gtk::Button m_btnBack;
 	
 	//Glib::SignalTimeout m_searchTimeout;
 	sigc::connection m_connSearch;
@@ -91,8 +112,11 @@ public:
 	virtual ~MainWindow();
 	/* Helper Functions */
 	void hlpr_append_patient(guint32 id, const Glib::ustring& name, guint32 nif);
+	void hlpr_append_visit(guint32 id, const Glib::ustring& complaint, const Glib::ustring& date);
 
 protected:
+	void get_visits_widgets(void);
+
 	/* Signal Handlers */
 	virtual bool on_delete_event(GdkEventAny *);
 
@@ -108,7 +132,7 @@ protected:
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
 
 	void on_treePatients_activated(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
-	void on_treePatients_selected();
+	//void on_treePatients_selected();
 	void on_txtSearch_changed();
 	void on_db_person_edited(const Person& p);
 	void on_mhAbout_activate(void);

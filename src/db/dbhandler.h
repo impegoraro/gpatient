@@ -34,6 +34,7 @@ protected:
 	inline bool user_has_contact(const Person& p) const;
 
 	sigc::signal<void, guint32, const Glib::ustring&, guint32> m_signal_person_added;
+	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_visit_added;
 	sigc::signal<void, const Person&> m_signal_person_edit;
 public:
 
@@ -48,6 +49,7 @@ public:
 
 	void get_patients(const Glib::ustring *name) const;
 	bool get_person(const guint32 id, Person& p) const;
+	void get_visits(guint32 personID) const;
 
 	const Glib::ustring& get_database_path(void) const;
 
@@ -55,6 +57,7 @@ public:
 	void close(void);
 
 	sigc::signal<void, guint32, const Glib::ustring&, guint32>& signal_person_added();
+	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&>& signal_visit_added();
 	sigc::signal<void, const Person&> signal_person_edited();
 };
 

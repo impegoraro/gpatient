@@ -31,19 +31,15 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_app(app), m_vp(NULL), m_vw(NULL),
 	m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT), m_mtbAddVisit("Nova Visita"),
-	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true),
-	m_frpinfo("<b>Identificação</b>"),
-	m_lblsugestions("<span size=\"xx-large\">Para começar selecione um paciente da lista</span>"),
-	m_btnShPatient("", "Ficha clinica")
+	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true)
 {
+	DBHandler db = DBHandler::get_instance();
 	Box *mbox = manage(new VBox()), *pbox2 = manage(new VBox(false, 0));
-	ScrolledWindow *swPatients = manage(new ScrolledWindow()), *swVisits = manage(new ScrolledWindow());
+	Grid *pGridp2 = manage(new Grid());
+	ScrolledWindow *swPatients = manage(new ScrolledWindow());
 	m_modelPatients = ListStore::create(m_lpCols);
 	Box *binfo, *pbox3, *pboxp2;
 	Table *tbinfo;
-	//RefPtr<Image> img_goback = Image::create_from_stock(Stock::GO_BACK, ICON_SIZE_SMALL_TOOLBAR);
-	Image *img_goback = manage(new Image());
-	DBHandler db = DBHandler::get_instance();
 	Widget * pwidget;
 	ustring menu =  "<ui>" \
 					 "<menubar name='MenuBar'>" \
@@ -55,15 +51,10 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 					 "</menu>" \
 					 "</menubar>" \
 					 "</ui>";
+
 	m_pw = new PatientWindow(*this, "Dados do paciente", PatientWindow::PW_TYPE_ADD);
+	get_visits_widgets();
 
-    img_goback->set(Stock::GO_BACK, ICON_SIZE_SMALL_TOOLBAR);
-	m_btnBack.set_image(*img_goback);
-	m_btnBack.set_relief(RELIEF_NONE);
-	m_btnBack.set_hexpand(false);
-	m_btnBack.set_halign(ALIGN_START);
-
-	
 	// Clear search timer...
 	m_timerSearch.stop();
 	m_timerSearch.reset();
@@ -100,39 +91,23 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_mainToolbar.add(m_mtbEntrySearch);
 	
 	swPatients->add(m_treePatients);
-	swVisits->add(m_treeVisits);
 	
 	m_mtbEntrySearch.add(m_entryPatients);
 
 	/*******************************
 	 *       Noteboook Page 1      *
 	 ******************************/
-	//pbox2->pack_start(*pbox1, PACK_SHRINK);
 	pbox2->pack_start(*swPatients, true, true, 0);
-	//pbox2->pack_start(m_lblsugestions, true, true, 0);
-	//pbox1->pack_start(m_entryPatients, PACK_EXPAND_PADDING);
 
 	m_nb.append_page(*pbox2);
 
 
 	/*******************************
-	 *       Noteboook Page 2      *
-	 ******************************/
+	*       Noteboook Page 2       *
+	*******************************/
 
-	m_frpinfo.add(*binfo);
-	binfo->pack_start(*tbinfo, true, true, 10);
-	tbinfo->attach(m_lblpname, 0, 4, 0, 1, FILL | SHRINK | EXPAND, FILL, 10, 0);
-	tbinfo->attach(m_lblpage, 0, 1, 1, 2, FILL | SHRINK | EXPAND, FILL, 10, 0);
-	tbinfo->attach(m_lblpbloodtype, 1, 2, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbinfo->attach(m_lblpheight, 2, 3, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbinfo->attach(m_lblpsex, 3, 4, 1, 2, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbinfo->attach(m_btnShPatient, 0, 4, 2, 3, FILL | SHRINK | EXPAND, FILL, 0, 0);
-	tbinfo->set_row_spacings(6);
+	m_nb.append_page(*m_gridVisits);
 
-	pboxp2->pack_start(m_btnBack, false, false, 0);
-	pboxp2->pack_start(m_frpinfo, false, true, 0);
-	m_nb.append_page(*pboxp2);
-	
 	mbox->pack_start(*pwidget, PACK_SHRINK);
 	mbox->pack_start(m_mainToolbar, PACK_SHRINK);
 	mbox->pack_start(m_nb, true, true, 0);
@@ -140,25 +115,41 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 
 	/*pbox3->pack_start(m_frpinfo, false, true, 1);
 	pbox3->pack_start(*swVisits, true, true, 2);
-	pbox3->pack_start(m_lblsugestions, true, true, 50);*/
 
 	/* Setting up columns in list patients */
 	TreeViewColumn *col;
+	m_modelVisits = ListStore::create(m_lvCols);
 
-	col = m_treePatients.get_column(m_treePatients.append_column("id", m_lpCols.m_col_id)-1);
+	col = m_treePatients.get_column(m_treePatients.append_column("id", m_lpCols.m_col_id) -1);
 	col->set_visible(false);
-	col = m_treePatients.get_column(m_treePatients.append_column("Nome", m_lpCols.m_col_name)-1);
+	col = m_treePatients.get_column(m_treePatients.append_column("Nome", m_lpCols.m_col_name) -1);
 	col->set_expand();
 	col->set_resizable();
-	col = m_treePatients.get_column(m_treePatients.append_column("Nº ID. Fiscal", m_lpCols.m_col_nif)-1);
+	col = m_treePatients.get_column(m_treePatients.append_column("Nº ID. Fiscal", m_lpCols.m_col_nif) -1);
 	col->set_resizable();
 	// set up the filter
 	m_treeFilter = TreeModelFilter::create(m_modelPatients);
 	
 	m_treePatients.set_model (m_treeFilter);
 	m_treeFilter->set_visible_func(sigc::mem_fun(*this, &MainWindow::filter_patient_by_name));
-	
+
+
+	/* Setup visits' treeview */
+	col = m_treeVisits->get_column(m_treeVisits->append_column("id", m_lvCols.m_col_id) -1);
+	col->set_visible(false);
+	col = m_treeVisits->get_column(m_treeVisits->append_column("Queixa Principal", m_lvCols.m_col_complaint) -1);
+	col->set_expand();
+	col->set_clickable();
+	col->set_resizable();
+	m_treeVisits->get_column(m_treeVisits->append_column("Data", m_lvCols.m_col_date) -1);
+	col->set_clickable();
+	col->set_resizable();
+
+	m_treeVisits->set_model(m_modelVisits);
+
+
 	db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
+	db.signal_visit_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_visit));
 	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
 	m_mtbAddVisit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAddVisit_clicked));
@@ -172,20 +163,15 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
 	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
 	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
-	m_btnShPatient.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnShPatient_clicked));
-	m_btnBack.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnBack_clicked));
+	m_btnViewPatient->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnShPatient_clicked));
+	m_btnBack->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnBack_clicked));
 	
 	/************************************
 	 *    Setting up some properties    *
 	 ***********************************/
 	m_mainToolbar.get_style_context()->add_class(GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
 	swPatients->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
-	swVisits->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	((Label*)m_frpinfo.get_label_widget())->set_use_markup();
-	m_lblPatients.set_use_markup();
-	m_lblPatients.set_alignment(0.00f, 0.5f);
-	m_btnBack.set_relief(RELIEF_NONE);
 	m_entryPatients.set_placeholder_text ("Procurar paciente...");
 	//m_entryPatients.set_icon_from_stock(Stock::FIND);
 	m_entryPatients.set_icon_from_icon_name("preferences-system-search-symbolic");
@@ -207,39 +193,21 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_mtbRemove.set_use_underline();
 	m_mtbAddVisit.set_stock_id(Stock::ADD);
 	
-	m_lblPatients.set_mnemonic_widget(m_entryPatients);
-
 	swPatients->set_shadow_type(SHADOW_ETCHED_OUT);
-	swVisits->set_shadow_type(SHADOW_ETCHED_OUT);
-
-	m_lblsugestions.set_use_markup();
-	//m_lblsugestions.set_line_wrap();
-	m_lblsugestions.set_visible(false);
-	m_lblsugestions.set_no_show_all(true);
 
 	set_title(title);
 	set_default_size(720,500);
 	set_icon_name(((ustring)PACKAGE_NAME).lowercase());
 	
 	m_entryPatients.set_width_chars(26);
-	//m_entryPatients.set_margin_top(2);
-	//m_entryPatients.set_margin_bottom(6);
-	//m_entryPatients.set_margin_left(100);
-	//m_entryPatients.set_margin_right(100);
 	swPatients->set_margin_left(1);
 	swPatients->set_margin_right(1);
 	swPatients->set_margin_top(5);
 	swPatients->set_margin_bottom(1);
-
-	m_frpinfo.set_margin_top(2);
-	m_frpinfo.set_margin_left(5);
-	m_frpinfo.set_margin_right(5);
-	
-	m_btnShPatient.set_tooltip_text("Ver ficha clinica completa do paciente");
-	m_btnShPatient.set_halign(ALIGN_END);
 	
 	m_nb.set_show_tabs(false);
-	
+	m_nb.set_current_page(1);
+	m_nb.set_current_page(0);
 	m_app->add_window(*m_pw);
 
 	add(*mbox);
@@ -269,6 +237,17 @@ void MainWindow::hlpr_append_patient(guint32 id, const ustring& name, guint32 ni
 	row[m_lpCols.m_col_name] = name;
 	row[m_lpCols.m_col_nif] = nif;
 }
+
+void MainWindow::hlpr_append_visit(guint32 id, const ustring& complaint, const ustring& date)
+{
+	TreeModel::Row row = *(m_modelVisits->append());
+
+	row[m_lvCols.m_col_id] = id;
+	row[m_lvCols.m_col_complaint] = complaint;
+	row[m_lvCols.m_col_date] = date;
+}
+
+
 
 /* Signal Handlers */
 
@@ -424,69 +403,6 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 	guint16 age;
 	char tmp[6];
 	bool close= true;
-	TreeModel::iterator row;
-	DBHandler db = DBHandler::get_instance();
-
-	today.set_time_current();
-
-	row = *m_modelPatients->get_iter(path);
-	if(!row) {
-		cout<< "Iterator is not valid"<< endl;
-		return;
-	}
-	
-	if(*row) {
-		try{
-			db.open();
-		} catch(SqlConnectionOpenedException& ex) {
-			close = false;
-		}
-
-		db.get_person((*row)[m_lpCols.m_col_id], p);
-		if(close)
-			db.close();
-		m_lblpname.set_text(ustring("<b>Paciente:</b> <i>") + p.get_name() + "</i>");
-		age = today.get_year() - p.get_birthday().get_year();
-
-		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
-			age--;
-
-		sprintf(tmp, "%hu", age);
-		m_lblpage.set_text(ustring("<b>Idade:</b> <i>") + tmp + (ustring)"</i>");
-		m_lblpbloodtype.set_text("<b>Tipo de Sangue:</b> <i>" + p.get_blood_type_string() + "</i>");
-		sprintf(tmp, "%.2f", p.get_height());
-		m_lblpheight.set_text(ustring("<b>Altura:</b> <i>") + tmp + (ustring)"</i>");
-		m_lblpsex.set_text(ustring("<b>Sexo:</b> ") + (p.get_sex()? "Masculino" : "Feminino") + (ustring)"<i></i>");
-
-		m_lblpname.set_use_markup();
-		m_lblpname.set_alignment(0.0f, 0.5f);
-		m_lblpage.set_use_markup();
-		m_lblpage.set_alignment(0.0f, 0.5f);
-		m_lblpbloodtype.set_use_markup();
-		m_lblpbloodtype.set_alignment(0.1f, 0.5f);
-		m_lblpheight.set_use_markup();
-		m_lblpheight.set_alignment(0.1f, 0.5f);
-		m_lblpsex.set_use_markup();
-		m_lblpsex.set_alignment(0.1f, 0.5f);
-
-		m_lblsugestions.hide();
-		m_frpinfo.show_all();
-		m_treeVisits.get_parent()->show();
-		m_nb.set_current_page(1);
-	} else {
-		m_lblsugestions.show();
-		m_frpinfo.hide();
-		m_treeVisits.get_parent()->hide();
-	}
-}
-
-void  MainWindow::on_treePatients_selected()
-{
-	Person p;
-	Date today;
-	guint16 age;
-	char tmp[6];
-	bool close= true;
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator row = sel->get_selected();
 	DBHandler db = DBHandler::get_instance();
@@ -508,40 +424,79 @@ void  MainWindow::on_treePatients_selected()
 		db.get_person((*row)[m_lpCols.m_col_id], p);
 		if(close)
 			db.close();
-		m_lblpname.set_text(ustring("<b>Paciente:</b> <i>") + p.get_name() + "</i>");
+		m_lblPName->set_text(ustring("<b><span size=\"x-large\">" + p.get_name() + "</span></b>"));
+		m_lblPName->set_use_markup();
 		age = today.get_year() - p.get_birthday().get_year();
 
 		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
 			age--;
 
 		sprintf(tmp, "%hu", age);
-		m_lblpage.set_text(ustring("<b>Idade:</b> <i>") + tmp + (ustring)"</i>");
-		m_lblpbloodtype.set_text("<b>Tipo de Sangue:</b> <i>" + p.get_blood_type_string() + "</i>");
+		m_lblPAge->set_text(tmp);
+		m_lblPBloodtype->set_text(p.get_blood_type_string());
 		sprintf(tmp, "%.2f", p.get_height());
-		m_lblpheight.set_text(ustring("<b>Altura:</b> <i>") + tmp + (ustring)"</i>");
-		m_lblpsex.set_text(ustring("<b>Sexo:</b> ") + (p.get_sex()? "Masculino" : "Feminino") + (ustring)"<i></i>");
+		m_lblPHeight->set_text(tmp);
+		m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
 
-		m_lblpname.set_use_markup();
-		m_lblpname.set_alignment(0.0f, 0.5f);
-		m_lblpage.set_use_markup();
-		m_lblpage.set_alignment(0.0f, 0.5f);
-		m_lblpbloodtype.set_use_markup();
-		m_lblpbloodtype.set_alignment(0.1f, 0.5f);
-		m_lblpheight.set_use_markup();
-		m_lblpheight.set_alignment(0.1f, 0.5f);
-		m_lblpsex.set_use_markup();
-		m_lblpsex.set_alignment(0.1f, 0.5f);
-
-		m_lblsugestions.hide();
-		m_frpinfo.show_all();
-		m_treeVisits.get_parent()->show();
 		m_nb.set_current_page(1);
-	} else {
-		m_lblsugestions.show();
-		m_frpinfo.hide();
-		m_treeVisits.get_parent()->hide();
 	}
 }
+
+//void  MainWindow::on_treePatients_selected()
+//{
+//	Person p;
+//	Date today;
+//	guint16 age;
+//	char tmp[6];
+//	bool close= true;
+//	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
+//	TreeModel::iterator row = sel->get_selected();
+//	DBHandler db = DBHandler::get_instance();
+//
+//	today.set_time_current();
+//
+//	if(!row) {
+//		cout<< "Iterator is not valid"<< endl;
+//		return;
+//	}
+//	
+//	if(*row) {
+//		try{
+//			db.open();
+//		} catch(SqlConnectionOpenedException& ex) {
+//			close = false;
+//		}
+//
+//		db.get_person((*row)[m_lpCols.m_col_id], p);
+//		if(close)
+//			db.close();
+//		m_lblPName->set_text(ustring("<b>" + p.get_name() + "</b>"));
+//		age = today.get_year() - p.get_birthday().get_year();
+//
+//		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
+//			age--;
+//
+//		sprintf(tmp, "%hu", age);
+//		m_lblPAge->set_text(tmp);
+//		m_lblPBloodtype->set_text(p.get_blood_type_string());
+//		sprintf(tmp, "%.2f", p.get_height());
+//		m_lblPHeight->set_text(tmp);
+//		m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
+//
+//		//m_lblpname.set_use_markup();
+//		//m_lblpname.set_alignment(0.0f, 0.5f);
+//		//m_lblpage.set_use_markup();
+//		//m_lblpage.set_alignment(0.0f, 0.5f);
+//		//m_lblpbloodtype.set_use_markup();
+//		//m_lblpbloodtype.set_alignment(0.1f, 0.5f);
+//		//m_lblpheight.set_use_markup();
+//		//m_lblpheight.set_alignment(0.1f, 0.5f);
+//		//m_lblpsex.set_use_markup();
+//		//m_lblpsex.set_alignment(0.1f, 0.5f);
+//
+//		m_nb.set_current_page(1);
+//	}
+//}
 
 void MainWindow::on_db_person_edited(const Person &p)
 {
@@ -551,33 +506,19 @@ void MainWindow::on_db_person_edited(const Person &p)
 
 	today.set_time_current();
 
-	m_lblpname.set_text(ustring("<b>Paciente:</b> <i>") + p.get_name() + "</i>");
+	m_lblPName->set_text(ustring("<b>" + p.get_name() + "</b>"));
 	age = today.get_year() - p.get_birthday().get_year();
 
 	if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
 		age--;
 
 	sprintf(tmp, "%hu", age);
-	m_lblpage.set_text(ustring("<b>Idade:</b> <i>") + tmp + (ustring)"</i>");
-	m_lblpbloodtype.set_text("<b>Tipo de Sangue:</b> <i>" + p.get_blood_type_string() + "</i>");
+	m_lblPAge->set_text(tmp);
+	m_lblPBloodtype->set_text(p.get_blood_type_string());
 	sprintf(tmp, "%.2f", p.get_height());
-	m_lblpheight.set_text(ustring("<b>Altura:</b> <i>") + tmp + (ustring)"</i>");
-	m_lblpsex.set_text(ustring("<b>Sexo:</b> ") + (p.get_sex()? "Masculino" : "Feminino") + (ustring)"<i></i>");
+	m_lblPHeight->set_text(tmp);
+	m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
 
-	m_lblpname.set_use_markup();
-	m_lblpname.set_alignment(0.0f, 0.5f);
-	m_lblpage.set_use_markup();
-	m_lblpage.set_alignment(0.0f, 0.5f);
-	m_lblpbloodtype.set_use_markup();
-	m_lblpbloodtype.set_alignment(0.1f, 0.5f);
-	m_lblpheight.set_use_markup();
-	m_lblpheight.set_alignment(0.1f, 0.5f);
-	m_lblpsex.set_use_markup();
-	m_lblpsex.set_alignment(0.1f, 0.5f);
-
-	m_lblsugestions.hide();
-	m_frpinfo.show_all();
-	m_treeVisits.get_parent()->show();
 }
 
 void MainWindow::patient_window_add(PatientWindow &pw)
@@ -664,4 +605,19 @@ bool MainWindow::filter_patient_by_name(const TreeModel::const_iterator& iter)
 void MainWindow::on_btnBack_clicked(void)
 {
 	m_nb.set_current_page(0);
+}
+
+void MainWindow::get_visits_widgets(void)
+{
+	RefPtr<Builder> builder = Builder::create_from_file(GLADE_VISITS);
+
+	builder->get_widget("treeVisits", m_treeVisits);
+	builder->get_widget("btnBack", m_btnBack);
+	builder->get_widget("lblPName", m_lblPName);
+	builder->get_widget("lblPBlood", m_lblPBloodtype);
+	builder->get_widget("lblPHeight", m_lblPHeight);
+	builder->get_widget("lblPSex", m_lblPSex);
+	builder->get_widget("lblPAge", m_lblPAge);
+	builder->get_widget("btnViewPatient", m_btnViewPatient);
+	builder->get_widget("gridVisits", m_gridVisits);
 }
