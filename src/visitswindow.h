@@ -163,7 +163,7 @@ private:
 	virtual int getPersonID();
 	virtual Glib::ustring getComplaint();
 	virtual Glib::ustring getAnamnesis();
-	virtual Glib::Date getDate();
+	virtual Glib::ustring getDate();
 	virtual float getWeight();
 	virtual Glib::ustring getAppearance();
 	virtual Glib::ustring getMovement();

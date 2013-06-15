@@ -10,7 +10,7 @@ public:
 	virtual int getPersonID() = 0;
 	virtual Glib::ustring getComplaint() = 0;
 	virtual Glib::ustring getAnamnesis() = 0;
-	virtual Glib::Date getDate() = 0;
+	virtual Glib::ustring getDate() = 0;
 	virtual float getWeight() = 0;
 	
 	virtual Glib::ustring getAppearance() = 0;

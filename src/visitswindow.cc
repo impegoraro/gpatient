@@ -241,7 +241,7 @@ void VisitsWindow::on_apply()
 		DBHandler::get_instance().visit_insert(*((VisitInterface*)this));
 		DBHandler::get_instance().close();
 	} catch(exception& ex)
-	{ }
+	{ std::cout<< "Could not add the visit"<< std::endl; }
 	m_win->hide();
 }
 
@@ -262,11 +262,9 @@ ustring VisitsWindow::getAnamnesis()
 {
 	return m_txtAnamnesis->get_buffer()->get_text(false);
 }
-Date VisitsWindow::getDate()
+ustring VisitsWindow::getDate()
 {
-	Date dt;
-	dt.set_parse(m_txtDate->get_text());
-	return dt;
+	return m_txtDate->get_text();
 }
 float VisitsWindow::getWeight()
 {

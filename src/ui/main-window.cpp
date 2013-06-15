@@ -30,7 +30,7 @@ using namespace Gtk;
 MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(WINDOW_TOPLEVEL),
 	m_app(app), m_vp(NULL), m_vw(NULL),
 	m_lblPatients("<b>_Pacientes</b>", true),
-	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT), m_mtbAddVisit("Nova Visita"),
+	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
 	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true)
 {
 	DBHandler db = DBHandler::get_instance();
@@ -86,7 +86,6 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_mainToolbar.add(m_mtbEdit);
 	m_mainToolbar.add(m_mtbRemove);
 	m_mainToolbar.add(*manage(new SeparatorToolItem ())); 
-	m_mainToolbar.add(m_mtbAddVisit);
 	m_mainToolbar.add(m_mtbExpander);
 	m_mainToolbar.add(m_mtbEntrySearch);
 	
@@ -152,7 +151,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	db.signal_visit_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_visit));
 	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
-	m_mtbAddVisit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAddVisit_clicked));
+	m_btnNewVisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAddVisit_clicked));
 	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
 	m_mtbRemove.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolRemove_clicked));
 	m_entryPatients.signal_focus_in_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusIn));
@@ -191,8 +190,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_mtbExpander.set_expand();
 	//m_mtbRemove.set_is_important();
 	m_mtbRemove.set_use_underline();
-	m_mtbAddVisit.set_stock_id(Stock::ADD);
 	
+	m_treeVisits->set_grid_lines(TREE_VIEW_GRID_LINES_VERTICAL);
 	swPatients->set_shadow_type(SHADOW_ETCHED_OUT);
 
 	set_title(title);
@@ -206,12 +205,11 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	swPatients->set_margin_bottom(1);
 	
 	m_nb.set_show_tabs(false);
-	m_nb.set_current_page(1);
-	m_nb.set_current_page(0);
 	m_app->add_window(*m_pw);
 
 	add(*mbox);
 	show_all_children();
+	m_nb.set_current_page(0);
 }
 
 MainWindow::~MainWindow()
@@ -296,7 +294,13 @@ void MainWindow::on_btnToolAdd_clicked(void)
 void MainWindow::on_btnToolAddVisit_clicked(void)
 {
 	if(!m_vw) {
-		m_vw = new VisitsWindow(10);
+		RefPtr<TreeSelection> sel = m_treePatients.get_selection();
+		TreeModel::iterator iter = sel->get_selected();
+		ListPatientsCols cols;
+		TreeModel::Row row = *iter;
+		Person p(row[cols.m_col_id]);
+
+		m_vw = new VisitsWindow(row[cols.m_col_id]);
 		m_app->add_window((Window&)*m_vw->get_window());
 	}
 	m_vw->show();
@@ -401,7 +405,7 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 	Person p;
 	Date today;
 	guint16 age;
-	char tmp[6];
+	char tmp[10];
 	bool close= true;
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator row = sel->get_selected();
@@ -420,8 +424,9 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		} catch(SqlConnectionOpenedException& ex) {
 			close = false;
 		}
-
+		m_modelVisits->clear();
 		db.get_person((*row)[m_lpCols.m_col_id], p);
+		db.get_visits((*row)[m_lvCols.m_col_id]);
 		if(close)
 			db.close();
 		m_lblPName->set_text(ustring("<b><span size=\"x-large\">" + p.get_name() + "</span></b>"));
@@ -434,11 +439,13 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		sprintf(tmp, "%hu", age);
 		m_lblPAge->set_text(tmp);
 		m_lblPBloodtype->set_text(p.get_blood_type_string());
-		sprintf(tmp, "%.2f", p.get_height());
+		sprintf(tmp, "%.2f cm", p.get_height());
 		m_lblPHeight->set_text(tmp);
 		m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
 
+		m_entryPatients.hide();
 		m_nb.set_current_page(1);
+
 	}
 }
 
@@ -502,11 +509,11 @@ void MainWindow::on_db_person_edited(const Person &p)
 {
 	Date today;
 	int age;
-	char tmp[10];
+	char tmp[12];
 
 	today.set_time_current();
 
-	m_lblPName->set_text(ustring("<b>" + p.get_name() + "</b>"));
+	m_lblPName->set_text(ustring("<b><span size=\"x-large\">" + p.get_name() + "</span></b>"));
 	age = today.get_year() - p.get_birthday().get_year();
 
 	if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
@@ -515,7 +522,7 @@ void MainWindow::on_db_person_edited(const Person &p)
 	sprintf(tmp, "%hu", age);
 	m_lblPAge->set_text(tmp);
 	m_lblPBloodtype->set_text(p.get_blood_type_string());
-	sprintf(tmp, "%.2f", p.get_height());
+	sprintf(tmp, "%.2f cm", p.get_height());
 	m_lblPHeight->set_text(tmp);
 	m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
 
@@ -604,6 +611,7 @@ bool MainWindow::filter_patient_by_name(const TreeModel::const_iterator& iter)
 
 void MainWindow::on_btnBack_clicked(void)
 {
+	m_entryPatients.show();
 	m_nb.set_current_page(0);
 }
 
@@ -620,4 +628,6 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("lblPAge", m_lblPAge);
 	builder->get_widget("btnViewPatient", m_btnViewPatient);
 	builder->get_widget("gridVisits", m_gridVisits);
+	builder->get_widget("btnNewVisit", m_btnNewVisit);
+
 }

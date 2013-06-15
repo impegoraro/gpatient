@@ -247,7 +247,7 @@ int DBHandler::visit_insert(VisitInterface& v) const
 			sqlite3_bind_int(stmt, 1, v.getPersonID());
 			sqlite3_bind_text(stmt, 2, v.getComplaint().c_str(), v.getComplaint().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 3, v.getAnamnesis().c_str(), v.getAnamnesis().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 4, v.getDate().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 4, v.getDate().c_str(), v.getDate().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_double(stmt, 5, v.getWeight());
 
 			sqlite3_bind_text(stmt, 6, v.getAppearance().c_str(), v.getAppearance().bytes(), SQLITE_TRANSIENT);
@@ -293,6 +293,9 @@ int DBHandler::visit_insert(VisitInterface& v) const
 	
 			if(sqlite3_step(stmt) == SQLITE_DONE) {
 				res = 1;
+				//Date dt;
+				//dt = Date::format_string((ustring)"%d/%m/%Y", v.getDate());
+				m_signal_visit_added.emit(v.getPersonID(), v.getComplaint(), v.getDate());
 				sqlite3_finalize(stmt);
 			} else {
 				shouldRollback = true;

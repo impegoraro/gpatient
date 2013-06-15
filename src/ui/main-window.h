@@ -62,7 +62,6 @@ protected:
 	Gtk::ToolButton m_mtbRemove;
 	Gtk::ToolItem m_mtbExpander;
 	Gtk::ToolItem m_mtbEntrySearch;
-	Gtk::ToolButton m_mtbAddVisit;
 	
 	Gtk::Notebook m_nb;
 	
@@ -87,6 +86,7 @@ protected:
 	Gtk::Label *m_lblPAge;
 
 	Gtk::Button *m_btnViewPatient;
+	Gtk::Button *m_btnNewVisit;
 	Gtk::Grid *m_gridVisits;
 
 	Glib::RefPtr<Gtk::TreeModelFilter> m_treeFilter;
