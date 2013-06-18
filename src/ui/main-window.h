@@ -18,7 +18,7 @@
 
 #define GLADE_VISITS "src/ui/main-visit.glade"
 
-class MainWindow : public Gtk::Window
+class MainWindow : public Gtk::Window, public VisitInterface
 {
 protected:
 	class ListPatientsCols : public Gtk::TreeModel::ColumnRecord
@@ -86,6 +86,7 @@ protected:
 	Gtk::Label *m_lblPAge;
 
 	Gtk::Button *m_btnViewPatient;
+	Gtk::Button *m_btnRemoveVisit;
 	Gtk::Button *m_btnNewVisit;
 	Gtk::Grid *m_gridVisits;
 
@@ -93,6 +94,47 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> m_modelPatients;
 	Glib::RefPtr<Gtk::ListStore> m_modelVisits;
 
+
+	Gtk::Label *m_lblComplaint;
+	Gtk::Label *m_lblAnamnesis;
+	Gtk::Label *m_lblDate;
+	Gtk::Label *m_lblWeight;
+	Gtk::Label *m_lblAppearance;
+	Gtk::Label *m_lblMovement;
+	Gtk::Label *m_lblVoice;
+	Gtk::Label *m_lblSmell;
+	Gtk::Image *m_imgHypertension;
+	Gtk::Image *m_imgCholesterol;
+	Gtk::Image *m_imgTriglycerides;
+	Gtk::Image *m_imgDiabetes;
+	Gtk::Label *m_lblSleepiness;
+	Gtk::Label *m_lblTranspiration;
+	Gtk::Label *m_lblDehydration;
+	Gtk::Image *m_imgAnxiety;
+	Gtk::Image *m_imgIrrt;
+	Gtk::Image *m_imgFrustration;
+	Gtk::Image *m_imgCry;
+	Gtk::Image *m_imgVerm;
+	Gtk::Image *m_imgVed;
+	Gtk::Image *m_imgBra;
+	Gtk::Image *m_imgPrt;
+	Gtk::Image *m_imgAml;
+	Gtk::Image *m_imgAlg;
+	Gtk::Image *m_imgIrritable;
+	Gtk::Image *m_imgSad;
+	Gtk::Image *m_imgMed;
+	Gtk::Image *m_imgMelan;
+	Gtk::Label *m_lblHearing;
+	Gtk::Label *m_lblThroat;
+	Gtk::Label *m_lblScent;
+	Gtk::Label *m_lblVision;
+	Gtk::Label *m_lblFatigue;
+	Gtk::Label *m_lblSexualActivity;
+	Gtk::Label *m_lblBody;
+	Gtk::Label *m_lblAbdomen;
+	Gtk::Label *m_lblHead;
+	Gtk::Label *m_lblCirculation;
+	Gtk::Label *m_lblEatingHabits;
 	
 	//Glib::SignalTimeout m_searchTimeout;
 	sigc::connection m_connSearch;
@@ -127,6 +169,9 @@ protected:
 	void on_btnToolEdit_clicked(void);
 	void on_btnToolRemove_clicked(void);
 	void on_window_show(void);
+	void on_treeVisit_activated(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
+
+	void on_btnRemoveVisit(void);
 
 	bool on_entryPatient_focusIn(GdkEventFocus *focus); 
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
@@ -141,6 +186,94 @@ protected:
 	void patient_window_add(PatientWindow &);
 
 	bool filter_patient_by_name(const Gtk::TreeModel::const_iterator&);
+
+public:
+/*****************************************
+ *           Interface methods           *
+ ****************************************/
+	virtual int getPersonID();
+	virtual Glib::ustring getComplaint();
+	virtual Glib::ustring getAnamnesis();
+	virtual Glib::ustring getDate();
+	virtual float getWeight();
+	virtual Glib::ustring getAppearance();
+	virtual Glib::ustring getMovement();
+	virtual Glib::ustring getVoice();
+	virtual Glib::ustring getSmell();
+	virtual int getHypertension();
+	virtual int getCholesterol();
+	virtual int getTriglyceride();
+	virtual int getDiabetes();
+	virtual Glib::ustring getSleepiness();
+	virtual Glib::ustring getTranspiration();
+	virtual Glib::ustring getDehydration();
+	virtual int isAnxiety();
+	virtual int isIrrt();
+	virtual int isFrustration();
+	virtual int isCry();
+	virtual int isVerm();
+	virtual int isVed();
+	virtual int isBrad();
+	virtual int isPrt();
+	virtual int isAml();
+	virtual int isAlg();
+	virtual int isIrritable();
+	virtual int isSad();
+	virtual int isMed();
+	virtual int isMelan();
+	virtual Glib::ustring getHearing();
+	virtual Glib::ustring getThroat();
+	virtual Glib::ustring getScent();
+	virtual Glib::ustring getVision();
+	virtual Glib::ustring getFatigue();
+	virtual Glib::ustring getSexualActivity();
+	virtual Glib::ustring getBody();
+	virtual Glib::ustring getAbdomen();
+	virtual Glib::ustring getHead();
+	virtual Glib::ustring getCirculation();
+	virtual Glib::ustring getEatingHabits();
+
+	virtual void setPersonID(int val);
+	virtual void setComplaint(const Glib::ustring& val);
+	virtual void setAnamnesis(const Glib::ustring& val);
+	virtual void setDate(const Glib::ustring& val);
+	virtual void setWeight(float val);
+	virtual void setAppearance(const Glib::ustring& val);
+	virtual void setMovement(const Glib::ustring& val);
+	virtual void setVoice(const Glib::ustring& val);
+	virtual void setSmell(const Glib::ustring& val);
+	virtual void setHypertension(int val);
+	virtual void setCholesterol(int val);
+	virtual void setTriglyceride(int val);
+	virtual void setDiabetes(int val);
+	virtual void setSleepiness(const Glib::ustring& val);
+	virtual void setTranspiration(const Glib::ustring& val);
+	virtual void setDehydration(const Glib::ustring& val);
+	virtual void setAnxiety(int val);
+	virtual void setIrrt(int val);
+	virtual void setFrustration(int val);
+	virtual void setCry(int val);
+	virtual void setVerm(int val);
+	virtual void setVed(int val);
+	virtual void setBrad(int val);
+	virtual void setPrt(int val);
+	virtual void setAml(int val);
+	virtual void setAlg(int val);
+	virtual void setIrritable(int val);
+	virtual void setSad(int val);
+	virtual void setMed(int val);
+	virtual void setMelan(int val);
+	virtual void setHearing(const Glib::ustring& val);
+	virtual void setThroat(const Glib::ustring& val);
+	virtual void setScent(const Glib::ustring& val);
+	virtual void setVision(const Glib::ustring& val);
+	virtual void setFatigue(const Glib::ustring& val);
+	virtual void setSexualActivity(const Glib::ustring& val);
+	virtual void setBody(const Glib::ustring& val);
+	virtual void setAbdomen(const Glib::ustring& val);
+	virtual void setHead(const Glib::ustring& val);
+	virtual void setCirculation(const Glib::ustring& val);
+	virtual void setEatingHabits(const Glib::ustring& val);
 };
 
 #endif

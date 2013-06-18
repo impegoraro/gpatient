@@ -342,3 +342,12 @@ void Visit::setAppearance(const ustring& appearance)
 {
 	_appearance = appearance;
 }
+
+void Visit::setEatingHabits(const Glib::ustring & eatingHabits)
+{
+	_eatingHabits = eatingHabits;
+}
+const ustring& Visit::getEatingHabits()
+{
+	return _eatingHabits;
+}

@@ -164,7 +164,8 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
 	m_btnViewPatient->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnShPatient_clicked));
 	m_btnBack->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnBack_clicked));
-	
+	m_btnRemoveVisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnRemoveVisit));
+	m_treeVisits->signal_row_activated().connect(sigc::mem_fun(*this, &MainWindow::on_treeVisit_activated));
 	/************************************
 	 *    Setting up some properties    *
 	 ***********************************/
@@ -191,11 +192,11 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	//m_mtbRemove.set_is_important();
 	m_mtbRemove.set_use_underline();
 	
-	m_treeVisits->set_grid_lines(TREE_VIEW_GRID_LINES_VERTICAL);
+	m_treeVisits->set_grid_lines(TREE_VIEW_GRID_LINES_HORIZONTAL);
 	swPatients->set_shadow_type(SHADOW_ETCHED_OUT);
 
 	set_title(title);
-	set_default_size(720,500);
+	set_default_size(860,640);
 	set_icon_name(((ustring)PACKAGE_NAME).lowercase());
 	
 	m_entryPatients.set_width_chars(26);
@@ -413,11 +414,6 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 
 	today.set_time_current();
 
-	if(!row) {
-		cout<< "Iterator is not valid"<< endl;
-		return;
-	}
-	
 	if(*row) {
 		try{
 			db.open();
@@ -429,7 +425,7 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		db.get_visits((*row)[m_lvCols.m_col_id]);
 		if(close)
 			db.close();
-		m_lblPName->set_text(ustring("<b><span size=\"x-large\">" + p.get_name() + "</span></b>"));
+		m_lblPName->set_text(ustring("<b><i><span size=\"x-large\">" + p.get_name() + "</span></i></b>"));
 		m_lblPName->set_use_markup();
 		age = today.get_year() - p.get_birthday().get_year();
 
@@ -629,5 +625,377 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("btnViewPatient", m_btnViewPatient);
 	builder->get_widget("gridVisits", m_gridVisits);
 	builder->get_widget("btnNewVisit", m_btnNewVisit);
+	builder->get_widget("btnRemoveVisit", m_btnRemoveVisit);
 
+
+	builder->get_widget("lblComplaint", m_lblComplaint);
+	builder->get_widget("lblAnamnesis", m_lblAnamnesis);
+	builder->get_widget("lblDate", m_lblDate);
+	builder->get_widget("lblWeight", m_lblWeight);
+	builder->get_widget("lblAppearance", m_lblAppearance);
+	builder->get_widget("lblMovement", m_lblMovement);
+	builder->get_widget("lblVoice", m_lblVoice);
+	builder->get_widget("lblSmell", m_lblSmell);
+	builder->get_widget("imgHypertension", m_imgHypertension);
+	builder->get_widget("imgCholesterol", m_imgCholesterol);
+	builder->get_widget("imgTriglycerides", m_imgTriglycerides);
+	builder->get_widget("imgDiabetes", m_imgDiabetes);
+	builder->get_widget("lblSleepiness", m_lblSleepiness);
+	builder->get_widget("lblTranspiration", m_lblTranspiration);
+	builder->get_widget("lblDehydration", m_lblDehydration);
+	builder->get_widget("imgAnxiety", m_imgAnxiety);
+	builder->get_widget("imgIrrt", m_imgIrrt);
+	builder->get_widget("imgFrustration", m_imgFrustration);
+	builder->get_widget("imgCry", m_imgCry);
+	builder->get_widget("imgVerm", m_imgVerm);
+	builder->get_widget("imgVed", m_imgVed);
+	builder->get_widget("imgBra", m_imgBra);
+	builder->get_widget("imgPrt", m_imgPrt);
+	builder->get_widget("imgAml", m_imgAml);
+	builder->get_widget("imgAlg", m_imgAlg);
+	builder->get_widget("imgIrritable", m_imgIrritable);
+	builder->get_widget("imgSad", m_imgSad);
+	builder->get_widget("imgMed", m_imgMed);
+	builder->get_widget("imgMelan", m_imgMelan);
+	builder->get_widget("lblHearing", m_lblHearing);
+	builder->get_widget("lblThroat", m_lblThroat);
+	builder->get_widget("lblScent", m_lblScent);
+	builder->get_widget("lblVision", m_lblVision);
+	builder->get_widget("lblFatigue", m_lblFatigue);
+	builder->get_widget("lblSexualActivity", m_lblSexualActivity);
+	builder->get_widget("lblBody", m_lblBody);
+	builder->get_widget("lblAbdomen", m_lblAbdomen);
+	builder->get_widget("lblHead", m_lblHead);
+	builder->get_widget("lblCirculation", m_lblCirculation);
+	builder->get_widget("lblEatingHabits", m_lblEatingHabits);
+
+}
+
+void MainWindow::on_btnRemoveVisit(void)
+{
+	RefPtr<TreeSelection> sel = m_treeVisits->get_selection();
+	TreeModel::iterator row = sel->get_selected();
+	DBHandler db = DBHandler::get_instance();
+	bool closed = true;
+
+	if(*row) {
+		try {
+			db.open();
+			if(db.visit_remove((*row)[m_lvCols.m_col_id]))
+				m_modelVisits->erase(row);
+			else {
+				MessageDialog dlg((ustring) "Não foi possível remove a visita!", false, MESSAGE_ERROR, BUTTONS_OK, true);
+				dlg.run();
+			}
+		} catch(SqlConnectionOpenedException& ex) {
+			closed = false;
+		}
+
+		if(closed)
+			db.close();
+	} else {
+		MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
+		dlg.run();
+	}
+}
+
+void MainWindow::on_treeVisit_activated(const TreeModel::Path& path, TreeViewColumn* col)
+{
+	RefPtr<TreeSelection> sel = m_treeVisits->get_selection();
+	TreeModel::iterator row = sel->get_selected();
+	DBHandler db = DBHandler::get_instance();
+	bool close = true;
+
+	if(*row) {
+		try{
+			db.open();	
+			db.get_visit((*row)[m_lvCols.m_col_id], *this);
+		}
+		catch(SqlConnectionOpenedException& ex) { close = false;}
+		
+		if(close)
+			db.close();
+	}
+}
+
+/***********************************
+ *             Getters             *
+***********************************/
+
+int MainWindow::getPersonID()
+{
+}
+
+ustring MainWindow::getComplaint()
+{
+}
+ustring MainWindow::getAnamnesis()
+{
+}
+ustring MainWindow::getDate()
+{
+}
+float MainWindow::getWeight()
+{
+}
+
+ustring MainWindow::getAppearance()
+{
+}
+ustring MainWindow::getMovement()
+{
+}
+ustring MainWindow::getVoice()
+{
+}
+ustring MainWindow::getSmell()
+{
+}
+
+int MainWindow::getHypertension()
+{
+}
+int MainWindow::getCholesterol()
+{
+}
+int MainWindow::getTriglyceride()
+{
+}
+int MainWindow::getDiabetes()
+{
+}
+
+ustring MainWindow::getSleepiness()
+{
+}
+ustring MainWindow::getTranspiration()
+{
+}
+ustring MainWindow::getDehydration()
+{
+}
+
+int MainWindow::isAnxiety()
+{
+}
+int MainWindow::isIrrt()
+{
+}
+int MainWindow::isFrustration()
+{
+}
+int MainWindow::isCry()
+{
+}
+int MainWindow::isVerm()
+{
+}
+int MainWindow::isVed()
+{
+}
+int MainWindow::isBrad()
+{
+}
+int MainWindow::isPrt()
+{
+}
+int MainWindow::isAml()
+{
+}
+int MainWindow::isAlg()
+{
+}
+int MainWindow::isIrritable()
+{
+}
+int MainWindow::isSad()
+{
+}
+int MainWindow::isMed()
+{
+}
+int MainWindow::isMelan()
+{
+}
+ustring MainWindow::getHearing()
+{
+}
+ustring MainWindow::getThroat()
+{
+}
+ustring MainWindow::getScent()
+{
+}
+ustring MainWindow::getVision()
+{
+}
+ustring MainWindow::getFatigue()
+{
+}
+ustring MainWindow::getSexualActivity()
+{
+}
+ustring MainWindow::getBody()
+{
+}
+ustring MainWindow::getAbdomen()
+{
+}
+ustring MainWindow::getHead()
+{
+}
+ustring MainWindow::getCirculation()
+{
+}
+ustring  MainWindow::getEatingHabits()
+{
+}
+
+/***********************************
+ *             Setters             *
+***********************************/
+void MainWindow::setPersonID(int val)
+{
+}
+void MainWindow::setComplaint(const Glib::ustring& val)
+{
+	m_lblComplaint->set_text(val);
+}
+void MainWindow::setAnamnesis(const Glib::ustring& val)
+{
+	m_lblAnamnesis->set_text(val);
+}
+void MainWindow::setDate(const Glib::ustring& val)
+{
+	m_lblDate->set_text(val);
+}
+void MainWindow::setWeight(float val)
+{
+	m_lblWeight->set_text(ustring::compose("%1 kg", val));
+}
+void MainWindow::setAppearance(const Glib::ustring& val)
+{
+	m_lblAppearance->set_text(val);
+}
+void MainWindow::setMovement(const Glib::ustring& val)
+{
+	m_lblMovement->set_text(val);
+}
+void MainWindow::setVoice(const Glib::ustring& val)
+{
+	m_lblVoice->set_text(val);
+}
+void MainWindow::setSmell(const Glib::ustring& val)
+{
+	m_lblSmell->set_text(val);
+}
+void MainWindow::setHypertension(int val)
+{
+}
+void MainWindow::setCholesterol(int val)
+{
+}
+void MainWindow::setTriglyceride(int val)
+{
+}
+void MainWindow::setDiabetes(int val)
+{
+}
+void MainWindow::setSleepiness(const Glib::ustring& val)
+{
+	m_lblSleepiness->set_text(val);
+}
+void MainWindow::setTranspiration(const Glib::ustring& val)
+{
+	m_lblTranspiration->set_text(val);
+}
+void MainWindow::setDehydration(const Glib::ustring& val)
+{
+	m_lblDehydration->set_text(val);
+}
+void MainWindow::setAnxiety(int val)
+{
+}
+void MainWindow::setIrrt(int val)
+{
+}
+void MainWindow::setFrustration(int val)
+{
+}
+void MainWindow::setCry(int val)
+{
+}
+void MainWindow::setVerm(int val)
+{
+}
+void MainWindow::setVed(int val)
+{
+}
+void MainWindow::setBrad(int val)
+{
+}
+void MainWindow::setPrt(int val)
+{
+}
+void MainWindow::setAml(int val)
+{
+}
+void MainWindow::setAlg(int val)
+{
+}
+void MainWindow::setIrritable(int val)
+{
+}
+void MainWindow::setSad(int val)
+{
+}
+void MainWindow::setMed(int val)
+{
+}
+void MainWindow::setMelan(int val)
+{
+}
+void MainWindow::setHearing(const Glib::ustring& val)
+{
+	m_lblHearing->set_text(val);
+}
+void MainWindow::setThroat(const Glib::ustring& val)
+{
+	m_lblThroat->set_text(val);
+}
+void MainWindow::setScent(const Glib::ustring& val)
+{
+	m_lblScent->set_text(val);
+}
+void MainWindow::setVision(const Glib::ustring& val)
+{
+	m_lblVision->set_text(val);
+}
+void MainWindow::setFatigue(const Glib::ustring& val)
+{
+	m_lblFatigue->set_text(val);
+}
+void MainWindow::setSexualActivity(const Glib::ustring& val)
+{
+	m_lblSexualActivity->set_text(val);
+}
+void MainWindow::setBody(const Glib::ustring& val)
+{
+	m_lblBody->set_text(val);
+}
+void MainWindow::setAbdomen(const Glib::ustring& val)
+{
+	m_lblAbdomen->set_text(val);
+}
+void MainWindow::setHead(const Glib::ustring& val)
+{
+	m_lblHead->set_text(val);
+}
+void MainWindow::setCirculation(const Glib::ustring& val)
+{
+	m_lblCirculation->set_text(val);
+}
+void MainWindow::setEatingHabits(const Glib::ustring& val)
+{
+	m_lblEatingHabits->set_text(val);
 }

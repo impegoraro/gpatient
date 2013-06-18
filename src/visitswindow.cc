@@ -84,6 +84,7 @@ VisitsWindow::VisitsWindow(int personID)
 	builder->get_widget("txtCirculation", m_txtCirculation);
 	builder->get_widget("txtTranspiration", m_txtTranspiration);
 	builder->get_widget("txtDehydration", m_txtDehydration);
+	builder->get_widget("txtEatingHabits", m_txtEatingHabits);
 
 
 	m_wincal = new Widgets::CalendarWindow(*((Window*)this), *((Widget*)m_txtDate));
@@ -413,4 +414,133 @@ ustring VisitsWindow::getHead()
 ustring VisitsWindow::getCirculation()
 {
 	return m_txtCirculation->get_text();
+}
+ustring  VisitsWindow::getEatingHabits()
+{
+	return m_txtEatingHabits->get_text();
+}
+
+
+/***********************************
+ *             Setters             *
+***********************************/
+void VisitsWindow::setComplaint(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setAnamnesis(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setDate(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setWeight(float val)
+{
+}
+void VisitsWindow::setAppearance(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setMovement(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setVoice(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setSmell(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setHypertension(int val)
+{
+}
+void VisitsWindow::setCholesterol(int val)
+{
+}
+void VisitsWindow::setTriglyceride(int val)
+{
+}
+void VisitsWindow::setDiabetes(int val)
+{
+}
+void VisitsWindow::setSleepiness(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setTranspiration(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setDehydration(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setAnxiety(int val)
+{
+}
+void VisitsWindow::setIrrt(int val)
+{
+}
+void VisitsWindow::setFrustration(int val)
+{
+}
+void VisitsWindow::setCry(int val)
+{
+}
+void VisitsWindow::setVerm(int val)
+{
+}
+void VisitsWindow::setVed(int val)
+{
+}
+void VisitsWindow::setBrad(int val)
+{
+}
+void VisitsWindow::setPrt(int val)
+{
+}
+void VisitsWindow::setAml(int val)
+{
+}
+void VisitsWindow::setAlg(int val)
+{
+}
+void VisitsWindow::setIrritable(int val)
+{
+}
+void VisitsWindow::setSad(int val)
+{
+}
+void VisitsWindow::setMed(int val)
+{
+}
+void VisitsWindow::setMelan(int val)
+{
+}
+void VisitsWindow::setHearing(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setThroat(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setScent(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setVision(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setFatigue(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setSexualActivity(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setBody(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setAbdomen(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setHead(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setCirculation(const Glib::ustring& val)
+{
+}
+void VisitsWindow::setEatingHabits(const Glib::ustring& val)
+{
 }

@@ -44,7 +44,7 @@ public:
 
 	const Gtk::Window* get_window();
 	
-	void setPersonID(int personID);
+	virtual void setPersonID(int personID);
 
 	void show();
 private:
@@ -112,6 +112,7 @@ private:
 	Gtk::SpinButton *m_txtWeight;
 	Gtk::Entry *m_txtTranspiration;
 	Gtk::Entry *m_txtDehydration;
+	Gtk::Entry *m_txtEatingHabits;
 
 	Gtk::CheckButton *m_chkAnxiety;
 	Gtk::CheckButton *m_chkIrrt;
@@ -156,7 +157,10 @@ private:
 	void hlpr_list_hereditary_add();
 	void hlpr_list_remove(Gtk::TreeView *);
 	void on_txtDate_iconPress(Gtk::EntryIconPosition, const GdkEventButton*);
+	void on_treeVisit_activate(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 	void on_apply();
+
+public:
 /*****************************************
  *           Interface methods           *
  ****************************************/
@@ -200,7 +204,49 @@ private:
 	virtual Glib::ustring getAbdomen();
 	virtual Glib::ustring getHead();
 	virtual Glib::ustring getCirculation();
+	virtual Glib::ustring getEatingHabits();
+
+	virtual void setComplaint(const Glib::ustring& val);
+	virtual void setAnamnesis(const Glib::ustring& val);
+	virtual void setDate(const Glib::ustring& val);
+	virtual void setWeight(float val);
+	virtual void setAppearance(const Glib::ustring& val);
+	virtual void setMovement(const Glib::ustring& val);
+	virtual void setVoice(const Glib::ustring& val);
+	virtual void setSmell(const Glib::ustring& val);
+	virtual void setHypertension(int val);
+	virtual void setCholesterol(int val);
+	virtual void setTriglyceride(int val);
+	virtual void setDiabetes(int val);
+	virtual void setSleepiness(const Glib::ustring& val);
+	virtual void setTranspiration(const Glib::ustring& val);
+	virtual void setDehydration(const Glib::ustring& val);
+	virtual void setAnxiety(int val);
+	virtual void setIrrt(int val);
+	virtual void setFrustration(int val);
+	virtual void setCry(int val);
+	virtual void setVerm(int val);
+	virtual void setVed(int val);
+	virtual void setBrad(int val);
+	virtual void setPrt(int val);
+	virtual void setAml(int val);
+	virtual void setAlg(int val);
+	virtual void setIrritable(int val);
+	virtual void setSad(int val);
+	virtual void setMed(int val);
+	virtual void setMelan(int val);
+	virtual void setHearing(const Glib::ustring& val);
+	virtual void setThroat(const Glib::ustring& val);
+	virtual void setScent(const Glib::ustring& val);
+	virtual void setVision(const Glib::ustring& val);
+	virtual void setFatigue(const Glib::ustring& val);
+	virtual void setSexualActivity(const Glib::ustring& val);
+	virtual void setBody(const Glib::ustring& val);
+	virtual void setAbdomen(const Glib::ustring& val);
+	virtual void setHead(const Glib::ustring& val);
+	virtual void setCirculation(const Glib::ustring& val);
+	virtual void setEatingHabits(const Glib::ustring& val);
 };
 
-#endif // _VISITSWINDOW_H_
+#endif
 

@@ -46,11 +46,13 @@ public:
 	int person_insert(const Person& p) const;
 	int person_update(const Person& p) const;
 	bool person_remove(unsigned int id) const;
+	bool visit_remove(unsigned int id) const;
 
 	void get_patients(const Glib::ustring *name) const;
 	bool get_person(const guint32 id, Person& p) const;
 	void get_visits(guint32 personID) const;
-
+	bool get_visit(int id, VisitInterface &v) const;
+	
 	const Glib::ustring& get_database_path(void) const;
 
 	bool open(void);

@@ -387,10 +387,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="btnEatingHabits">
+                  <object class="GtkEntry" id="txtEatingHabits">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="hexpand">True</property>
+                    <property name="max_length">300</property>
                     <property name="invisible_char">•</property>
                     <property name="invisible_char_set">True</property>
                   </object>

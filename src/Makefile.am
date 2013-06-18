@@ -16,5 +16,5 @@ herbanaria_SOURCES = util.h util.cpp \
                      ui/view-patient.cpp ui/view-patient.h \
                      db/dbhandler.h db/dbhandler.cpp \
                      person.h person.cpp \
-                     visit.h visit.cpp \
-                     main.cpp main.h visitswindow.cc visitswindow.h PatientVisit.h 
+                     main.cpp main.h visitswindow.cc visitswindow.h PatientVisit.h
+#                    visit.h #visit.cpp 

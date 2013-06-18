@@ -93,6 +93,8 @@ public:
 	const Glib::ustring& getComplaint() const;
 	void setComplaint(const Glib::ustring& complaint);
 	int getPersonID() const;
+	void setEatingHabits(const Glib::ustring & eatingHabits);
+	const Glib::ustring& getEatingHabits();
 
 	bool validate() const;
 private:
@@ -103,6 +105,7 @@ private:
 	Glib::Date _date;
 	float _weight;
 
+	Glib::ustring _eatingHabits;
 	Glib::ustring _appearance;
 	Glib::ustring _movement;
 	Glib::ustring _voice;
