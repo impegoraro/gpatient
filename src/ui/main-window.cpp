@@ -166,9 +166,12 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_btnBack->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnBack_clicked));
 	m_btnRemoveVisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnRemoveVisit));
 	m_treeVisits->signal_row_activated().connect(sigc::mem_fun(*this, &MainWindow::on_treeVisit_activated));
+	m_treeVisits->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_visits_selection_changed));
+
 	/************************************
 	 *    Setting up some properties    *
 	 ***********************************/
+	
 	m_mainToolbar.get_style_context()->add_class(GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
 	swPatients->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
@@ -299,11 +302,12 @@ void MainWindow::on_btnToolAddVisit_clicked(void)
 		TreeModel::iterator iter = sel->get_selected();
 		ListPatientsCols cols;
 		TreeModel::Row row = *iter;
-		Person p(row[cols.m_col_id]);
 
-		m_vw = new VisitsWindow(row[cols.m_col_id]);
+		m_vw = new VisitsWindow(*this, row[cols.m_col_id]);
 		m_app->add_window((Window&)*m_vw->get_window());
 	}
+
+	m_vw->set_sex_widgets(!(m_lblPSex->get_text().substr(0,1) == (ustring)"M"));
 	m_vw->show();
 }
 
@@ -411,6 +415,7 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator row = sel->get_selected();
 	DBHandler db = DBHandler::get_instance();
+	gint n_rows;
 
 	today.set_time_current();
 
@@ -437,9 +442,21 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		m_lblPBloodtype->set_text(p.get_blood_type_string());
 		sprintf(tmp, "%.2f cm", p.get_height());
 		m_lblPHeight->set_text(tmp);
-		m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
-
+		
+		if(p.get_sex()) {
+			m_lblPSex->set_text("Masculino");
+			m_lblMenstruationStr->hide();
+			m_lblPregnancyStr->hide();
+		} else {
+			m_lblPSex->set_text("Feminino");
+			m_lblMenstruationStr->show();
+			m_lblPregnancyStr->show();
+		}
 		m_entryPatients.hide();
+	
+		m_lblSuggestions->show();
+		m_boxVisitInfo->hide();
+		
 		m_nb.set_current_page(1);
 
 	}
@@ -668,7 +685,34 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("lblHead", m_lblHead);
 	builder->get_widget("lblCirculation", m_lblCirculation);
 	builder->get_widget("lblEatingHabits", m_lblEatingHabits);
-
+	builder->get_widget("lblSuggestions", m_lblSuggestions);
+	builder->get_widget("boxVisitInfo", m_boxVisitInfo);
+	builder->get_widget("lblPain", m_lblPain);
+	builder->get_widget("lblPainSince", m_lblPainSince);
+	builder->get_widget("lblPainObs", m_lblPainObs);
+	builder->get_widget("lblSurgery", m_lblSurgery);
+	builder->get_widget("lblWeight2", m_lblWeight2);
+	builder->get_widget("lblPreviousTreatment", m_lblPreviousTreatment);
+	builder->get_widget("lblProstheses", m_lblProstheses);
+	builder->get_widget("lblUrine", m_lblUrine);
+	builder->get_widget("lblFaeces", m_lblFaeces);
+	builder->get_widget("lblTongue", m_lblTongue);
+	builder->get_widget("lblPulseD", m_lblPulseD);
+	builder->get_widget("lblPulseE", m_lblPulseE);
+	builder->get_widget("lblBloodPressure", m_lblBloodPressure);
+	builder->get_widget("lblApal", m_lblApal);
+	builder->get_widget("lblExams", m_lblExams);
+	builder->get_widget("lblClinicalAnalysis", m_lblClinicalAnalysis);
+	builder->get_widget("lblColor", m_lblColor);
+	builder->get_widget("lblEscle", m_lblEscle);
+	builder->get_widget("lblObservations", m_lblObservations);
+	builder->get_widget("lblMed", m_lblMed);
+	builder->get_widget("lblMedication", m_lblMedication);
+	builder->get_widget("lblTreatment", m_lblTreatment);
+	builder->get_widget("lblMenstruationStr", m_lblMenstruationStr);
+	builder->get_widget("lblMenstruation", m_lblMenstruation);
+	builder->get_widget("lblPregnancyStr", m_lblPregnancyStr);
+	builder->get_widget("lblPregnancy", m_lblPregnancy);
 }
 
 void MainWindow::on_btnRemoveVisit(void)
@@ -681,10 +725,21 @@ void MainWindow::on_btnRemoveVisit(void)
 	if(*row) {
 		try {
 			db.open();
-			if(db.visit_remove((*row)[m_lvCols.m_col_id]))
+			if(db.visit_remove((*row)[m_lvCols.m_col_id])) {
+				gint n_rows;
+
 				m_modelVisits->erase(row);
-			else {
-				MessageDialog dlg((ustring) "Não foi possível remove a visita!", false, MESSAGE_ERROR, BUTTONS_OK, true);
+
+				n_rows = gtk_tree_model_iter_n_children(RefPtr<TreeModel>::cast_dynamic(m_modelVisits)->gobj(), NULL);
+				if(n_rows <= 0) {
+					m_lblSuggestions->show();
+					m_boxVisitInfo->hide();
+				} else {
+					m_lblSuggestions->hide();
+					m_boxVisitInfo->show();
+				}
+			} else {
+				MessageDialog dlg((ustring) "Não foi possível remover a visita!", false, MESSAGE_ERROR, BUTTONS_OK, true);
 				dlg.run();
 			}
 		} catch(SqlConnectionOpenedException& ex) {
@@ -710,11 +765,26 @@ void MainWindow::on_treeVisit_activated(const TreeModel::Path& path, TreeViewCol
 		try{
 			db.open();	
 			db.get_visit((*row)[m_lvCols.m_col_id], *this);
+			
+			m_lblSuggestions->hide();
+			m_boxVisitInfo->show();
 		}
 		catch(SqlConnectionOpenedException& ex) { close = false;}
 		
 		if(close)
 			db.close();
+	}
+}
+
+void MainWindow::on_visits_selection_changed(void)
+{
+	gint n_rows;
+	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
+	TreeModel::iterator row = sel->get_selected();
+
+	if(*row) {
+		m_lblSuggestions->show();
+		m_boxVisitInfo->hide();
 	}
 }
 
@@ -851,6 +921,85 @@ ustring  MainWindow::getEatingHabits()
 {
 }
 
+ustring MainWindow::getMenstruation()
+{
+}
+ustring MainWindow::getPregnancy()
+{
+}
+ustring MainWindow::getPain()
+{
+}
+ustring MainWindow::getPainSince()
+{
+}
+ustring MainWindow::getPainObs()
+{
+}
+ustring MainWindow::getSurgery()
+{
+}
+ustring MainWindow::getPreviousTreatment()
+{
+}
+bool MainWindow::getProstheses()
+{
+}
+bool MainWindow::getWeightBool()
+{
+}
+ustring MainWindow::getUrine()
+{
+}
+ustring MainWindow::getFaeces()
+{
+}
+ustring MainWindow::getTongue()
+{
+}
+ustring MainWindow::getPulseD()
+{
+}
+ustring MainWindow::getPulseE()
+{
+}
+gint16 MainWindow::getBPMax()
+{
+}
+gint16 MainWindow::getBPMin()
+{
+}
+gint16 MainWindow::getBPM()
+{
+}
+ustring MainWindow::getApal()
+{
+}
+ustring MainWindow::getExams()
+{
+}
+ustring MainWindow::getClinicalAnalysis()
+{
+}
+ustring MainWindow::getColor()
+{
+}
+ustring MainWindow::getEscle()
+{
+}
+ustring MainWindow::getObservations()
+{
+}
+ustring MainWindow::getMed()
+{
+}
+ustring MainWindow::getMedication()
+{
+}
+ustring MainWindow::getTreatment()
+{
+}
+
 /***********************************
  *             Setters             *
 ***********************************/
@@ -891,15 +1040,75 @@ void MainWindow::setSmell(const Glib::ustring& val)
 }
 void MainWindow::setHypertension(int val)
 {
+	ustring iconStr;
+
+	switch(val) {
+		case 0:
+			iconStr = "list-remove-symbolic";
+			break;
+		case 1:
+			iconStr = "go-up-symbolic";
+			break;
+		default:
+			iconStr = "go-down-symbolic";
+			break;
+	}
+	m_imgHypertension->clear();
+	m_imgHypertension->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setCholesterol(int val)
 {
+	ustring iconStr;
+
+	switch(val) {
+		case 0:
+			iconStr = "list-remove-symbolic";
+			break;
+		case 1:
+			iconStr = "go-up-symbolic";
+			break;
+		default:
+			iconStr = "go-down-symbolic";
+			break;
+	}
+	m_imgCholesterol->clear();
+	m_imgCholesterol->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setTriglyceride(int val)
 {
+	ustring iconStr;
+
+	switch(val) {
+		case 0:
+			iconStr = "list-remove-symbolic";
+			break;
+		case 1:
+			iconStr = "go-up-symbolic";
+			break;
+		default:
+			iconStr = "go-down-symbolic";
+			break;
+	}
+	m_imgTriglycerides->clear();
+	m_imgTriglycerides->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setDiabetes(int val)
 {
+	ustring iconStr;
+
+	switch(val) {
+		case 0:
+			iconStr = "list-remove-symbolic";
+			break;
+		case 1:
+			iconStr = "go-up-symbolic";
+			break;
+		default:
+			iconStr = "go-down-symbolic";
+			break;
+	}
+	m_imgDiabetes->clear();
+	m_imgDiabetes->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setSleepiness(const Glib::ustring& val)
 {
@@ -915,45 +1124,227 @@ void MainWindow::setDehydration(const Glib::ustring& val)
 }
 void MainWindow::setAnxiety(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgAnxiety->clear();
+	m_imgAnxiety->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setIrrt(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgIrrt->clear();
+	m_imgIrrt->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setFrustration(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgFrustration->clear();
+	m_imgFrustration->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setCry(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgCry->clear();
+	m_imgCry->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setVerm(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgVerm->clear();
+	m_imgVerm->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setVed(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgVed->clear();
+	m_imgVed->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setBrad(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgBra->clear();
+	m_imgBra->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setPrt(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgPrt->clear();
+	m_imgPrt->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setAml(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgAml->clear();
+	m_imgAml->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setAlg(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgAlg->clear();
+	m_imgAlg->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setIrritable(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgIrritable->clear();
+	m_imgIrritable->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setSad(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgSad->clear();
+	m_imgSad->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setMed(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgMed->clear();
+	m_imgMed->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setMelan(int val)
 {
+	ustring iconStr;
+
+	switch(val)
+	{
+		case 1:
+			iconStr = "emblem-ok-symbolic";
+			break;
+		default:
+			iconStr = "list-remove-symbolic";
+			break;
+	}
+	m_imgMelan->clear();
+	m_imgMelan->set_from_icon_name(iconStr, ICON_SIZE_BUTTON);
 }
 void MainWindow::setHearing(const Glib::ustring& val)
 {
@@ -998,4 +1389,107 @@ void MainWindow::setCirculation(const Glib::ustring& val)
 void MainWindow::setEatingHabits(const Glib::ustring& val)
 {
 	m_lblEatingHabits->set_text(val);
+}
+void MainWindow::setMenstruation(const Glib::ustring& val)
+{
+	m_lblMenstruation->set_text(val);
+}
+void MainWindow::setPregnancy(const Glib::ustring& val)
+{
+	m_lblPregnancy->set_text(val);
+}
+void MainWindow::setPain(const Glib::ustring& val)
+{
+	m_lblPain->set_text(val);
+}
+void MainWindow::setPainSince(const Glib::ustring& val)
+{
+	m_lblPainSince->set_text(val);
+}
+void MainWindow::setPainObs(const Glib::ustring& val)
+{
+	m_lblPainObs->set_text(val);
+}
+void MainWindow::setSurgery(const Glib::ustring& val)
+{
+	m_lblSurgery->set_text(val);
+}
+void MainWindow::setPreviousTreatment(const Glib::ustring& val)
+{
+	m_lblPreviousTreatment->set_text(val);
+}
+void MainWindow::setProstheses(bool val)
+{
+	if(val)
+		m_lblProstheses->set_text("Sim");
+	else
+		m_lblProstheses->set_text("Não");
+}
+void MainWindow::setWeightBool(bool val)
+{
+	if(val)
+		m_lblWeight2->set_text("Sim");
+	else
+		m_lblWeight2->set_text("Não");
+}
+void MainWindow::setUrine(const Glib::ustring& val)
+{
+	m_lblUrine->set_text(val);
+}
+void MainWindow::setFaeces(const Glib::ustring& val)
+{
+	m_lblFaeces->set_text(val);
+}
+void MainWindow::setTongue(const Glib::ustring& val)
+{
+	m_lblTongue->set_text(val);
+}
+void MainWindow::setPulseD(const Glib::ustring& val)
+{
+	m_lblPulseD->set_text(val);
+}
+void MainWindow::setPulseE(const Glib::ustring& val)
+{
+	m_lblPulseE->set_text(val);
+}
+void MainWindow::setBloodPressure(gint16 high, gint16 low, gint16 bpm)
+{
+	m_lblBloodPressure->set_text(ustring::compose(ustring("%1 <b>/</b> %2    <b>PPM: </b>%3"),high, low, bpm));
+	m_lblBloodPressure->set_use_markup();
+}
+void MainWindow::setApal(const Glib::ustring& val)
+{
+	m_lblApal->set_text(val);
+}
+void MainWindow::setExams(const Glib::ustring& val)
+{
+	m_lblExams->set_text(val);
+}
+void MainWindow::setClinicalAnalysis(const Glib::ustring& val)
+{
+	m_lblClinicalAnalysis->set_text(val);
+}
+void MainWindow::setColor(const Glib::ustring& val)
+{
+	m_lblColor->set_text(val);
+}
+void MainWindow::setEscle(const Glib::ustring& val)
+{
+	m_lblEscle->set_text(val);
+}
+void MainWindow::setObservations(const Glib::ustring& val)
+{
+	m_lblObservations->set_text(val);
+}
+void MainWindow::setMed(const Glib::ustring& val)
+{
+	m_lblMed->set_text(val);
+}
+void MainWindow::setMedication(const Glib::ustring& val)
+{
+	m_lblMedication->set_text(val);
+}
+void MainWindow::setTreatment(const Glib::ustring& val)
+{
+	m_lblTreatment->set_text(val);
 }

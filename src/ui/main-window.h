@@ -55,7 +55,10 @@ protected:
 
 	Glib::RefPtr<Gtk::UIManager> m_uiman;
 	Glib::RefPtr<Gtk::ActionGroup> m_actionGroup;
-	
+
+	Gtk::Box *m_boxVisitInfo;
+	Gtk::Label *m_lblSuggestions;
+
 	Gtk::Toolbar m_mainToolbar;
 	Gtk::ToolButton m_mtbAdd;
 	Gtk::ToolButton m_mtbEdit;
@@ -136,6 +139,35 @@ protected:
 	Gtk::Label *m_lblCirculation;
 	Gtk::Label *m_lblEatingHabits;
 	
+	Gtk::Label *m_lblPain;
+	Gtk::Label *m_lblPainSince;
+	Gtk::Label *m_lblPainObs;
+	Gtk::Label *m_lblSurgery;
+	Gtk::Label *m_lblProstheses;
+	Gtk::Label *m_lblWeight2;
+	Gtk::Label *m_lblPreviousTreatment;
+
+	Gtk::Label *m_lblMenstruationStr;
+	Gtk::Label *m_lblMenstruation;
+	Gtk::Label *m_lblPregnancyStr;
+	Gtk::Label *m_lblPregnancy;
+
+	Gtk::Label *m_lblUrine;
+	Gtk::Label *m_lblFaeces;
+	Gtk::Label *m_lblTongue;
+	Gtk::Label *m_lblPulseD;
+	Gtk::Label *m_lblPulseE;
+	Gtk::Label *m_lblBloodPressure;
+	Gtk::Label *m_lblApal;
+	Gtk::Label *m_lblExams;
+	Gtk::Label *m_lblClinicalAnalysis;
+	Gtk::Label *m_lblColor;
+	Gtk::Label *m_lblEscle;
+	Gtk::Label *m_lblObservations;
+	Gtk::Label *m_lblMed;
+	Gtk::Label *m_lblMedication;
+	Gtk::Label *m_lblTreatment;
+
 	//Glib::SignalTimeout m_searchTimeout;
 	sigc::connection m_connSearch;
 	Glib::Timer m_timerSearch;
@@ -187,6 +219,8 @@ protected:
 
 	bool filter_patient_by_name(const Gtk::TreeModel::const_iterator&);
 
+	void on_visits_selection_changed(void);
+
 public:
 /*****************************************
  *           Interface methods           *
@@ -233,6 +267,33 @@ public:
 	virtual Glib::ustring getCirculation();
 	virtual Glib::ustring getEatingHabits();
 
+	virtual Glib::ustring getMenstruation();
+	virtual Glib::ustring getPregnancy();
+	virtual Glib::ustring getPain();
+	virtual Glib::ustring getPainSince();
+	virtual Glib::ustring getPainObs();
+	virtual Glib::ustring getSurgery();
+	virtual Glib::ustring getPreviousTreatment();
+	virtual bool getProstheses();
+	virtual bool getWeightBool();
+	virtual Glib::ustring getUrine();
+	virtual Glib::ustring getFaeces();
+	virtual Glib::ustring getTongue();
+	virtual Glib::ustring getPulseD();
+	virtual Glib::ustring getPulseE();
+	virtual gint16 getBPMax();
+	virtual gint16 getBPMin();
+	virtual gint16 getBPM();
+	virtual Glib::ustring getApal();
+	virtual Glib::ustring getExams();
+	virtual Glib::ustring getClinicalAnalysis();
+	virtual Glib::ustring getColor();
+	virtual Glib::ustring getEscle();
+	virtual Glib::ustring getObservations();
+	virtual Glib::ustring getMed();
+	virtual Glib::ustring getMedication();
+	virtual Glib::ustring getTreatment();
+
 	virtual void setPersonID(int val);
 	virtual void setComplaint(const Glib::ustring& val);
 	virtual void setAnamnesis(const Glib::ustring& val);
@@ -274,6 +335,31 @@ public:
 	virtual void setHead(const Glib::ustring& val);
 	virtual void setCirculation(const Glib::ustring& val);
 	virtual void setEatingHabits(const Glib::ustring& val);
+
+	virtual void setMenstruation(const Glib::ustring& val);
+	virtual void setPregnancy(const Glib::ustring& val);
+	virtual void setPain(const Glib::ustring& val);
+	virtual void setPainSince(const Glib::ustring& val);
+	virtual void setPainObs(const Glib::ustring& val);
+	virtual void setSurgery(const Glib::ustring& val);
+	virtual void setPreviousTreatment(const Glib::ustring& val);
+	virtual void setProstheses(bool val);
+	virtual void setWeightBool(bool val);
+	virtual void setUrine(const Glib::ustring& val);
+	virtual void setFaeces(const Glib::ustring& val);
+	virtual void setTongue(const Glib::ustring& val);
+	virtual void setPulseD(const Glib::ustring& val);
+	virtual void setPulseE(const Glib::ustring& val);
+	virtual void setBloodPressure(gint16 high, gint16 low, gint16 bpm);
+	virtual void setApal(const Glib::ustring& val);
+	virtual void setExams(const Glib::ustring& val);
+	virtual void setClinicalAnalysis(const Glib::ustring& val);
+	virtual void setColor(const Glib::ustring& val);
+	virtual void setEscle(const Glib::ustring& val);
+	virtual void setObservations(const Glib::ustring& val);
+	virtual void setMed(const Glib::ustring& val);
+	virtual void setMedication(const Glib::ustring& val);
+	virtual void setTreatment(const Glib::ustring& val);
 };
 
 #endif

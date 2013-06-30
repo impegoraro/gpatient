@@ -39,14 +39,14 @@ gestao-herb is free software: you can redistribute it and/or modify it
 class VisitsWindow : public VisitInterface
 {
 public:
-	VisitsWindow(int personID);
+	VisitsWindow(Gtk::Window& win, int personID);
 	~VisitsWindow();
 
 	const Gtk::Window* get_window();
 	
 	virtual void setPersonID(int personID);
-
-	void show();
+	virtual void set_sex_widgets(bool sex);
+	void show();	
 private:
 	class ListAlergies : public Gtk::TreeModel::ColumnRecord
 	{
@@ -108,10 +108,8 @@ private:
 	Gtk::Entry *m_txtComplaint;
 	Gtk::Entry *m_txtDate;
 	Gtk::TextView *m_txtAnamnesis;
-	Gtk::Entry *m_txtSleepiness;
 	Gtk::SpinButton *m_txtWeight;
-	Gtk::Entry *m_txtTranspiration;
-	Gtk::Entry *m_txtDehydration;
+	Gtk::Entry *m_txtSleepiness;
 	Gtk::Entry *m_txtEatingHabits;
 
 	Gtk::CheckButton *m_chkAnxiety;
@@ -135,6 +133,8 @@ private:
 	Gtk::ComboBoxText *m_cmbThroat; 
 	Gtk::ComboBoxText *m_cmbScent; 
 	Gtk::ComboBoxText *m_cmbVision;
+	Gtk::Entry *m_txtTranspiration;
+	Gtk::Entry *m_txtDehydration;
 	Gtk::Entry *m_txtVoice;
 	Gtk::Entry *m_txtSmell;
 	Gtk::Entry *m_txtFatigue;
@@ -143,6 +143,36 @@ private:
 	Gtk::Entry *m_txtAbdomen;
 	Gtk::Entry *m_txtHead;
 	Gtk::Entry *m_txtCirculation;
+
+	Gtk::Entry *m_txtPainSince;
+	Gtk::Entry *m_txtPainObs;
+	Gtk::Entry *m_txtSurgery;
+	Gtk::Entry *m_txtPreviousTreatment;
+	Gtk::CheckButton *m_chkProstheses;
+	Gtk::CheckButton *m_chkWeight;
+
+	Gtk::Label *m_lblMenstruation;
+	Gtk::Label *m_lblPregnancy;
+	Gtk::ComboBoxText *m_cmbPain;
+	Gtk::Entry *m_txtMenstruation;
+	Gtk::Entry *m_txtPregnancy;
+	Gtk::Entry *m_txtUrine;
+	Gtk::Entry *m_txtFaeces;
+	Gtk::Entry *m_txtTongue;
+	Gtk::Entry *m_txtPulseD;
+	Gtk::Entry *m_txtPulseE;
+	Gtk::Entry *m_txtBPMax;
+	Gtk::Entry *m_txtBPMin;
+	Gtk::Entry *m_txtBPM;
+	Gtk::Entry *m_txtApal;
+	Gtk::Entry *m_txtExams;
+	Gtk::Entry *m_txtClinicalAnalysis;
+	Gtk::Entry *m_txtColor;
+	Gtk::Entry *m_txtEscle;
+	Gtk::Entry *m_txtObservations;
+	Gtk::Entry *m_txtMed;
+	Gtk::TextView *m_txtMedication;
+	Gtk::TextView *m_txtTreatment;
 
 	ListAlergies m_la;
 	ListHereditary m_lhd;
@@ -159,6 +189,10 @@ private:
 	void on_txtDate_iconPress(Gtk::EntryIconPosition, const GdkEventButton*);
 	void on_treeVisit_activate(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 	void on_apply();
+
+	void on_widget_check(Gtk::Entry* entry);
+	void on_widget_check_textview(Gtk::TextView* txtview);
+	void inline clear();
 
 public:
 /*****************************************
@@ -206,6 +240,33 @@ public:
 	virtual Glib::ustring getCirculation();
 	virtual Glib::ustring getEatingHabits();
 
+	virtual Glib::ustring getMenstruation();
+	virtual Glib::ustring getPregnancy();
+	virtual Glib::ustring getPain();
+	virtual Glib::ustring getPainSince();
+	virtual Glib::ustring getPainObs();
+	virtual Glib::ustring getSurgery();
+	virtual Glib::ustring getPreviousTreatment();
+	virtual bool getProstheses();
+	virtual bool getWeightBool();
+	virtual Glib::ustring getUrine();
+	virtual Glib::ustring getFaeces();
+	virtual Glib::ustring getTongue();
+	virtual Glib::ustring getPulseD();
+	virtual Glib::ustring getPulseE();
+	virtual gint16 getBPMax();
+	virtual gint16 getBPMin();
+	virtual gint16 getBPM();
+	virtual Glib::ustring getApal();
+	virtual Glib::ustring getExams();
+	virtual Glib::ustring getClinicalAnalysis();
+	virtual Glib::ustring getColor();
+	virtual Glib::ustring getEscle();
+	virtual Glib::ustring getObservations();
+	virtual Glib::ustring getMed();
+	virtual Glib::ustring getMedication();
+	virtual Glib::ustring getTreatment();
+
 	virtual void setComplaint(const Glib::ustring& val);
 	virtual void setAnamnesis(const Glib::ustring& val);
 	virtual void setDate(const Glib::ustring& val);
@@ -246,6 +307,31 @@ public:
 	virtual void setHead(const Glib::ustring& val);
 	virtual void setCirculation(const Glib::ustring& val);
 	virtual void setEatingHabits(const Glib::ustring& val);
+
+	virtual void setMenstruation(const Glib::ustring& val);
+	virtual void setPregnancy(const Glib::ustring& val);
+	virtual void setPain(const Glib::ustring& val);
+	virtual void setPainSince(const Glib::ustring& val);
+	virtual void setPainObs(const Glib::ustring& val);
+	virtual void setSurgery(const Glib::ustring& val);
+	virtual void setPreviousTreatment(const Glib::ustring& val);
+	virtual void setProstheses(bool val);
+	virtual void setWeightBool(bool val);
+	virtual void setUrine(const Glib::ustring& val);
+	virtual void setFaeces(const Glib::ustring& val);
+	virtual void setTongue(const Glib::ustring& val);
+	virtual void setPulseD(const Glib::ustring& val);
+	virtual void setPulseE(const Glib::ustring& val);
+	virtual void setBloodPressure(gint16 high, gint16 low, gint16 bpm);
+	virtual void setApal(const Glib::ustring& val);
+	virtual void setExams(const Glib::ustring& val);
+	virtual void setClinicalAnalysis(const Glib::ustring& val);
+	virtual void setColor(const Glib::ustring& val);
+	virtual void setEscle(const Glib::ustring& val);
+	virtual void setObservations(const Glib::ustring& val);
+	virtual void setMed(const Glib::ustring& val);
+	virtual void setMedication(const Glib::ustring& val);
+	virtual void setTreatment(const Glib::ustring& val);
 };
 
 #endif

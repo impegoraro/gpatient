@@ -48,6 +48,33 @@ public:
 	virtual Glib::ustring getHead() = 0;
 	virtual Glib::ustring getCirculation() = 0;
 	virtual Glib::ustring getEatingHabits() = 0;
+	virtual Glib::ustring getMenstruation() = 0;
+	virtual Glib::ustring getPregnancy() = 0;
+	virtual Glib::ustring getPain() = 0;
+	virtual Glib::ustring getPainSince() = 0;
+	virtual Glib::ustring getPainObs() = 0;
+	virtual Glib::ustring getSurgery() = 0;
+	virtual Glib::ustring getPreviousTreatment() = 0;
+	virtual bool getProstheses() = 0;
+	virtual bool getWeightBool() = 0;
+	virtual Glib::ustring getUrine() = 0;
+	virtual Glib::ustring getFaeces() = 0;
+	virtual Glib::ustring getTongue() = 0;
+	virtual Glib::ustring getPulseD() = 0;
+	virtual Glib::ustring getPulseE() = 0;
+	virtual gint16 getBPMax() = 0;
+	virtual gint16 getBPMin() = 0;
+	virtual gint16 getBPM() = 0;
+	virtual Glib::ustring getApal() = 0;
+	virtual Glib::ustring getExams() = 0;
+	virtual Glib::ustring getClinicalAnalysis() = 0;
+	virtual Glib::ustring getColor() = 0;
+	virtual Glib::ustring getEscle() = 0;
+	virtual Glib::ustring getObservations() = 0;
+	virtual Glib::ustring getMed() = 0;
+	virtual Glib::ustring getMedication() = 0;
+	virtual Glib::ustring getTreatment() = 0;
+
 
 
 	/* Setters */
@@ -91,5 +118,30 @@ public:
 	virtual void setHead(const Glib::ustring& val) = 0;
 	virtual void setCirculation(const Glib::ustring& val) = 0;
 	virtual void setEatingHabits(const Glib::ustring& val) = 0;
+
+	virtual void setMenstruation(const Glib::ustring& val) = 0;
+	virtual void setPregnancy(const Glib::ustring& val) = 0;
+	virtual void setPain(const Glib::ustring& val) = 0;
+	virtual void setPainSince(const Glib::ustring& val) = 0;
+	virtual void setPainObs(const Glib::ustring& val) = 0;
+	virtual void setSurgery(const Glib::ustring& val) = 0;
+	virtual void setPreviousTreatment(const Glib::ustring& val) = 0;
+	virtual void setProstheses(bool val) = 0;
+	virtual void setWeightBool(bool val) = 0;
+	virtual void setUrine(const Glib::ustring& val) = 0;
+	virtual void setFaeces(const Glib::ustring& val) = 0;
+	virtual void setTongue(const Glib::ustring& val) = 0;
+	virtual void setPulseD(const Glib::ustring& val) = 0;
+	virtual void setPulseE(const Glib::ustring& val) = 0;
+	virtual void setBloodPressure(gint16 high, gint16 low, gint16 bpm) = 0;
+	virtual void setApal(const Glib::ustring& val) = 0;
+	virtual void setExams(const Glib::ustring& val) = 0;
+	virtual void setClinicalAnalysis(const Glib::ustring& val) = 0;
+	virtual void setColor(const Glib::ustring& val) = 0;
+	virtual void setEscle(const Glib::ustring& val) = 0;
+	virtual void setObservations(const Glib::ustring& val) = 0;
+	virtual void setMed(const Glib::ustring& val) = 0;
+	virtual void setMedication(const Glib::ustring& val) = 0;
+	virtual void setTreatment(const Glib::ustring& val) = 0;
 };
 #endif

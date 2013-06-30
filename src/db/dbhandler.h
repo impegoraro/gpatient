@@ -32,6 +32,7 @@ protected:
 	DBHandler(const std::string& dbname, bool use_fk_constraint = true);
 
 	inline bool user_has_contact(const Person& p) const;
+	inline guint get_visit_from_person(gint PersonID) const;
 
 	sigc::signal<void, guint32, const Glib::ustring&, guint32> m_signal_person_added;
 	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_visit_added;

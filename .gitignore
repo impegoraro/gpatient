@@ -1,6 +1,7 @@
 *.o
 *~
 *.bak
+*.exe
 src/herbanaria
 Makefile.in
 Makefile
