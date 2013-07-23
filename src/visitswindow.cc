@@ -186,11 +186,11 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	col = m_treeHereditary->get_column(m_treeHereditary->append_column_editable("Parente", m_lhd.m_col_parent)-1);
 	col = m_treeHereditary->get_column(m_treeHereditary->append_column_editable("Nome", m_lhd.m_col_name)-1);
 	
-	((Image*)m_btnHyper->get_image())->set_from_icon_name("list-remove-symbolic", IconSize(16));
-	((Image*)m_btnChol->get_image())->set_from_icon_name("list-remove-symbolic", IconSize(16));
-	((Image*)m_btnTrigl->get_image())->set_from_icon_name("list-remove-symbolic", IconSize(16));
-	((Image*)m_btnDiabetes->get_image())->set_from_icon_name("list-remove-symbolic", IconSize(16));
-	m_txtDate->set_icon_from_icon_name("x-office-calendar-symbolic", ENTRY_ICON_SECONDARY);
+	((Image*)m_btnHyper->get_image())->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
+	((Image*)m_btnChol->get_image())->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
+	((Image*)m_btnTrigl->get_image())->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
+	((Image*)m_btnDiabetes->get_image())->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
+	m_txtDate->set_icon_from_icon_name("x-office-calendar", ENTRY_ICON_SECONDARY);
 	m_txtDate->set_icon_tooltip_text("Escolher data da consulta", ENTRY_ICON_SECONDARY);
 
 	m_win->signal_cancel().connect(sigc::mem_fun(*m_win, &Widget::hide));
@@ -338,15 +338,15 @@ void VisitsWindow::on_btnChangeState(VisitsWindow::BasicInfoButtons type)
 	switch(*val) {
 		case 0:
 			*val = 1;
-			img->set_from_icon_name("go-up-symbolic", IconSize(16));
+			img->set_from_icon_name("go-up", ICON_SIZE_BUTTON);
 			break;
 		case 1:
 			*val = 2;
-			img->set_from_icon_name("go-down-symbolic", IconSize(16));
+			img->set_from_icon_name("go-down", ICON_SIZE_BUTTON);
 			break;
 		default:
 			*val = 0;
-			img->set_from_icon_name("list-remove-symbolic", IconSize(16));
+			img->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
 			break;
 	}
 }

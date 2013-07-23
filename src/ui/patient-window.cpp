@@ -152,7 +152,7 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_lblNacionality.set_mnemonic_widget(m_txtNationality);
 	m_lblBirthday.set_alignment(1.0f, 0.5f);
 	m_lblBirthday.set_mnemonic_widget(m_txtBirthday);
-	m_txtBirthday.set_icon_from_icon_name("x-office-calendar-symbolic", ENTRY_ICON_SECONDARY);
+	m_txtBirthday.set_icon_from_icon_name("x-office-calendar", ENTRY_ICON_SECONDARY);
 	m_txtBirthday.set_icon_tooltip_text("Escolher data de nascimento", ENTRY_ICON_SECONDARY);
 	m_lblBirthplace.set_alignment(1.0f, 0.5f);
 	m_lblBirthplace.set_mnemonic_widget(m_txtBirthday);

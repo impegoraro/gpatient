@@ -15,6 +15,8 @@
 #include "../person.h"
 #include "../visit.h"
 #include "visit-interface.h"
+#include "../configuration.h"
+
 /*
  * This class is a singleton to the proxy that interacts with the database.
  */
@@ -54,6 +56,9 @@ public:
 	void get_visits(guint32 personID) const;
 	bool get_visit(int id, VisitInterface &v) const;
 	
+	void configuration_update(Configuration& conf);
+	void get_configuration(Configuration& c);
+
 	const Glib::ustring& get_database_path(void) const;
 
 	bool open(void);

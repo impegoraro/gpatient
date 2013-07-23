@@ -31,7 +31,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_app(app), m_vp(NULL), m_vw(NULL),
 	m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
-	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true)
+	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true), m_maximized(false)
 {
 	DBHandler db = DBHandler::get_instance();
 	Box *mbox = manage(new VBox()), *pbox2 = manage(new VBox(false, 0));
@@ -161,6 +161,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_entryPatients.signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_txtSearch_changed));
 	signal_show().connect(sigc::mem_fun(*this, &MainWindow::on_window_show));
 	signal_timeout().connect(sigc::mem_fun(*this, &MainWindow::handler_timeout_search), 1);
+	signal_window_state_event().connect(sigc::mem_fun(*this, &MainWindow::on_maximized_change));
 	m_pw->signal_add().connect(sigc::mem_fun(*this, &MainWindow::patient_window_add));
 	m_btnViewPatient->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnShPatient_clicked));
 	m_btnBack->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnBack_clicked));
@@ -176,8 +177,9 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	swPatients->set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
 	m_entryPatients.set_placeholder_text ("Procurar paciente...");
-	//m_entryPatients.set_icon_from_stock(Stock::FIND);
-	m_entryPatients.set_icon_from_icon_name("preferences-system-search-symbolic");
+	m_entryPatients.set_icon_from_stock(Stock::FIND);
+	//preferences-system-search-symbolic
+	//m_entryPatients.set_icon_from_icon_name("preferences-system-search-symbolic");
 	m_entryPatients.set_icon_sensitive(ENTRY_ICON_PRIMARY, true);
 	m_entryPatients.set_icon_activatable(false);
 
@@ -255,6 +257,13 @@ void MainWindow::hlpr_append_visit(guint32 id, const ustring& complaint, const u
 
 bool MainWindow::on_delete_event(GdkEventAny * event)
 {
+	DBHandler db = DBHandler::get_instance();
+	this->hide();
+	if(db.open()) {
+		db.configuration_update(*this);
+		db.close();
+	} else
+		cout<< "Error while opening the database..."<< endl;	
 	return false;
 }
 
@@ -264,6 +273,7 @@ void MainWindow::on_window_show(void)
 
 	if(db.open()) {
 		db.get_patients(NULL);
+		db.get_configuration(*this);
 		db.close();
 	} else
 		cout<< "Error while opening the database..."<< endl;
@@ -788,6 +798,45 @@ void MainWindow::on_visits_selection_changed(void)
 	}
 }
 
+bool MainWindow::on_maximized_change(GdkEventWindowState *state)
+{
+	if(state->type == GDK_WINDOW_STATE && state->changed_mask == GDK_WINDOW_STATE_MAXIMIZED)
+		m_maximized = !m_maximized;
+
+
+	return false;
+}
+
+/***********************************
+ *          Configuration          *
+***********************************/
+void MainWindow::get_window_size(gint& width, gint& height)
+{
+	get_size(width, height);
+}
+void MainWindow::get_window_position(gint& posx, gint& posy)
+{
+	get_position(posx, posy);
+}
+bool MainWindow::get_window_maximized()
+{
+	return m_maximized;
+}
+void MainWindow::set_window_maximized(bool maximized)
+{
+	if(maximized)
+		this->maximize();
+	else
+		this->unmaximize();
+}
+void MainWindow::set_window_resize(int width, int height) 
+{
+	resize(width, height);
+}
+void MainWindow::set_window_move(int posx, int posy) 
+{
+	move(posx, posy);
+}
 /***********************************
  *             Getters             *
 ***********************************/
@@ -1044,13 +1093,13 @@ void MainWindow::setHypertension(int val)
 
 	switch(val) {
 		case 0:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 		case 1:
-			iconStr = "go-up-symbolic";
+			iconStr = "go-up";
 			break;
 		default:
-			iconStr = "go-down-symbolic";
+			iconStr = "go-down";
 			break;
 	}
 	m_imgHypertension->clear();
@@ -1062,13 +1111,13 @@ void MainWindow::setCholesterol(int val)
 
 	switch(val) {
 		case 0:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 		case 1:
-			iconStr = "go-up-symbolic";
+			iconStr = "go-up";
 			break;
 		default:
-			iconStr = "go-down-symbolic";
+			iconStr = "go-down";
 			break;
 	}
 	m_imgCholesterol->clear();
@@ -1080,13 +1129,13 @@ void MainWindow::setTriglyceride(int val)
 
 	switch(val) {
 		case 0:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 		case 1:
-			iconStr = "go-up-symbolic";
+			iconStr = "go-up";
 			break;
 		default:
-			iconStr = "go-down-symbolic";
+			iconStr = "go-down";
 			break;
 	}
 	m_imgTriglycerides->clear();
@@ -1098,13 +1147,13 @@ void MainWindow::setDiabetes(int val)
 
 	switch(val) {
 		case 0:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 		case 1:
-			iconStr = "go-up-symbolic";
+			iconStr = "go-up";
 			break;
 		default:
-			iconStr = "go-down-symbolic";
+			iconStr = "go-down";
 			break;
 	}
 	m_imgDiabetes->clear();
@@ -1129,10 +1178,10 @@ void MainWindow::setAnxiety(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgAnxiety->clear();
@@ -1145,10 +1194,10 @@ void MainWindow::setIrrt(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgIrrt->clear();
@@ -1161,10 +1210,10 @@ void MainWindow::setFrustration(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgFrustration->clear();
@@ -1177,10 +1226,10 @@ void MainWindow::setCry(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgCry->clear();
@@ -1193,10 +1242,10 @@ void MainWindow::setVerm(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgVerm->clear();
@@ -1209,10 +1258,10 @@ void MainWindow::setVed(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgVed->clear();
@@ -1225,10 +1274,10 @@ void MainWindow::setBrad(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgBra->clear();
@@ -1241,10 +1290,10 @@ void MainWindow::setPrt(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgPrt->clear();
@@ -1257,10 +1306,10 @@ void MainWindow::setAml(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgAml->clear();
@@ -1273,10 +1322,10 @@ void MainWindow::setAlg(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgAlg->clear();
@@ -1289,10 +1338,10 @@ void MainWindow::setIrritable(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgIrritable->clear();
@@ -1305,10 +1354,10 @@ void MainWindow::setSad(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgSad->clear();
@@ -1321,10 +1370,10 @@ void MainWindow::setMed(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgMed->clear();
@@ -1337,10 +1386,10 @@ void MainWindow::setMelan(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-ok-symbolic";
+			iconStr = "emblem-default";
 			break;
 		default:
-			iconStr = "list-remove-symbolic";
+			iconStr = "list-remove";
 			break;
 	}
 	m_imgMelan->clear();

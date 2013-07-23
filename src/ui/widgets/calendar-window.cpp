@@ -106,11 +106,15 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	m_btnYear.set_relief(RELIEF_NONE);
 	m_btnNextYear.set_relief(RELIEF_NONE);
 
-	imgPrev1->set_from_icon_name("go-previous-symbolic", ICON_SIZE_MENU);
-	imgNext1->set_from_icon_name("go-next-symbolic", ICON_SIZE_MENU);
+	//go-previous-symbolic
+	//go-next-symbolic
+	//go-previous-symbolic
+	//go-next-symbolic
+	imgPrev1->set_from_icon_name("go-previous", ICON_SIZE_MENU);
+	imgNext1->set_from_icon_name("go-next", ICON_SIZE_MENU);
 
-	imgPrev2->set_from_icon_name("go-previous-symbolic", ICON_SIZE_MENU);
-	imgNext2->set_from_icon_name("go-next-symbolic", ICON_SIZE_MENU);
+	imgPrev2->set_from_icon_name("go-previous", ICON_SIZE_MENU);
+	imgNext2->set_from_icon_name("go-next", ICON_SIZE_MENU);
 	
 	m_btnPrevMonth.set_image(*imgPrev1);
 	m_btnNextMonth.set_image(*imgNext1);
@@ -147,7 +151,8 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	
 	set_border_width(1);
 	on_cal_monthChanged();
-
+	set_parent(win);
+	parent = &win;
 	m_txtYear.set_no_show_all(true);
 }
 
@@ -166,9 +171,11 @@ void Widgets::CalendarWindow::popup(unsigned int x, unsigned int y)
 		m_cal.select_month(tmp.get_month()-1, tmp.get_year());
 		m_cal.select_day(tmp.get_day());
 	}
-
+	
 	response(RESPONSE_ACCEPT);
 	show_all();
+	set_keep_above(true);
+	raise();
 	run();
 }
 

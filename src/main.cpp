@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	app = Application::create("org.herbanaria.base");
 	ustring dbpath;
 	RefPtr<Gio::File> fdb;
-
+	
 	app->register_application();
 
 	dbpath = get_home_dir();
@@ -62,7 +62,6 @@ int main(int argc, char** argv)
 	MainWindow mwin("Herbanária - Gestão", app);
 	app->add_window(mwin);
 	mwin.show();
-
 	Main::run(mwin);
 
 	return 0;

@@ -40,6 +40,7 @@ public:
 
 protected:
 	bool shoulClose;
+	Gtk::Window *parent;
 	Gtk::Calendar m_cal;
 	Gtk::Widget *m_wDate;
 	Gtk::Button m_btnPrevMonth;

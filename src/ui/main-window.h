@@ -15,10 +15,11 @@
 #include "../person.h"
 #include "../db/dbhandler.h"
 #include "visitswindow.h"
+#include "../configuration.h"
 
 #define GLADE_VISITS "src/ui/main-visit.glade"
 
-class MainWindow : public Gtk::Window, public VisitInterface
+class MainWindow : public Gtk::Window, public VisitInterface, public Configuration
 {
 protected:
 	class ListPatientsCols : public Gtk::TreeModel::ColumnRecord
@@ -180,6 +181,7 @@ protected:
 	PatientWindow *m_pw;
 	VisitsWindow *m_vw;
 	
+	bool m_maximized;
 public:
 
 	MainWindow(const Glib::ustring& title, Glib::RefPtr<Gtk::Application>& app);
@@ -220,8 +222,20 @@ protected:
 	bool filter_patient_by_name(const Gtk::TreeModel::const_iterator&);
 
 	void on_visits_selection_changed(void);
-
+	bool on_maximized_change(GdkEventWindowState *state);
 public:
+
+/***********************************
+ *          Configuration          *
+***********************************/
+ 	virtual void get_window_size(gint& width, gint& height);
+	virtual void get_window_position(gint& posx, gint& posy);
+	virtual bool get_window_maximized();
+
+	virtual void set_window_maximized(bool maximized = true);
+	virtual void set_window_resize(int width, int height);
+	virtual void set_window_move(int posx, int posy);
+
 /*****************************************
  *           Interface methods           *
  ****************************************/

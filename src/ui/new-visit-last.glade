@@ -1564,7 +1564,7 @@
                         <property name="tooltip_text" translatable="yes">Adicionar nova alergia</property>
                         <property name="label" translatable="yes">Adicionar</property>
                         <property name="use_underline">True</property>
-                        <property name="icon_name">list-add-symbolic</property>
+                        <property name="stock_id">gtk-add</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1577,7 +1577,7 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Remover</property>
                         <property name="use_underline">True</property>
-                        <property name="icon_name">list-remove-symbolic</property>
+                        <property name="stock_id">gtk-remove</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1658,7 +1658,7 @@
                         <property name="tooltip_text" translatable="yes">Adicionar nova alergia</property>
                         <property name="label" translatable="yes">Adicionar</property>
                         <property name="use_underline">True</property>
-                        <property name="icon_name">list-add-symbolic</property>
+                        <property name="stock_id">gtk-add</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1671,7 +1671,7 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Remover</property>
                         <property name="use_underline">True</property>
-                        <property name="icon_name">list-remove-symbolic</property>
+                        <property name="stock_id">gtk-remove</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2338,12 +2338,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixel_size">16</property>
-    <property name="icon_name">go-up-symbolic</property>
-  </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -2361,5 +2355,11 @@
     <property name="can_focus">False</property>
     <property name="pixel_size">16</property>
     <property name="icon_name">go-down-symbolic</property>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixel_size">16</property>
+    <property name="icon_name">go-up-symbolic</property>
   </object>
 </interface>
