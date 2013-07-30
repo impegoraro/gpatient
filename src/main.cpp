@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 	DBHandler::get_instance((string)dbpath);
-	MainWindow mwin("Herbanária - Gestão", app);
+	MainWindow mwin("Gestão de Pacientes", app);
 	app->add_window(mwin);
 	mwin.show();
 	Main::run(mwin);

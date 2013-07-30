@@ -51,7 +51,6 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 					 "</menu>" \
 					 "</menubar>" \
 					 "</ui>";
-
 	m_pw = new PatientWindow(*this, "Dados do paciente", PatientWindow::PW_TYPE_ADD);
 	get_visits_widgets();
 
@@ -201,7 +200,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	swPatients->set_shadow_type(SHADOW_ETCHED_OUT);
 
 	set_title(title);
-	set_default_size(860,640);
+	set_default_size(860, 640);
 	set_icon_name(((ustring)PACKAGE_NAME).lowercase());
 	
 	m_entryPatients.set_width_chars(26);
@@ -216,6 +215,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	add(*mbox);
 	show_all_children();
 	m_nb.set_current_page(0);
+	parse();
 }
 
 MainWindow::~MainWindow()
@@ -257,23 +257,16 @@ void MainWindow::hlpr_append_visit(guint32 id, const ustring& complaint, const u
 
 bool MainWindow::on_delete_event(GdkEventAny * event)
 {
-	DBHandler db = DBHandler::get_instance();
 	this->hide();
-	if(db.open()) {
-		db.configuration_update(*this);
-		db.close();
-	} else
-		cout<< "Error while opening the database..."<< endl;	
+	store();
 	return false;
 }
 
 void MainWindow::on_window_show(void)
 {
 	DBHandler db = DBHandler::get_instance();
-
 	if(db.open()) {
 		db.get_patients(NULL);
-		db.get_configuration(*this);
 		db.close();
 	} else
 		cout<< "Error while opening the database..."<< endl;

@@ -55,9 +55,6 @@ public:
 	bool get_person(const guint32 id, Person& p) const;
 	void get_visits(guint32 personID) const;
 	bool get_visit(int id, VisitInterface &v) const;
-	
-	void configuration_update(Configuration& conf);
-	void get_configuration(Configuration& c);
 
 	const Glib::ustring& get_database_path(void) const;
 

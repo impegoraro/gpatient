@@ -52,7 +52,6 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	Grid *tbContacts = manage(new Grid());
 	Grid *mGrid = manage(new Grid());
 	ButtonBox *btnBox = manage(new ButtonBox());
-
 	set_title((ustring)title);
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_transient_for(parent);

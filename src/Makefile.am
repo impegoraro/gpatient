@@ -4,9 +4,6 @@ AM_CPPFLAGS=$(DEPS_CFLAGS) -std=c++0x -O3
 herbanaria_LDADD=$(DEPS_LIBS)
 
 herbanaria_SOURCES = util.h util.cpp \
-                     configuration/key.h configuration/key.cpp \
-                     configuration/section.h configuration/section.cpp \
-                     configuration/configuration.h configuration/configuration.cpp \
                      exceptions/sql-connection.h exceptions/sql-connection.cpp \
                      ui/widgets/widgets.h ui/widgets/numeric-entry.h ui/widgets/numeric-entry.cpp \
                      ui/widgets/date-entry.h ui/widgets/date-entry.cpp \
@@ -17,5 +14,5 @@ herbanaria_SOURCES = util.h util.cpp \
                      db/dbhandler.h db/dbhandler.cpp \
                      person.h person.cpp \
                      main.cpp main.h visitswindow.cc visitswindow.h PatientVisit.h \
-                     configuration.h 
+                     configuration.h configuration.cpp
 #                    visit.h #visit.cpp 
