@@ -46,7 +46,8 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
         "  </popup>"
         "</ui>";
 
-	
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_POPUP_MENU);
+
 	m_uiman = UIManager::create();
 	m_actionGrp = ActionGroup::create();
 
@@ -72,8 +73,6 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	} catch (Glib::MarkupError ex) {
 		std::cout<< "Warning: error while parsing calendar poupup menu. Cause: "<< ex.what()<< std::endl;
 	}
-	//set_parent(win);
-	set_type_hint(Gdk::WINDOW_TYPE_HINT_POPUP_MENU);
 		
 	pGrid->attach(m_btnPrevMonth, 0, 0, 1, 1);
 	pGrid->attach_next_to(m_btnMonth, m_btnPrevMonth, POS_RIGHT, 1, 1);
@@ -151,9 +150,10 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	
 	set_border_width(1);
 	on_cal_monthChanged();
-	set_parent(win);
-	parent = &win;
 	m_txtYear.set_no_show_all(true);
+
+	set_transient_for(win);	
+	parent = &win;
 }
 
 void Widgets::CalendarWindow::selected_date(Date& date) const

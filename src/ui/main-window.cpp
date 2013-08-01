@@ -222,13 +222,17 @@ MainWindow::~MainWindow()
 {
 	if(m_vp)
 		delete m_vp;
-	m_app->remove_window(*m_pw);
+	
 	if(m_vw) {
 		m_app->remove_window((Window&)*m_vw->get_window());
 		delete m_vw;
 	}
 	
-	//delete m_pw;
+	if(m_pw) {
+		m_app->remove_window(*m_pw);
+		delete m_pw;
+	}
+		
 }
 
 /* Helpers */
@@ -374,6 +378,7 @@ void MainWindow::on_btnToolEdit_clicked(void)
 	DBHandler db = DBHandler::get_instance();
 
 	if(*iter) {
+		iter = m_treeFilter->convert_iter_to_child_iter(iter);
 		TreeModel::Row row = *iter;
 		Person p(row[cols.m_col_id]);
 		db.open();
@@ -393,6 +398,8 @@ void MainWindow::on_btnToolRemove_clicked()
 	DBHandler db = DBHandler::get_instance();
 
 	if(*iter) {
+		iter = m_treeFilter->convert_iter_to_child_iter(iter);
+
 		db.open();
 		if(db.person_remove((*iter)[m_lpCols.m_col_id]))
 			m_modelPatients->erase(iter);
@@ -422,6 +429,7 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 
 	today.set_time_current();
 
+	row = m_treeFilter->convert_iter_to_child_iter(row);
 	if(*row) {
 		try{
 			db.open();

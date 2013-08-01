@@ -8,11 +8,12 @@ herbanaria_SOURCES = util.h util.cpp \
                      ui/widgets/widgets.h ui/widgets/numeric-entry.h ui/widgets/numeric-entry.cpp \
                      ui/widgets/date-entry.h ui/widgets/date-entry.cpp \
                      ui/widgets/calendar-window.h ui/widgets/calendar-window.cpp \
+                     ui/visitswindow.cpp ui/visitswindow.h \
                      ui/patient-window.h ui/patient-window.cpp \
                      ui/main-window.h ui/main-window.cpp \
                      ui/view-patient.cpp ui/view-patient.h \
                      db/dbhandler.h db/dbhandler.cpp \
                      person.h person.cpp \
-                     main.cpp main.h visitswindow.cc visitswindow.h PatientVisit.h \
+                     main.cpp main.h \
                      configuration.h configuration.cpp
 #                    visit.h #visit.cpp 

@@ -171,7 +171,7 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	grid5->attach_next_to(*m_cmbVision, *lblTmp, POS_RIGHT, 1, 1);
 	
 
-	m_wincal = new Widgets::CalendarWindow(*((Window*)this), *((Widget*)m_txtDate));
+	m_wincal = new Widgets::CalendarWindow(*m_win, *((Widget*)m_txtDate));
 
 	/* Tree Alergies configuration */
 	m_treeAlergies->set_model(ListStore::create(m_la));
@@ -248,7 +248,7 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	m_txtMedication->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtMedication));
 	m_txtTreatment->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtTreatment));
 
-	m_win->set_parent(win);
+	m_win->set_transient_for(win);
 	m_win->set_modal(true);
 }
 
@@ -265,8 +265,7 @@ void VisitsWindow::show()
 
 VisitsWindow::~VisitsWindow()
 {
-	if(m_wincal != NULL)
-		delete m_wincal;
+	delete m_wincal;
 	if(m_win != NULL)
 		delete m_win;
 }
