@@ -110,8 +110,8 @@ int DBHandler::person_insert(const Person& p) const
 		string query = "INSERT INTO Person( " \
 						"Name, Address, Zip1, Zip2, Location, Sex, Height, Birthday, " \
 						"Birthplace, Nationality, Profession, TaxNumber, Referer, " \
-						"Email, RefMaritalStatusID, RefBloodTypeID) " \
-						"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+						"Email, RefMaritalStatusID, RefBloodTypeID, IdentificationCard) " \
+						"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 		string qPhones = "INSERT INTO Contact(ContactNumber, RefPersonID, RefNumberTypeID, RefCountryCode) VALUES(?,?,?,?)";
 		string qFinish = "COMMIT TRANSACTION;";
 
@@ -149,6 +149,7 @@ int DBHandler::person_insert(const Person& p) const
 			sqlite3_bind_text(stmt, 14, p.get_email().c_str(), p.get_email().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 15, p.get_marital_status());
 			sqlite3_bind_int(stmt, 16, p.get_blood_type());
+			sqlite3_bind_int(stmt, 17, p.get_identification_card());
 
 			if(sqlite3_step(stmt) == SQLITE_DONE) {
 				res = 1;
@@ -552,7 +553,7 @@ bool DBHandler::get_person(const guint32 id, Person& p) const
 
 	if(m_db != NULL) {
 		string query = "SELECT Name, Address, Zip1, Zip2, Location, Sex, Height, Birthday, Birthplace, Nationality, " \
-					"Profession, TaxNumber, Referer, Email, RefBloodTypeID, RefMaritalStatusID FROM Person WHERE PersonID=?";
+					"Profession, TaxNumber, Referer, Email, RefBloodTypeID, RefMaritalStatusID,IdentificationCard FROM Person WHERE PersonID=?";
 
 		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
 			int val(SQLITE_ROW);
@@ -582,6 +583,7 @@ bool DBHandler::get_person(const guint32 id, Person& p) const
 					p.set_email(ustring((const char *)sqlite3_column_text(stmt, 13)));
 					p.set_blood_type(sqlite3_column_int(stmt, 14));
 					p.set_marital_status(sqlite3_column_int(stmt, 15));
+					p.set_identification_card(sqlite3_column_int(stmt, 16));
 					break;
 				}
 				case SQLITE_DONE: {
@@ -622,6 +624,84 @@ bool DBHandler::get_person(const guint32 id, Person& p) const
 				}
 				sqlite3_finalize(stmt);
 			}
+		}
+	} else
+		throw (SqlConnectionClosedException());
+
+	return res;
+}
+
+bool DBHandler::exists_person_by_tax_number(const guint32 tax, guint32 *personID) const
+{
+	bool res = false;
+	sqlite3_stmt *stmt;
+	ustring tmp;
+
+	if(m_db != NULL) {
+		string query = "SELECT PersonID FROM Person WHERE TaxNumber=?";
+
+		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
+			int val(SQLITE_ROW);
+			guint16 zip1, zip2;
+			sqlite3_bind_int(stmt, 1, tax);
+
+			while(val == SQLITE_ROW) {
+				val = sqlite3_step(stmt);
+				switch(val) {
+				case SQLITE_ROW: {
+					if(personID == NULL || (personID != NULL && *personID != sqlite3_column_int(stmt, 0)))
+						res = true;
+					break;
+				}
+				case SQLITE_DONE: {
+
+					break;
+				}
+				case SQLITE_ERROR:
+					res = false;
+					break;
+				}
+			}
+			sqlite3_finalize(stmt);
+		}
+	} else
+		throw (SqlConnectionClosedException());
+
+	return res;
+}
+
+bool DBHandler::exists_person_by_identification_card(const guint32 ic, guint32 *personID) const
+{
+	bool res = false;
+	sqlite3_stmt *stmt;
+	ustring tmp;
+
+	if(m_db != NULL) {
+		string query = "SELECT PersonID FROM Person WHERE IdentificationCard = ?";
+
+		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
+			int val(SQLITE_ROW);
+			guint16 zip1, zip2;
+			sqlite3_bind_int(stmt, 1, ic);
+
+			while(val == SQLITE_ROW) {
+				val = sqlite3_step(stmt);
+				switch(val) {
+				case SQLITE_ROW: {
+					if(personID == NULL || (personID != NULL && *personID != sqlite3_column_int(stmt, 0)))
+						res = true;
+					break;
+				}
+				case SQLITE_DONE: {
+
+					break;
+				}
+				case SQLITE_ERROR:
+					res = false;
+					break;
+				}
+			}
+			sqlite3_finalize(stmt);
 		}
 	} else
 		throw (SqlConnectionClosedException());

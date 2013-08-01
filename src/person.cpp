@@ -13,7 +13,7 @@ using namespace std;
 using namespace Glib;
 
 Person::Person() : m_id(0), m_height(1.0), m_bloodtype(BT_A), m_sex(true), m_taxNumber(0),
-	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER)
+	m_phone(0), m_cellphone(0), m_maritalStatus(MS_OTHER), m_identificationCard(0)
 {
 }
 
@@ -231,4 +231,13 @@ ustring Person::get_marital_status_string(int val)
 {
 	ustring status[] = {"Casado(a)", "Divorciado(a)", "Solteiro(a)", "Viúvo(a)", "Outro..."};
 	return status[val - 1];
+}
+
+void Person::set_identification_card(guint32 id)
+{
+	m_identificationCard = id;
+}
+guint32 Person::get_identification_card(void) const
+{
+	return m_identificationCard;
 }

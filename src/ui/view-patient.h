@@ -46,6 +46,7 @@ private:
 	Gtk::Label* m_lblBirthplace;
 	Gtk::Label* m_lblProfession;
 	Gtk::Label* m_lblTaxNumber;
+	Gtk::Label* m_lblIdentificationCard;
 	Gtk::Label* m_lblMaritalStatus;
 	Gtk::Label* m_lblBloodType;
 

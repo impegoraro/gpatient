@@ -45,6 +45,7 @@ ViewPatientWindow::ViewPatientWindow(Window &parent) : Dialog("Ficha do paciente
 	builder->get_widget("lblTaxNumber", m_lblTaxNumber);
 	builder->get_widget("lblMaritalStatus", m_lblMaritalStatus);
 	builder->get_widget("lblBloodType", m_lblBloodType);
+	builder->get_widget("lblIdentificationCard", m_lblIdentificationCard);
 
 	builder->get_widget("lblAddress", m_lblAddress);
 	builder->get_widget("lblLocation", m_lblLocation);
@@ -83,11 +84,24 @@ void ViewPatientWindow::set_person(const Person& p)
 	m_lblAddress->set_text(p.get_address());
 	m_lblMaritalStatus->set_text(p.get_marital_status_text());
 	m_lblLocation->set_text(p.get_locality());
-	m_lblTelephone->set_text(ustring::compose("%1", p.get_phone()));
-	m_lblCellphone->set_text(ustring::compose("%1", p.get_cellphone()));
+	if(p.get_phone() == 0)
+		m_lblTelephone->set_text("N/A");
+	else
+		m_lblTelephone->set_text(ustring::compose("%1", p.get_phone()));
+	if(p.get_cellphone() == 0)
+		m_lblCellphone->set_text("N/A");
+	else
+		m_lblCellphone->set_text(ustring::compose("%1", p.get_cellphone()));
 	m_lblEmail->set_text(p.get_email());
 	m_lblReferer->set_text(p.get_referer());
-	m_lblTaxNumber->set_text(ustring::compose("%1", p.get_tax_number()));
+	if(p.get_tax_number() == 0)
+		m_lblTaxNumber->set_text("N/A");
+	else
+		m_lblTaxNumber->set_text(ustring::compose("%1", p.get_tax_number()));
+	if(p.get_identification_card() == 0)
+		m_lblIdentificationCard->set_text("N/A");
+	else
+		m_lblIdentificationCard->set_text(ustring::compose("%1", p.get_identification_card()));
 }
 
 

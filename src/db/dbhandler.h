@@ -53,6 +53,8 @@ public:
 
 	void get_patients(const Glib::ustring *name) const;
 	bool get_person(const guint32 id, Person& p) const;
+	bool exists_person_by_tax_number(const guint32 tax, guint32 *personID = NULL) const;
+	bool exists_person_by_identification_card(const guint32 ic, guint32 *personID = NULL) const;
 	void get_visits(guint32 personID) const;
 	bool get_visit(int id, VisitInterface &v) const;
 

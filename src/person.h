@@ -41,6 +41,7 @@ public:
 protected:
 	guint32 m_id;
 	guint32 m_taxNumber;
+	guint32 m_identificationCard;
 	guint32 m_phone;
 	guint32 m_cellphone;
 	guint16 m_zip1;
@@ -106,7 +107,9 @@ public:
 	void set_zip(Glib::ustring& zip);
 	void get_zip(guint16 &zip1, guint16 &zip2) const;
 	Glib::ustring get_zip() const;
-
+	void set_identification_card(guint32 id);
+	guint32 get_identification_card(void) const;
+	
 	bool validate(void) const;
 
 	static Glib::ustring get_blood_type_string(int val);

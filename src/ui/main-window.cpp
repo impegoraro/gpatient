@@ -181,7 +181,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	//m_entryPatients.set_icon_from_icon_name("preferences-system-search-symbolic");
 	m_entryPatients.set_icon_sensitive(ENTRY_ICON_PRIMARY, true);
 	m_entryPatients.set_icon_activatable(false);
-
+	m_entryPatients.set_width_chars(15);
 	m_mtbAdd.set_stock_id(Stock::ADD);
 	m_mtbAdd.set_use_underline();
 	m_mtbAdd.set_is_important();
@@ -618,8 +618,8 @@ bool MainWindow::on_entryPatient_focusOut(GdkEventFocus *focus)
 bool MainWindow::filter_patient_by_name(const TreeModel::const_iterator& iter)
 {
 	ustring item = (*iter)[m_lpCols.m_col_name];
-
-	if(m_entryPatientStatus || Regex::match_simple(".*" + m_entryPatients.get_text() + ".*", item))
+	ustring nameLower = m_entryPatients.get_text().lowercase();
+	if(m_entryPatientStatus || Regex::match_simple(".*" + nameLower + ".*", item.lowercase()))
 		return true;
 	else
 		return false;

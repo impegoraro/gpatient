@@ -29,6 +29,8 @@ protected:
 	bool m_cellphoneStatus;
 	bool m_dateStatus;
 	Gtk::Label m_lblTitle;
+	bool m_tnUnique;
+	bool m_icUnique;
 
 	Gtk::Label m_lblName;
 	Gtk::Entry m_txtName;
@@ -50,6 +52,8 @@ protected:
 	Gtk::Entry m_txtProfession;
 	Gtk::Label m_lblTaxNumber;
 	Widgets::NumericEntry m_txtTaxNumber;
+	Gtk::Label m_lblIdentificationCard;
+	Widgets::NumericEntry m_txtIdentificationCard;
 	Gtk::Label m_lblMaritalStatus;
 	Gtk::ComboBoxText m_cmbMaritalStatus;
 
@@ -101,9 +105,12 @@ protected:
 	void on_txtBirthday_iconPress(Gtk::EntryIconPosition, const GdkEventButton*);
 
 	bool on_focusOut_trim(GdkEventFocus*, Gtk::Entry*);
-
+	bool on_taxNumber_focus_out(GdkEventFocus *event);
+	bool on_identificationCard_focus_out(GdkEventFocus *event);
 	void activate_close(bool);
 
+	inline void validate_entry(Gtk::Entry& entry, guint32 val);
+	inline void validate_entry(Gtk::Entry& entry);
 	virtual bool on_delete_event(GdkEventAny *);
 };
 
