@@ -36,10 +36,10 @@ void Configuration::store()
 	get_window_position(posx, posy);
 	get_window_size(width, height);
 
-	root["Position"][0] = posx;
-	root["Position"][1] = posy;
-	root["Size"][0] = width;
-	root["Size"][1] = height;
+	root["Position"][(Json::UInt)0] = posx;
+	root["Position"][(Json::UInt)1] = posy;
+	root["Size"][(Json::UInt)0] = width;
+	root["Size"][(Json::UInt)1] = height;
 	root["Maximized"] = get_window_maximized();
 	
 	tmp = writer.write(root);
@@ -67,7 +67,8 @@ bool Configuration::parse()
 		return false;
 	}
 	if(!parsing) {
-		std::cout<< "Could not read from configurations from file: '"<< m_fpath<< "'." << std::endl<< reader.getFormattedErrorMessages()<< std::endl;
+		//std::cout<< "Could not read from configurations from file: '"<< m_fpath<< "'." << std::endl<< reader.getFormattedErrorMessages()<< std::endl;
+		std::cout<< "Could not read from configurations from file: '"<< m_fpath<< "'." << std::endl;
 		return false;
 	}
 
@@ -77,17 +78,17 @@ bool Configuration::parse()
 
 	jval = root["Position"];
 	if(!jval && jval.size() == 2){
-		if(jval[0].isInt() && jval[1].isInt()) {
-			posx = jval[0].asInt();
-			posy = jval[1].asInt();
+		if(jval[(Json::UInt)0].isInt() && jval[(Json::UInt)1].isInt()) {
+			posx = jval[(Json::UInt)0].asInt();
+			posy = jval[(Json::UInt)1].asInt();
 		}
 	}
 	
 	jval = root["Size"];
 	if(!jval.isNull() && jval.size() == 2) {
-		if(jval[0].isInt() && jval[1].isInt()) {
-			width = jval[0].asInt();
-			height = jval[1].asInt();
+		if(jval[(Json::UInt)0].isInt() && jval[(Json::UInt)1].isInt()) {
+			width = jval[(Json::UInt)0].asInt();
+			height = jval[(Json::UInt)1].asInt();
 		}
 	}
 

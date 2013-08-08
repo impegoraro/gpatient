@@ -1,6 +1,10 @@
 bin_PROGRAMS = herbanaria
 
-AM_CPPFLAGS=$(DEPS_CFLAGS) -std=c++0x -O3 
+# For Windows compilantion use the folling settings
+#AM_CXXFLAGS=-mwindows
+
+# for Unixx compilation
+AM_CPPFLAGS=$(DEPS_CFLAGS) -std=c++0x -O3
 herbanaria_LDADD=$(DEPS_LIBS)
 
 herbanaria_SOURCES = util.h util.cpp \
@@ -14,7 +18,7 @@ herbanaria_SOURCES = util.h util.cpp \
                      ui/view-patient.cpp ui/view-patient.h \
                      db/dbhandler.h db/dbhandler.cpp \
                      db/allergy.h db/allergy.cpp \
-		     db/visit-interface.h db/visit-interface.cpp \
+                     db/visit-interface.h db/visit-interface.cpp \
                      person.h person.cpp \
                      main.cpp main.h \
                      configuration.h configuration.cpp

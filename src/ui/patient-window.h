@@ -111,8 +111,8 @@ protected:
 	bool on_identificationCard_focus_out(GdkEventFocus *event);
 	void activate_close(bool);
 
-	inline void validate_entry(Gtk::Entry& entry, guint32 val);
-	inline void validate_entry(Gtk::Entry& entry);
+	inline void validate_entry(Gtk::Entry& entry, guint32 val, bool set_icon = true);
+	inline void validate_entry(Gtk::Entry& entry, bool set_icon = true);
 	virtual bool on_delete_event(GdkEventAny *);
 };
 

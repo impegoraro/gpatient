@@ -17,7 +17,7 @@
             <property name="can_focus">False</property>
             <property name="xalign">0</property>
             <property name="pixel_size">28</property>
-            <property name="icon_name">user-info-symbolic</property>
+            <property name="icon_name">user-info</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -468,7 +468,7 @@
             <property name="can_focus">False</property>
             <property name="xalign">0</property>
             <property name="pixel_size">28</property>
-            <property name="icon_name">go-home-symbolic</property>
+            <property name="icon_name">go-home</property>
           </object>
           <packing>
             <property name="expand">False</property>

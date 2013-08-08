@@ -548,7 +548,7 @@ void PatientWindow::activate_close(bool val)
 			MessageDialog msgbox("Não é possível adicionar o novo paciente.", true, MESSAGE_ERROR, BUTTONS_OK, true);
 			validate_entry(m_txtName);
 			validate_entry(m_txtNationality);
-			validate_entry(m_txtBirthday);
+			validate_entry(m_txtBirthday, false);
 			validate_entry(m_txtProfession);
 			validate_entry(m_txtBirthplace);
 			validate_entry(m_txtTaxNumber);
@@ -726,30 +726,34 @@ bool PatientWindow::on_identificationCard_focus_out(GdkEventFocus *event)
 	return false;
 }
 
-inline void PatientWindow::validate_entry(Entry& entry)
+inline void PatientWindow::validate_entry(Entry& entry, bool set_icon)
 {
 	if(entry.get_text_length() == 0) {
 		entry.override_background_color(Gdk::RGBA("Red"), STATE_FLAG_NORMAL);
 		//entry.override_color(Gdk::RGBA("White"), STATE_FLAG_NORMAL);
-		//entry.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
-		//entry.set_icon_tooltip_text("O campo é de preenchimento obrigatório!", ENTRY_ICON_SECONDARY);
+		if(set_icon) {
+			entry.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
+			entry.set_icon_tooltip_text("O campo é de preenchimento obrigatório!", ENTRY_ICON_SECONDARY);
+		}
 	} else {
 		entry.unset_background_color(STATE_FLAG_NORMAL);
 		entry.unset_color(STATE_FLAG_NORMAL);
-		//entry.unset_icon(ENTRY_ICON_SECONDARY);
+		entry.unset_icon(ENTRY_ICON_SECONDARY);
 	}
 }
 
-inline void PatientWindow::validate_entry(Entry& entry, guint32 val)
+inline void PatientWindow::validate_entry(Entry& entry, guint32 val, bool set_icon)
 {
 	if(val == 0) {
 		entry.override_background_color(Gdk::RGBA("Red"), STATE_FLAG_NORMAL);
 		//entry.override_color(Gdk::RGBA("White"), STATE_FLAG_NORMAL);
-		//entry.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
-		//entry.set_icon_tooltip_text("O campo é de preenchimento obrigatório!", ENTRY_ICON_SECONDARY);
+		if(set_icon) {
+			entry.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
+			entry.set_icon_tooltip_text("O campo é de preenchimento obrigatório!", ENTRY_ICON_SECONDARY);
+		}
 	} else {
 		entry.unset_background_color(STATE_FLAG_NORMAL);
 		entry.unset_color(STATE_FLAG_NORMAL);
-		//entry.unset_icon(ENTRY_ICON_SECONDARY);
+		entry.unset_icon(ENTRY_ICON_SECONDARY);
 	}
 }
