@@ -104,6 +104,8 @@ protected:
 
 	void on_txtBirthday_iconPress(Gtk::EntryIconPosition, const GdkEventButton*);
 
+	bool close_on_esc(GdkEventKey* event);
+
 	bool on_focusOut_trim(GdkEventFocus*, Gtk::Entry*);
 	bool on_taxNumber_focus_out(GdkEventFocus *event);
 	bool on_identificationCard_focus_out(GdkEventFocus *event);

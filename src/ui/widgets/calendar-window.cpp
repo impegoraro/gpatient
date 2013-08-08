@@ -95,6 +95,7 @@ Widgets::CalendarWindow::CalendarWindow(Window& win, Widget& widget) :
 	m_txtYear.signal_focus_out_event().connect(sigc::mem_fun(*this, &CalendarWindow::on_btnYear_focusOut));
 	m_txtYear.signal_changed().connect(sigc::mem_fun(*this, &CalendarWindow::on_btnYear_changed));
 	m_btnMonth.signal_button_press_event().connect(sigc::mem_fun(*this, &CalendarWindow::on_btnMonth_buttonPressed), false);
+	
 	m_wDate = &widget;
 
 	m_btnPrevMonth.set_relief(RELIEF_NONE);

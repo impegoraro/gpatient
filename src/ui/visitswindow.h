@@ -40,6 +40,20 @@ gestao-herb is free software: you can redistribute it and/or modify it
 class VisitsWindow : public VisitInterface
 {
 public:
+	enum BasicInfoButtons
+	{
+		Hypertension,
+		Cholesterol,
+		Triglycerides,
+		Diabetes
+	};
+
+	enum WindowType
+	{
+		WINDOW_TYPE_ADD,
+		WINDOW_TYPE_EDIT
+	};
+
 	VisitsWindow(Gtk::Window& win, int personID);
 	~VisitsWindow();
 
@@ -49,6 +63,8 @@ public:
 	void set_to_garbage();
 	virtual void setPersonID(int personID);
 	virtual void set_sex_widgets(bool sex);
+	virtual int get_window_type();
+	virtual void set_window_type(WindowType type = WINDOW_TYPE_ADD, guint32 visitID = 0);
 	void show();	
 
 	class ListAllergies : public Gtk::TreeModel::ColumnRecord
@@ -68,6 +84,7 @@ public:
 		Gtk::TreeModelColumn<Glib::ustring> m_col_obs;
 		Gtk::TreeModelColumn<guint32> m_col_status;
 	};
+
 	class ListHereditary : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
@@ -89,14 +106,9 @@ public:
 	};
 	
 private:
-	enum BasicInfoButtons
-	{
-		Hypertension,
-		Cholesterol,
-		Triglycerides,
-		Diabetes
-	};
 	
+	guint32 m_visitID;
+	int m_type;
 	Gtk::Assistant *m_win;
 
 	Gtk::Button *m_btnHyper;
@@ -162,6 +174,7 @@ private:
 	Gtk::CheckButton *m_chkProstheses;
 	Gtk::CheckButton *m_chkWeight;
 
+	Gtk::Label *m_lblTitle;
 	Gtk::Label *m_lblMenstruation;
 	Gtk::Label *m_lblPregnancy;
 	Gtk::ComboBoxText *m_cmbPain;
@@ -191,6 +204,7 @@ private:
 	
 	guint32 m_personID;
 
+	void set_button_state(BasicInfoButtons type);
 	bool on_window_closing(GdkEventAny*);
 	void on_btnChangeState(BasicInfoButtons);
 	void hlpr_list_allergies_add();
@@ -203,7 +217,7 @@ private:
 	void on_apply();
 
 	void on_listAllergies_row_changed(const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter);
-
+	bool close_on_esc(GdkEventKey* event);
 	void next_page(Gtk::Widget* page);
 	void on_widget_check(Gtk::Entry* entry);
 	void on_widget_check_textview(Gtk::TextView* txtview);
@@ -215,76 +229,77 @@ public:
 /*****************************************
  *           Interface methods           *
  ****************************************/
-	virtual int getPersonID();
-	virtual Glib::ustring getComplaint();
-	virtual Glib::ustring getAnamnesis();
-	virtual Glib::ustring getDate();
-	virtual float getWeight();
-	virtual Glib::ustring getAppearance();
-	virtual Glib::ustring getMovement();
-	virtual Glib::ustring getVoice();
-	virtual Glib::ustring getSmell();
-	virtual int getHypertension();
-	virtual int getCholesterol();
-	virtual int getTriglyceride();
-	virtual int getDiabetes();
-	virtual Glib::ustring getSleepiness();
-	virtual Glib::ustring getTranspiration();
-	virtual Glib::ustring getDehydration();
-	virtual int isAnxiety();
-	virtual int isIrrt();
-	virtual int isFrustration();
-	virtual int isCry();
-	virtual int isVerm();
-	virtual int isVed();
-	virtual int isBrad();
-	virtual int isPrt();
-	virtual int isAml();
-	virtual int isAlg();
-	virtual int isIrritable();
-	virtual int isSad();
-	virtual int isMed();
-	virtual int isMelan();
-	virtual Glib::ustring getHearing();
-	virtual Glib::ustring getThroat();
-	virtual Glib::ustring getScent();
-	virtual Glib::ustring getVision();
-	virtual Glib::ustring getFatigue();
-	virtual Glib::ustring getSexualActivity();
-	virtual Glib::ustring getBody();
-	virtual Glib::ustring getAbdomen();
-	virtual Glib::ustring getHead();
-	virtual Glib::ustring getCirculation();
-	virtual Glib::ustring getEatingHabits();
+	virtual guint32 getPersonID() const;
+ 	virtual guint32 getVisitID() const;
+	virtual Glib::ustring getComplaint() const;
+	virtual Glib::ustring getAnamnesis() const;
+	virtual Glib::ustring getDate() const;
+	virtual float getWeight() const;
+	virtual Glib::ustring getAppearance() const;
+	virtual Glib::ustring getMovement() const;
+	virtual Glib::ustring getVoice() const;
+	virtual Glib::ustring getSmell() const;
+	virtual int getHypertension() const;
+	virtual int getCholesterol() const;
+	virtual int getTriglyceride() const;
+	virtual int getDiabetes() const;
+	virtual Glib::ustring getSleepiness() const;
+	virtual Glib::ustring getTranspiration() const;
+	virtual Glib::ustring getDehydration() const;
+	virtual int isAnxiety() const;
+	virtual int isIrrt() const;
+	virtual int isFrustration() const;
+	virtual int isCry() const;
+	virtual int isVerm() const;
+	virtual int isVed() const;
+	virtual int isBrad() const;
+	virtual int isPrt() const;
+	virtual int isAml() const;
+	virtual int isAlg() const;
+	virtual int isIrritable() const;
+	virtual int isSad() const;
+	virtual int isMed() const;
+	virtual int isMelan() const;
+	virtual Glib::ustring getHearing() const;
+	virtual Glib::ustring getThroat() const;
+	virtual Glib::ustring getScent() const;
+	virtual Glib::ustring getVision() const;
+	virtual Glib::ustring getFatigue() const;
+	virtual Glib::ustring getSexualActivity() const;
+	virtual Glib::ustring getBody() const;
+	virtual Glib::ustring getAbdomen() const;
+	virtual Glib::ustring getHead() const;
+	virtual Glib::ustring getCirculation() const;
+	virtual Glib::ustring getEatingHabits() const;
+	virtual Glib::ustring getMenstruation() const;
+	virtual Glib::ustring getPregnancy() const;
+	virtual Glib::ustring getPain() const;
+	virtual Glib::ustring getPainSince() const;
+	virtual Glib::ustring getPainObs() const;
+	virtual Glib::ustring getSurgery() const;
+	virtual Glib::ustring getPreviousTreatment() const;
+	virtual bool getProstheses() const;
+	virtual bool getWeightBool() const;
+	virtual Glib::ustring getUrine() const;
+	virtual Glib::ustring getFaeces() const;
+	virtual Glib::ustring getTongue() const;
+	virtual Glib::ustring getPulseD() const;
+	virtual Glib::ustring getPulseE() const;
+	virtual gint16 getBPMax() const;
+	virtual gint16 getBPMin() const;
+	virtual gint16 getBPM() const;
+	virtual Glib::ustring getApal() const;
+	virtual Glib::ustring getExams() const;
+	virtual Glib::ustring getClinicalAnalysis() const;
+	virtual Glib::ustring getColor() const;
+	virtual Glib::ustring getEscle() const;
+	virtual Glib::ustring getObservations() const;
+	virtual Glib::ustring getMed() const;
+	virtual Glib::ustring getMedication() const;
+	virtual Glib::ustring getTreatment() const;
+	virtual Gtk::TreeModel::Children getAllergies() const;
 
-	virtual Glib::ustring getMenstruation();
-	virtual Glib::ustring getPregnancy();
-	virtual Glib::ustring getPain();
-	virtual Glib::ustring getPainSince();
-	virtual Glib::ustring getPainObs();
-	virtual Glib::ustring getSurgery();
-	virtual Glib::ustring getPreviousTreatment();
-	virtual bool getProstheses();
-	virtual bool getWeightBool();
-	virtual Glib::ustring getUrine();
-	virtual Glib::ustring getFaeces();
-	virtual Glib::ustring getTongue();
-	virtual Glib::ustring getPulseD();
-	virtual Glib::ustring getPulseE();
-	virtual gint16 getBPMax();
-	virtual gint16 getBPMin();
-	virtual gint16 getBPM();
-	virtual Glib::ustring getApal();
-	virtual Glib::ustring getExams();
-	virtual Glib::ustring getClinicalAnalysis();
-	virtual Glib::ustring getColor();
-	virtual Glib::ustring getEscle();
-	virtual Glib::ustring getObservations();
-	virtual Glib::ustring getMed();
-	virtual Glib::ustring getMedication();
-	virtual Glib::ustring getTreatment();
-	virtual Gtk::TreeModel::Children getAllergies();
-
+	virtual void setVisitID(const guint32 visitID);
 	virtual void setComplaint(const Glib::ustring& val);
 	virtual void setAnamnesis(const Glib::ustring& val);
 	virtual void setDate(const Glib::ustring& val);

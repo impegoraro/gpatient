@@ -33,7 +33,7 @@ ViewPatientWindow::ViewPatientWindow(Window &parent) : Dialog("Ficha do paciente
 {
 	RefPtr<Builder> builder = Builder::create_from_file(GLADE_FILE);
 	Button *btnClose;
-	
+
 	builder->get_widget("mainBox", m_mainBox);
 	builder->get_widget("lblName", m_lblName);
 	builder->get_widget("lblHeight", m_lblHeight);
@@ -60,7 +60,9 @@ ViewPatientWindow::ViewPatientWindow(Window &parent) : Dialog("Ficha do paciente
 	get_vbox()->pack_start(*m_mainBox, true, true, 0);
 
 	btnClose = add_button(Stock::CLOSE, RESPONSE_CLOSE);
-
+	signal_key_press_event().connect(sigc::mem_fun(*this, &ViewPatientWindow::close_on_esc));
+	add_events(Gdk::KEY_PRESS_MASK);
+	
 	//btnClose->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(*this, &ViewPatientWindow::response), RESPONSE_CLOSE));
 	btnClose->signal_clicked().connect(sigc::mem_fun(*this, &ViewPatientWindow::hide));
 	if(!(m_mainBox && m_lblName && m_lblHeight && m_lblSex && m_lblNationality && m_lblBirthday && m_lblBirthplace &&
@@ -70,6 +72,14 @@ ViewPatientWindow::ViewPatientWindow(Window &parent) : Dialog("Ficha do paciente
 		throw std::exception();
 }
 
+bool ViewPatientWindow::close_on_esc(GdkEventKey* event)
+{
+	if (event->type == GDK_KEY_PRESS && event->keyval == GDK_KEY_Escape) {
+		hide();
+    	return true;
+  	}
+  		return false;
+}
 void ViewPatientWindow::set_person(const Person& p)
 {
 	m_lblName->set_text(p.get_name());

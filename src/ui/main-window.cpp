@@ -30,7 +30,7 @@ using namespace Gtk;
 #define SEARCH_TIMEOUT 0.325
 
 MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(WINDOW_TOPLEVEL),
-	m_app(app), m_vp(NULL), m_vw(NULL),
+	m_app(app), m_vp(NULL), m_vw(NULL), m_visitID(0),
 	m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
 	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true), m_maximized(false)
@@ -151,6 +151,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
 	db.signal_visit_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_visit));
 	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
+	db.signal_visit_edited().connect(sigc::mem_fun(*this, &MainWindow::on_visitEdited));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
 	m_btnNewVisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAddVisit_clicked));
 	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
@@ -169,7 +170,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_btnRemoveVisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnRemoveVisit));
 	m_treeVisits->signal_row_activated().connect(sigc::mem_fun(*this, &MainWindow::on_treeVisit_activated));
 	m_treeVisits->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_visits_selection_changed));
-
+	m_btnVisitEdit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_visitEdit_clicked));
 	/************************************
 	 *    Setting up some properties    *
 	 ***********************************/
@@ -183,7 +184,6 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	//m_entryPatients.set_icon_from_icon_name("preferences-system-search-symbolic");
 	m_entryPatients.set_icon_sensitive(ENTRY_ICON_PRIMARY, true);
 	m_entryPatients.set_icon_activatable(false);
-	m_entryPatients.set_width_chars(15);
 	m_mtbAdd.set_stock_id(Stock::ADD);
 	m_mtbAdd.set_use_underline();
 	m_mtbAdd.set_is_important();
@@ -205,7 +205,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	set_default_size(860, 640);
 	set_icon_name(((ustring)PACKAGE_NAME).lowercase());
 	
-	m_entryPatients.set_width_chars(26);
+	m_entryPatients.set_width_chars(34);
 	swPatients->set_margin_left(1);
 	swPatients->set_margin_right(1);
 	swPatients->set_margin_top(5);
@@ -325,6 +325,11 @@ void MainWindow::on_btnToolAddVisit_clicked(void)
 		m_vw = new VisitsWindow(*this, m_personID);
 		m_app->add_window((Window&)*m_vw->get_window());
 	}
+
+	// TODO: remove gargage
+	//m_vw->clear();
+	m_vw->set_window_type();
+	m_vw->set_to_garbage();
 	m_vw->setPersonID(m_personID);
 	m_vw->set_sex_widgets(!(m_lblPSex->get_text().substr(0,1) == (ustring)"M"));
 	m_vw->show();
@@ -653,6 +658,41 @@ void MainWindow::on_btnBack_clicked(void)
 	m_nb.set_current_page(0);
 }
 
+void MainWindow::on_visitEdit_clicked(void)
+{
+	DBHandler db = DBHandler::get_instance();
+
+	if(m_vw == NULL) {
+		m_vw = new VisitsWindow(*this, m_personID);
+		m_app->add_window((Window&)*m_vw->get_window());
+	}
+	m_vw->set_window_type(VisitsWindow::WindowType::WINDOW_TYPE_EDIT, m_visitID);
+	m_vw->setPersonID(m_personID);
+	m_vw->set_sex_widgets(!(m_lblPSex->get_text().substr(0,1) == (ustring)"M"));
+	
+	db.open();
+	db.get_visit(m_visitID, *m_vw);
+	db.close();
+
+	m_vw->show();
+}
+
+void MainWindow::on_visitEdited(const VisitInterface& v)
+{
+	//RefPtr<TreeSelection> sel = m_treeVisits->get_selection();
+	//TreeModel::iterator m_visitSelected = sel->get_selected();
+	RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model())->clear();
+
+	if(m_visitSelected) {
+		TreeRow row =*m_visitSelected;
+
+		row[m_lvCols.m_col_complaint] = v.getComplaint();
+		row[m_lvCols.m_col_date] = v.getDate();
+
+		*((VisitInterface*) this) = v;
+	}
+}
+
 void MainWindow::get_visits_widgets(void)
 {
 	RefPtr<Builder> builder = Builder::create_from_file(GLADE_VISITS);
@@ -671,6 +711,7 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("btnNewVisit", m_btnNewVisit);
 	builder->get_widget("btnRemoveVisit", m_btnRemoveVisit);
 
+	builder->get_widget("btnVisitEdit", m_btnVisitEdit);
 	builder->get_widget("lblComplaint", m_lblComplaint);
 	builder->get_widget("lblAnamnesis", m_lblAnamnesis);
 	builder->get_widget("lblDate", m_lblDate);
@@ -795,14 +836,17 @@ void MainWindow::on_btnRemoveVisit(void)
 void MainWindow::on_treeVisit_activated(const TreeModel::Path& path, TreeViewColumn* col)
 {
 	RefPtr<TreeSelection> sel = m_treeVisits->get_selection();
-	TreeModel::iterator row = sel->get_selected();
+	//TreeModel::iterator m_visitSelected = sel->get_selected();
+	m_visitSelected = sel->get_selected();
 	DBHandler db = DBHandler::get_instance();
 	bool close = true;
 	RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model())->clear();
-	if(*row) {
+
+	if(*m_visitSelected) {
 		try{
-			db.open();	
-			db.get_visit((*row)[m_lvCols.m_col_id], *this);
+			db.open();
+			m_visitID = (*m_visitSelected)[m_lvCols.m_col_id];
+			db.get_visit((*m_visitSelected)[m_lvCols.m_col_id], *this);
 			db.get_person_allergies(m_personID, Util::parse_date(m_lblDate->get_text()), sigc::mem_fun(*this, &MainWindow::hlpr_append_allergy));	
 			m_lblSuggestions->hide();
 			m_boxVisitInfo->show();
@@ -869,221 +913,299 @@ void MainWindow::set_window_move(int posx, int posy)
  *             Getters             *
 ***********************************/
 
-int MainWindow::getPersonID()
+guint32 MainWindow::getPersonID() const
+{
+	return m_personID;
+}
+guint32 MainWindow::getVisitID() const
+{
+	return m_visitID;
+}
+ustring MainWindow::getComplaint() const
+{
+	return m_lblComplaint->get_text();
+}
+ustring MainWindow::getAnamnesis() const
+{
+	return m_lblAnamnesis->get_text();
+}
+ustring MainWindow::getDate() const
+{
+	return m_lblDate->get_text();
+}
+float MainWindow::getWeight() const
+{
+	float w;
+	auto i = m_lblWeight->get_text().find_first_of(' ');
+	stringstream ss;
+	ss<<m_lblWeight->get_text().substr(0, i).raw();
+	ss>>w;
+	return w;
+}
+
+ustring MainWindow::getAppearance() const
+{
+	return m_lblAppearance->get_text();
+}
+ustring MainWindow::getMovement() const
+{
+	return m_lblMovement->get_text();
+}
+ustring MainWindow::getVoice() const
+{
+	return m_lblVoice->get_text();
+}
+ustring MainWindow::getSmell() const
+{
+	return m_lblSmell->get_text();
+}
+
+int MainWindow::getHypertension() const
+{
+}
+int MainWindow::getCholesterol() const
+{
+}
+int MainWindow::getTriglyceride() const
+{
+}
+int MainWindow::getDiabetes() const
 {
 }
 
-ustring MainWindow::getComplaint()
+ustring MainWindow::getSleepiness() const
 {
+	return m_lblSleepiness->get_text();
 }
-ustring MainWindow::getAnamnesis()
+ustring MainWindow::getTranspiration() const
 {
+	return m_lblTranspiration->get_text();
 }
-ustring MainWindow::getDate()
+ustring MainWindow::getDehydration() const
 {
-}
-float MainWindow::getWeight()
-{
-}
-
-ustring MainWindow::getAppearance()
-{
-}
-ustring MainWindow::getMovement()
-{
-}
-ustring MainWindow::getVoice()
-{
-}
-ustring MainWindow::getSmell()
-{
+	return m_lblDehydration->get_text();
 }
 
-int MainWindow::getHypertension()
+int MainWindow::isAnxiety() const
 {
 }
-int MainWindow::getCholesterol()
+int MainWindow::isIrrt() const
 {
 }
-int MainWindow::getTriglyceride()
+int MainWindow::isFrustration() const
 {
 }
-int MainWindow::getDiabetes()
+int MainWindow::isCry() const
 {
 }
-
-ustring MainWindow::getSleepiness()
+int MainWindow::isVerm() const
 {
 }
-ustring MainWindow::getTranspiration()
+int MainWindow::isVed() const
 {
 }
-ustring MainWindow::getDehydration()
+int MainWindow::isBrad() const
 {
 }
-
-int MainWindow::isAnxiety()
+int MainWindow::isPrt() const
 {
 }
-int MainWindow::isIrrt()
+int MainWindow::isAml() const
 {
 }
-int MainWindow::isFrustration()
+int MainWindow::isAlg() const
 {
 }
-int MainWindow::isCry()
+int MainWindow::isIrritable() const
 {
 }
-int MainWindow::isVerm()
+int MainWindow::isSad() const
 {
 }
-int MainWindow::isVed()
+int MainWindow::isMed() const
 {
 }
-int MainWindow::isBrad()
+int MainWindow::isMelan() const
 {
 }
-int MainWindow::isPrt()
+ustring MainWindow::getHearing() const
 {
+	m_lblHearing->get_text();
 }
-int MainWindow::isAml()
+ustring MainWindow::getThroat() const
 {
+	m_lblThroat->get_text();
 }
-int MainWindow::isAlg()
+ustring MainWindow::getScent() const
 {
+	m_lblScent->get_text();
 }
-int MainWindow::isIrritable()
+ustring MainWindow::getVision() const
 {
+	m_lblVision->get_text();
 }
-int MainWindow::isSad()
+ustring MainWindow::getFatigue() const
 {
+	m_lblFatigue->get_text();
 }
-int MainWindow::isMed()
+ustring MainWindow::getSexualActivity() const
 {
+	m_lblSexualActivity->get_text();
 }
-int MainWindow::isMelan()
+ustring MainWindow::getBody() const
 {
+	m_lblBody->get_text();
 }
-ustring MainWindow::getHearing()
+ustring MainWindow::getAbdomen() const
 {
+	m_lblAbdomen->get_text();
 }
-ustring MainWindow::getThroat()
+ustring MainWindow::getHead() const
 {
+	m_lblHead->get_text();
 }
-ustring MainWindow::getScent()
+ustring MainWindow::getCirculation() const
 {
+	m_lblCirculation->get_text();
 }
-ustring MainWindow::getVision()
+ustring  MainWindow::getEatingHabits() const
 {
-}
-ustring MainWindow::getFatigue()
-{
-}
-ustring MainWindow::getSexualActivity()
-{
-}
-ustring MainWindow::getBody()
-{
-}
-ustring MainWindow::getAbdomen()
-{
-}
-ustring MainWindow::getHead()
-{
-}
-ustring MainWindow::getCirculation()
-{
-}
-ustring  MainWindow::getEatingHabits()
-{
+	m_lblEatingHabits->get_text();
 }
 
-ustring MainWindow::getMenstruation()
+ustring MainWindow::getMenstruation() const
+{
+	m_lblMenstruation->get_text();
+}
+ustring MainWindow::getPregnancy() const
+{
+	m_lblPregnancy->get_text();
+}
+ustring MainWindow::getPain() const
+{
+	m_lblPain->get_text();
+}
+ustring MainWindow::getPainSince() const
+{
+	m_lblPainSince->get_text();
+}
+ustring MainWindow::getPainObs() const
+{
+	m_lblPainObs->get_text();
+}
+ustring MainWindow::getSurgery() const
+{
+	m_lblSurgery->get_text();
+}
+ustring MainWindow::getPreviousTreatment() const
+{
+	m_lblPreviousTreatment->get_text();
+}
+bool MainWindow::getProstheses() const
 {
 }
-ustring MainWindow::getPregnancy()
+bool MainWindow::getWeightBool() const
 {
 }
-ustring MainWindow::getPain()
+ustring MainWindow::getUrine() const
+{
+	m_lblUrine->get_text();
+}
+ustring MainWindow::getFaeces() const
+{
+	m_lblFaeces->get_text();
+}
+ustring MainWindow::getTongue() const
+{
+	m_lblTongue->get_text();
+}
+ustring MainWindow::getPulseD() const
+{
+	m_lblPulseD->get_text();
+}
+ustring MainWindow::getPulseE() const
+{
+	m_lblPulseE->get_text();
+}
+gint16 MainWindow::getBPMax() const
+{
+	guint16 val;
+	string tmp = m_lblBloodPressure->get_text();
+	stringstream ss;
+	auto i = tmp.find_first_of('/');
+	ss<<tmp.substr(0, i-1);
+	ss>>val;
+	return val;
+}
+gint16 MainWindow::getBPMin() const
+{
+	guint16 val;
+	string tmp = m_lblBloodPressure->get_text();
+	stringstream ss;
+	auto i = tmp.find_first_of('/');
+	auto i2 = tmp.find_first_of("PPM");
+	ss<<tmp.substr(i+1, i2-1);
+	ss>>val;
+	return val;
+}
+gint16 MainWindow::getBPM() const
+{
+	guint16 val;
+	string tmp = m_lblBloodPressure->get_text();
+	stringstream ss;
+	auto i = tmp.find_first_of("PPM");
+	ss<<tmp.substr(i+6);
+	ss>>val;
+	return val;
+}
+ustring MainWindow::getApal() const
+{
+	m_lblApal->get_text();
+}
+ustring MainWindow::getExams() const
+{
+	m_lblExams->get_text();
+}
+ustring MainWindow::getClinicalAnalysis() const
+{
+	m_lblClinicalAnalysis->get_text();
+}
+ustring MainWindow::getColor() const
+{
+	m_lblColor->get_text();
+}
+ustring MainWindow::getEscle() const
+{
+	m_lblEscle->get_text();
+}
+ustring MainWindow::getObservations() const
+{
+	m_lblObservations->get_text();
+}
+ustring MainWindow::getMed() const
+{
+	m_lblMed->get_text();
+}
+ustring MainWindow::getMedication() const
+{
+	m_lblMedication->get_text();
+}
+ustring MainWindow::getTreatment() const
+{
+	m_lblTreatment->get_text();
+}
+TreeModel::Children MainWindow::getAllergies() const
 {
 }
-ustring MainWindow::getPainSince()
-{
-}
-ustring MainWindow::getPainObs()
-{
-}
-ustring MainWindow::getSurgery()
-{
-}
-ustring MainWindow::getPreviousTreatment()
-{
-}
-bool MainWindow::getProstheses()
-{
-}
-bool MainWindow::getWeightBool()
-{
-}
-ustring MainWindow::getUrine()
-{
-}
-ustring MainWindow::getFaeces()
-{
-}
-ustring MainWindow::getTongue()
-{
-}
-ustring MainWindow::getPulseD()
-{
-}
-ustring MainWindow::getPulseE()
-{
-}
-gint16 MainWindow::getBPMax()
-{
-}
-gint16 MainWindow::getBPMin()
-{
-}
-gint16 MainWindow::getBPM()
-{
-}
-ustring MainWindow::getApal()
-{
-}
-ustring MainWindow::getExams()
-{
-}
-ustring MainWindow::getClinicalAnalysis()
-{
-}
-ustring MainWindow::getColor()
-{
-}
-ustring MainWindow::getEscle()
-{
-}
-ustring MainWindow::getObservations()
-{
-}
-ustring MainWindow::getMed()
-{
-}
-ustring MainWindow::getMedication()
-{
-}
-ustring MainWindow::getTreatment()
-{
-}
-TreeModel::Children MainWindow::getAllergies()
-{}
 
 
 /***********************************
  *             Setters             *
 ***********************************/
-void MainWindow::setPersonID(int val)
+void MainWindow::setPersonID(guint32 val)
+{
+}
+void MainWindow::setVisitID(const guint32 val)
 {
 }
 void MainWindow::setComplaint(const Glib::ustring& val)

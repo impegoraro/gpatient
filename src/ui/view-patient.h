@@ -36,7 +36,7 @@ public:
 	void set_person(const Person& p);
 private:
 	Gtk::Box* m_mainBox;
-
+	
 	Gtk::Image* m_imgPersonal; 
 	Gtk::Label* m_lblName;
 	Gtk::Label* m_lblHeight;
@@ -58,6 +58,8 @@ private:
 	Gtk::Label* m_lblCellphone;
 	Gtk::Label* m_lblEmail;
 	Gtk::Label* m_lblReferer;
+
+	bool close_on_esc(GdkEventKey* event);
 
 };
 

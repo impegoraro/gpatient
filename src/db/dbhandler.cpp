@@ -466,6 +466,248 @@ int DBHandler::visit_insert(VisitInterface& v) const
 	return res;
 }
 
+int DBHandler::visit_update(VisitInterface& v) const
+{
+	int res = 0;
+	bool shouldRollback = false;
+
+	/*TODO: Handle the errors correctly */
+	//if(!v.validate())
+	//	throw std::invalid_argument("Os dados da visita são inválidos.");
+
+	if(m_db != NULL) {
+		string qBegin = "BEGIN IMMEDIATE TRANSACTION;";
+		string query = "UPDATE Visits SET " \
+						"Complaint = ?, Anamnesis = ?, VisitDate = ?, Weight = ?, PhysicalAppearance = ?, " \
+						"Movement = ?, Voice = ?, Smell = ?, Hypertension = ?, Cholesterol = ?, Triglyceride = ?, " \
+						"Diabetes = ?, Sleepiness = ?, Transpiration = ?, Dehydration = ?, Anxiety = ?, Irrt = ?, " \
+						"Frustration = ?, Cry = ?, Verm = ?, Ved = ?, Brad = ?, Prt = ?, Aml = ?, Alg = ?, Irritable = ?, Sad = ?, " \
+						"Med = ?, Melan = ?, Hearing = ?, Throat = ?, Scent = ?, Vision = ?, Fatigue = ?, SexualActivity = ?, " \
+						"Body = ?, Abdomen = ?, Head = ?, Circulation = ?, EatingHabits = ?," \
+						"Menstruation = ?, Pregnancy = ?, Surgery = ?," \
+						"PreviousTreatment = ?, Prostheses = ?, Weight2 = ?, Urine = ?, Faeces = ?, Tongue = ?," \
+						"PulseD = ?, PulseE = ?, Apal = ?, Exams = ?, ClinicalAnalysis = ?, Color = ?," \
+						"Escle = ?, Observations = ?, MedTxt = ?, Medication = ?, Treatment = ? WHERE VisitID = ?";
+		string queryPain = "INSERT INTO Pain(Type,Since,Observation,RefVisitID)" \
+						" VALUES(?, ?, ?, ?);";
+		string queryBP = "INSERT INTO BloodPressure(High, Low, BPM, RefVisitID)" \
+						" VALUES(?, ?, ?, ?);";
+		string qFinish = "COMMIT TRANSACTION;";
+
+		sqlite3_stmt *stmt, *stmtB, *stmtE;
+
+		if(sqlite3_prepare_v2(m_db, qBegin.c_str(), -1, &stmtB, NULL) == SQLITE_OK && sqlite3_step(stmtB) != SQLITE_DONE) {
+			//Error could start transaction...
+			if(stmtB != NULL)
+				sqlite3_finalize(stmtB);
+			return -1;
+		}
+
+		if((res = sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
+			
+			sqlite3_bind_text(stmt, 1, v.getComplaint().c_str(), v.getComplaint().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, v.getAnamnesis().c_str(), v.getAnamnesis().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, v.getDate().c_str(), v.getDate().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_double(stmt, 4, v.getWeight());
+
+			sqlite3_bind_text(stmt, 5, v.getAppearance().c_str(), v.getAppearance().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 6, v.getMovement().c_str(), v.getMovement().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 7, v.getVoice().c_str(), v.getVoice().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, v.getSmell().c_str(), v.getSmell().bytes(), SQLITE_TRANSIENT);
+
+			sqlite3_bind_int(stmt, 9, v.getHypertension());
+			sqlite3_bind_int(stmt, 10, v.getCholesterol());
+			sqlite3_bind_int(stmt, 11, v.getTriglyceride());
+			sqlite3_bind_int(stmt, 12, v.getDiabetes());
+
+			sqlite3_bind_text(stmt, 13, v.getSleepiness().c_str(), v.getSleepiness().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 14, v.getTranspiration().c_str(), v.getTranspiration().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 15, v.getDehydration().c_str(), v.getDehydration().bytes(), SQLITE_TRANSIENT);
+
+			sqlite3_bind_int(stmt, 16, v.isAnxiety());
+			sqlite3_bind_int(stmt, 17, v.isIrrt());
+			sqlite3_bind_int(stmt, 18, v.isFrustration());
+			sqlite3_bind_int(stmt, 19, v.isCry());
+			sqlite3_bind_int(stmt, 20, v.isVerm());
+			sqlite3_bind_int(stmt, 21, v.isVed());
+			sqlite3_bind_int(stmt, 22, v.isBrad());
+			sqlite3_bind_int(stmt, 23, v.isPrt());
+			sqlite3_bind_int(stmt, 24, v.isAml());
+			sqlite3_bind_int(stmt, 25, v.isAlg());
+			sqlite3_bind_int(stmt, 26, v.isIrritable());
+			sqlite3_bind_int(stmt, 27, v.isSad());
+			sqlite3_bind_int(stmt, 28, v.isMed());
+			sqlite3_bind_int(stmt, 29, v.isMelan());
+
+			sqlite3_bind_text(stmt, 30, v.getHearing().c_str(), v.getHearing().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 31, v.getThroat().c_str(), v.getThroat().bytes(), SQLITE_TRANSIENT); 
+			sqlite3_bind_text(stmt, 32, v.getScent().c_str(), v.getScent().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 33, v.getVision().c_str(), v.getVision().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 34, v.getFatigue().c_str(), v.getFatigue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 35, v.getSexualActivity().c_str(), v.getSexualActivity().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 36, v.getBody().c_str(), v.getBody().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 37, v.getAbdomen().c_str(), v.getAbdomen().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 38, v.getHead().c_str(), v.getHead().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 39, v.getCirculation().c_str(), v.getCirculation().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 40, v.getEatingHabits().c_str(), v.getEatingHabits().bytes(), SQLITE_TRANSIENT);
+
+			sqlite3_bind_text(stmt, 41, v.getMenstruation().c_str(), v.getMenstruation().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 42, v.getPregnancy().c_str(), v.getPregnancy().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 43, v.getSurgery().c_str(), v.getSurgery().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 44, v.getPreviousTreatment().c_str(), v.getPreviousTreatment().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 45, v.getProstheses());
+			sqlite3_bind_int(stmt, 46, v.getWeightBool());
+			sqlite3_bind_text(stmt, 47, v.getUrine().c_str(), v.getUrine().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 48, v.getFaeces().c_str(), v.getFaeces().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 49, v.getTongue().c_str(), v.getTongue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 50, v.getPulseD().c_str(), v.getPulseD().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 51, v.getPulseE().c_str(), v.getPulseE().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 52, v.getApal().c_str(), v.getApal().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 53, v.getExams().c_str(), v.getExams().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 54, v.getClinicalAnalysis().c_str(), v.getClinicalAnalysis().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 55, v.getColor().c_str(), v.getColor().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 56, v.getEscle().c_str(), v.getEscle().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 57, v.getObservations().c_str(), v.getObservations().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 58, v.getMed().c_str(), v.getMed().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 59, v.getMedication().c_str(), v.getMedication().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 60, v.getTreatment().c_str(), v.getTreatment().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 61, v.getVisitID());
+
+			if(sqlite3_step(stmt) == SQLITE_DONE) {
+				res = 1;
+			} else {
+				shouldRollback = true;
+				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+			}
+			sqlite3_finalize(stmt);
+
+			/************************ inserting pain info ************************/
+			//if((res = sqlite3_prepare_v2(m_db, queryPain.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
+			//	sqlite3_bind_text(stmt, 1, v.getPain().c_str(), v.getPain().bytes(), SQLITE_TRANSIENT);
+			//	sqlite3_bind_text(stmt, 2, v.getPainSince().c_str(), v.getPainSince().bytes(), SQLITE_TRANSIENT);
+			//	sqlite3_bind_text(stmt, 3, v.getPainObs().c_str(), v.getPainObs().bytes(), SQLITE_TRANSIENT);
+			//	sqlite3_bind_int(stmt, 4, v.getVisitID());
+			//	if(sqlite3_step(stmt) == SQLITE_DONE)
+			//		res = 1;
+			//	else
+			//		shouldRollback = true;
+			//	sqlite3_finalize(stmt);
+			//} else {
+			//	shouldRollback = true;
+			//	std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+			//	sqlite3_finalize(stmt);
+			//}
+			
+			/************************  end of pain info  ************************/
+
+			/************************ inserting blood pressure info ************************/
+			//if((res = sqlite3_prepare_v2(m_db, queryBP.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
+			//	sqlite3_bind_int(stmt, 1, v.getBPMax());
+			//	sqlite3_bind_int(stmt, 2, v.getBPMin());
+			//	sqlite3_bind_int(stmt, 3, v.getBPM());
+			//	sqlite3_bind_int(stmt, 4, v.getVisitID());
+			//	if(sqlite3_step(stmt) == SQLITE_DONE)
+			//		res = 1;
+			//	else {
+			//		std::cerr<< "Error executing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+			//		shouldRollback = true;
+			//	}
+			//	sqlite3_finalize(stmt);
+			//} else {
+			//	shouldRollback = true;
+			//	std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+			//	sqlite3_finalize(stmt);
+			//}
+			
+			/************************  end of blood pressure info  ************************/
+
+			/****************************** updating allergies ****************************/
+			VisitsWindow::ListAllergies i;
+			string qAllAdd = "INSERT INTO Allergies (Name, Observation, RefVisitID) VALUES(?,?,?);";
+			string qAllMod = "UPDATE Allergies SET Name = ?, Observation = ? WHERE AllergyID = ?";
+			string qAllRem = "UPDATE Allergies SET DeleteDate = ? WHERE AllergyID = ?";
+			
+			for(auto iter = v.getAllergies().begin(); iter; iter++) {
+				Gtk::TreeRow row = *iter;
+				ustring allName = row[i.m_col_name];
+				ustring allObs = row[i.m_col_obs];
+				guint32 rstatus;
+
+				// the name is mandatory
+				if(allName.length() == 0) 
+					continue;
+				rstatus = row[i.m_col_status];
+				cout<<"here: "<< allName<< " - " << rstatus << endl;
+				if(rstatus == LIST_STATUS_ADDED) {
+					if(sqlite3_prepare_v2(m_db, qAllAdd.c_str(), qAllAdd.size(), &stmt, NULL) == SQLITE_OK) {
+						sqlite3_bind_text(stmt, 1, allName.c_str(), allName.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_text(stmt, 2, allObs.c_str(), allObs.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_int(stmt, 3, v.getVisitID());
+					} else {
+						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						shouldRollback = true;
+						break;
+					}
+				} else if(rstatus == LIST_STATUS_MODIFIED) {
+					if(sqlite3_prepare_v2(m_db, qAllMod.c_str(), qAllMod.size(), &stmt, NULL) == SQLITE_OK) {
+						sqlite3_bind_text(stmt, 1, allName.c_str(), allName.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_text(stmt, 2, allObs.c_str(), allObs.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_int(stmt, 3, row[i.m_col_id]);
+					} else {
+						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						shouldRollback = true;
+						break;
+					}
+				} else if(rstatus == LIST_STATUS_REMOVED) {
+					DateTime tm = DateTime::create_now_utc();
+					ustring now = tm.format("%Y-%m-%d");
+
+					if(sqlite3_prepare_v2(m_db, qAllRem.c_str(), qAllRem.size(), &stmt, NULL) == SQLITE_OK) {
+						sqlite3_bind_text(stmt, 1, now.c_str(), now.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_int(stmt, 2, row[i.m_col_id]);
+					} else {
+						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						shouldRollback = true;
+						break;
+					}
+				}
+
+				if(sqlite3_step(stmt) == SQLITE_DONE)
+					res = 1;
+				else {
+					std::cerr<< "Error executing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+					shouldRollback = true;
+					break;
+				}
+				sqlite3_finalize(stmt);
+			}
+			/**************************** end updating allergies **************************/
+
+			if(shouldRollback)
+				qFinish = "ROLLBACK TRANSACTION;";
+			else 
+				m_signal_visit_edited(v);
+			// End the transaction... either by issuing a rollback or commit.
+			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
+				//Error could start transaction...
+				if(stmtB != NULL)
+					sqlite3_finalize(stmtB); // clean up
+				return -1;
+			}
+
+			//cleanup
+			sqlite3_finalize(stmtB);
+			sqlite3_finalize(stmtE);
+		} else {
+			std::cout<< "Error (" << res <<") while updating" <<endl <<"Message: "<< sqlite3_errmsg(m_db) << std::endl<< "'" << query <<"'"<<endl;
+			sqlite3_finalize(stmtB);
+		}
+	} else
+		throw (SqlConnectionClosedException());
+
+	return res;
+}
+
 int DBHandler::person_update(const Person& p) const
 {
 	int res = 0;
@@ -1065,12 +1307,17 @@ sigc::signal<void, guint32, const ustring&, const ustring&>& DBHandler::signal_v
 	return m_signal_visit_added;
 }
 
-sigc::signal<void, const Person&> DBHandler::signal_person_edited()
+sigc::signal<void, const VisitInterface&>& DBHandler::signal_visit_edited()
+{
+	return m_signal_visit_edited;
+}
+
+sigc::signal<void, const Person&>& DBHandler::signal_person_edited()
 {
 	return m_signal_person_edit;
 }
 
-sigc::signal<void, const Allergy&, const Glib::Date&> DBHandler::signal_allergies()
+sigc::signal<void, const Allergy&, const Glib::Date&>& DBHandler::signal_allergies()
 {
 	return m_signal_allergies;
 }

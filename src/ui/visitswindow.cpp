@@ -106,10 +106,15 @@ void VisitsWindow::set_to_garbage()
 	m_chkProstheses->set_active(0);
 	m_chkWeight->set_active(0);
 
+	m_win->set_page_complete(*m_win->get_nth_page(0), true);
+	m_win->set_page_complete(*m_win->get_nth_page(1), true);
+	m_win->set_page_complete(*m_win->get_nth_page(2), true);
+	m_win->set_page_complete(*m_win->get_nth_page(3), true);
+
 }
 
 VisitsWindow::VisitsWindow(Window& win, int personID)
-	: m_hyper(0), m_chol(0), m_trigl(0), m_diabetes(0), m_personID(personID)
+	: m_hyper(0), m_chol(0), m_trigl(0), m_diabetes(0), m_personID(personID), m_visitID(0), m_type(VisitsWindow::WINDOW_TYPE_ADD)
 {
 	RefPtr<Builder> builder = Builder::create_from_file("src/ui/new-visit-last.glade");
 	TreeViewColumn *col;
@@ -189,7 +194,8 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	builder->get_widget("txtMed", m_txtMed);
 	builder->get_widget("txtMedication", m_txtMedication);
 	builder->get_widget("txtTreatment", m_txtTreatment);
-	
+	builder->get_widget("lblTitle", m_lblTitle);
+
 	Gtk::Box *pboxBP;
 	builder->get_widget("boxBloodPressure", pboxBP);
 
@@ -336,9 +342,20 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	m_txtMedication->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtMedication));
 	m_txtTreatment->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtTreatment));
 	m_treeAllergies->get_model()->signal_row_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_listAllergies_row_changed));
+	m_win->signal_key_press_event().connect(sigc::mem_fun(*this, &VisitsWindow::close_on_esc));
+	m_win->add_events(Gdk::KEY_PRESS_MASK);
 
 	m_win->set_transient_for(win);
 	m_win->set_modal(true);
+}
+
+bool VisitsWindow::close_on_esc(GdkEventKey* event)
+{
+	if (event->type == GDK_KEY_PRESS && event->keyval == GDK_KEY_Escape) {
+		m_win->hide();
+    	return true;
+  	}
+  		return false;
 }
 
 const Gtk::Window* VisitsWindow::get_window()
@@ -348,9 +365,6 @@ const Gtk::Window* VisitsWindow::get_window()
 
 void VisitsWindow::show()
 {
-	// TODO: remove gargage
-	set_to_garbage();
-//	clear();
 	get_db_data();
 	m_win->show_all();
 }
@@ -455,6 +469,30 @@ void VisitsWindow::hlpr_list_remove(int val)
 		
 }
 
+void VisitsWindow::set_window_type(VisitsWindow::WindowType type, guint32 visitID)
+{
+	m_type = type;
+	m_visitID = visitID;
+	if(m_type == WINDOW_TYPE_ADD) {
+		m_lblTitle->set_markup("<span size=\"xx-large\"><b><i>Nova Visita</i></b></span>");
+		m_win->set_title("Nova Visita");
+	}
+	else{
+		m_lblTitle->set_markup("<span size=\"xx-large\"><b><i>Editar Visita</i></b></span>");
+		m_win->set_title("Editar Visita");
+
+		m_win->set_page_complete(*m_win->get_nth_page(0), true);
+		m_win->set_page_complete(*m_win->get_nth_page(1), true);
+		m_win->set_page_complete(*m_win->get_nth_page(2), true);
+		m_win->set_page_complete(*m_win->get_nth_page(3), true);
+	}
+}
+
+int VisitsWindow::get_window_type()
+{
+	return m_type;	
+}
+
 void VisitsWindow::on_btnChangeState(VisitsWindow::BasicInfoButtons type)
 {
 	Button *btn;
@@ -476,8 +514,7 @@ void VisitsWindow::on_btnChangeState(VisitsWindow::BasicInfoButtons type)
 	} else
 		return;
 	
-	img= (Image*)btn->get_image();;
-	
+	img = (Image*)btn->get_image();;
 	switch(*val) {
 		case 0:
 			*val = 1;
@@ -490,6 +527,41 @@ void VisitsWindow::on_btnChangeState(VisitsWindow::BasicInfoButtons type)
 		default:
 			*val = 0;
 			img->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
+			break;
+	}
+}
+
+void VisitsWindow::set_button_state(VisitsWindow::BasicInfoButtons type)
+{
+	Button *btn;
+	Image *img;
+	int *val;
+
+	if(type == BasicInfoButtons::Hypertension) {
+		btn = m_btnHyper;
+		val = &m_hyper;
+	} else if(type == BasicInfoButtons::Cholesterol) {
+		btn = m_btnChol;
+		val = &m_chol;
+	} else if (type == BasicInfoButtons::Triglycerides) {
+		btn = m_btnTrigl;
+		val = &m_trigl;
+	} else if(type == BasicInfoButtons::Diabetes) {
+		btn = m_btnDiabetes;
+		val = &m_diabetes;
+	} else
+		return;
+	
+	img = (Image*)btn->get_image();;
+	switch(*val) {
+		case 0:
+			img->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
+			break;
+		case 1:
+			img->set_from_icon_name("go-up", ICON_SIZE_BUTTON);
+			break;
+		default:
+			img->set_from_icon_name("go-down", ICON_SIZE_BUTTON);
 			break;
 	}
 }
@@ -526,12 +598,19 @@ void VisitsWindow::on_txtDate_iconPress(Gtk::EntryIconPosition ipos, const GdkEv
 
 void VisitsWindow::on_apply()
 {
+	DBHandler::get_instance().open();
 	try {
-		DBHandler::get_instance().open();
-		DBHandler::get_instance().visit_insert(*((VisitInterface*)this));
-		DBHandler::get_instance().close();
+		if(m_type == WINDOW_TYPE_ADD) {
+			DBHandler::get_instance().visit_insert(*((VisitInterface*)this));
+		} else {
+			DBHandler::get_instance().visit_update(*((VisitInterface*)this));
+		}
+
 	} catch(exception& ex)
-	{ std::cout<< "Could not add the visit"<< std::endl; }
+	{
+		std::cout<< "Could not add the visit"<< std::endl;
+	}
+	DBHandler::get_instance().close();
 	m_win->hide();
 }
 
@@ -624,6 +703,11 @@ void VisitsWindow::clear()
 	hereditary = RefPtr<ListStore>::cast_dynamic(m_treeHereditary->get_model());
 	allergies->clear();
 	hereditary->clear();
+
+	m_win->set_page_complete(*m_win->get_nth_page(0), false);
+	m_win->set_page_complete(*m_win->get_nth_page(1), false);
+	m_win->set_page_complete(*m_win->get_nth_page(2), false);
+	m_win->set_page_complete(*m_win->get_nth_page(3), false);
 }
 
 
@@ -754,235 +838,240 @@ void VisitsWindow::on_widget_check_textview(TextView* textview)
  *           Interface methods           *
  ****************************************/
 
-int VisitsWindow::getPersonID()
+guint32 VisitsWindow::getPersonID() const
 {
 	return m_personID;
 }
 
-ustring VisitsWindow::getComplaint()
+guint32 VisitsWindow::getVisitID() const
+{
+	return m_visitID;
+}
+
+ustring VisitsWindow::getComplaint() const
 {
 	return m_txtComplaint->get_text();
 }
-ustring VisitsWindow::getAnamnesis()
+ustring VisitsWindow::getAnamnesis() const
 {
 	return m_txtAnamnesis->get_buffer()->get_text(false);
 }
-ustring VisitsWindow::getDate()
+ustring VisitsWindow::getDate() const
 {
 	Date date;
 	m_wincal->selected_date(date);
 	return date.format_string("%Y-%m-%d");
 }
-float VisitsWindow::getWeight()
+float VisitsWindow::getWeight() const
 {
 	return (float)m_txtWeight->get_value();
 }
 
-ustring VisitsWindow::getAppearance()
+ustring VisitsWindow::getAppearance() const
 {
 	return m_cmbAppearance->get_active_text();
 }
-ustring VisitsWindow::getMovement()
+ustring VisitsWindow::getMovement() const
 {
 	return m_cmbMovement->get_active_text();
 }
-ustring VisitsWindow::getVoice()
+ustring VisitsWindow::getVoice() const
 {
 	return m_txtVoice->get_text();
 }
-ustring VisitsWindow::getSmell()
+ustring VisitsWindow::getSmell() const
 {
 	return m_txtSmell->get_text();
 }
 
-int VisitsWindow::getHypertension()
+int VisitsWindow::getHypertension() const
 {
 	return m_hyper;
 }
-int VisitsWindow::getCholesterol()
+int VisitsWindow::getCholesterol() const
 {
 	return m_chol;
 }
-int VisitsWindow::getTriglyceride()
+int VisitsWindow::getTriglyceride() const
 {
 	return m_trigl;
 }
-int VisitsWindow::getDiabetes()
+int VisitsWindow::getDiabetes() const
 {
 	return m_diabetes;
 }
 
-ustring VisitsWindow::getSleepiness()
+ustring VisitsWindow::getSleepiness() const
 {
 	return m_txtSleepiness->get_text();
 }
-ustring VisitsWindow::getTranspiration()
+ustring VisitsWindow::getTranspiration() const
 {
 	return m_txtTranspiration->get_text();
 }
-ustring VisitsWindow::getDehydration()
+ustring VisitsWindow::getDehydration() const
 {
 	return m_txtDehydration->get_text();
 }
 
-int VisitsWindow::isAnxiety()
+int VisitsWindow::isAnxiety() const
 {
 	return m_chkAnxiety->get_active();
 }
-int VisitsWindow::isIrrt()
+int VisitsWindow::isIrrt() const
 {
 	return m_chkIrrt->get_active();
 }
-int VisitsWindow::isFrustration()
+int VisitsWindow::isFrustration() const
 {
 	return m_chkFrustration->get_active();
 }
-int VisitsWindow::isCry()
+int VisitsWindow::isCry() const
 {
 	return m_chkCry->get_active();
 }
-int VisitsWindow::isVerm()
+int VisitsWindow::isVerm() const
 {
 	return m_chkVerm->get_active();
 }
-int VisitsWindow::isVed()
+int VisitsWindow::isVed() const
 {
 	return m_chkVed->get_active();
 }
-int VisitsWindow::isBrad()
+int VisitsWindow::isBrad() const
 {
 	return m_chkBrad->get_active();
 }
-int VisitsWindow::isPrt()
+int VisitsWindow::isPrt() const
 {
 	return m_chkPrt->get_active();
 }
-int VisitsWindow::isAml()
+int VisitsWindow::isAml() const
 {
 	return m_chkAml->get_active();
 }
-int VisitsWindow::isAlg()
+int VisitsWindow::isAlg() const
 {
 	return m_chkAlg->get_active();
 }
-int VisitsWindow::isIrritable()
+int VisitsWindow::isIrritable() const
 {
 	return m_chkIrritable->get_active();
 }
-int VisitsWindow::isSad()
+int VisitsWindow::isSad() const
 {
 	return m_chkSad->get_active();
 }
-int VisitsWindow::isMed()
+int VisitsWindow::isMed() const
 {
 	return m_chkMed->get_active();
 }
-int VisitsWindow::isMelan()
+int VisitsWindow::isMelan() const
 {
 	return m_chkMelan->get_active();
 }
-ustring VisitsWindow::getHearing()
+ustring VisitsWindow::getHearing() const
 {
 	return m_cmbHearing->get_active_text();
 }
-ustring VisitsWindow::getThroat()
+ustring VisitsWindow::getThroat() const
 {
 	return m_cmbThroat->get_active_text();
 }
-ustring VisitsWindow::getScent()
+ustring VisitsWindow::getScent() const
 {
 	return m_cmbScent->get_active_text();
 }
-ustring VisitsWindow::getVision()
+ustring VisitsWindow::getVision() const
 {
 	return m_cmbVision->get_active_text();
 }
-ustring VisitsWindow::getFatigue()
+ustring VisitsWindow::getFatigue() const
 {
 	return m_txtFatigue->get_text();
 }
-ustring VisitsWindow::getSexualActivity()
+ustring VisitsWindow::getSexualActivity() const
 {
 	return m_txtSexualActivity->get_text();
 }
-ustring VisitsWindow::getBody()
+ustring VisitsWindow::getBody() const
 {
 	return m_txtBody->get_text();
 }
-ustring VisitsWindow::getAbdomen()
+ustring VisitsWindow::getAbdomen() const
 {
 	return m_txtAbdomen->get_text();
 }
-ustring VisitsWindow::getHead()
+ustring VisitsWindow::getHead() const
 {
 	return m_txtHead->get_text();
 }
-ustring VisitsWindow::getCirculation()
+ustring VisitsWindow::getCirculation() const
 {
 	return m_txtCirculation->get_text();
 }
-ustring  VisitsWindow::getEatingHabits()
+ustring  VisitsWindow::getEatingHabits() const
 {
 	return m_txtEatingHabits->get_text();
 }
 
-ustring VisitsWindow::getMenstruation()
+ustring VisitsWindow::getMenstruation() const
 {
 	return m_txtMenstruation->get_text();
 }
-ustring VisitsWindow::getPregnancy()
+ustring VisitsWindow::getPregnancy() const
 {
 	return m_txtPregnancy->get_text();
 }
-ustring VisitsWindow::getPain()
+ustring VisitsWindow::getPain() const
 {
 	return m_cmbPain->get_active_text();
 }
-ustring VisitsWindow::getPainSince()
+ustring VisitsWindow::getPainSince() const
 {
 	return m_txtPainSince->get_text();
 }
-ustring VisitsWindow::getPainObs()
+ustring VisitsWindow::getPainObs() const
 {
 	return m_txtPainObs->get_text();
 }
-ustring VisitsWindow::getSurgery()
+ustring VisitsWindow::getSurgery() const
 {
 	return m_txtSurgery->get_text();
 }
-ustring VisitsWindow::getPreviousTreatment()
+ustring VisitsWindow::getPreviousTreatment() const
 {
 	return m_txtPreviousTreatment->get_text();
 }
-bool VisitsWindow::getProstheses()
+bool VisitsWindow::getProstheses() const
 {
 	return m_chkProstheses->get_active();
 }
-bool VisitsWindow::getWeightBool()
+bool VisitsWindow::getWeightBool() const
 {
 	return m_chkWeight->get_active();
 }
-ustring VisitsWindow::getUrine()
+ustring VisitsWindow::getUrine() const
 {
 	return m_txtUrine->get_text();
 }
-ustring VisitsWindow::getFaeces()
+ustring VisitsWindow::getFaeces() const
 {
 	return m_txtFaeces->get_text();
 }
-ustring VisitsWindow::getTongue()
+ustring VisitsWindow::getTongue() const
 {
 	return m_txtTongue->get_text();
 }
-ustring VisitsWindow::getPulseD()
+ustring VisitsWindow::getPulseD() const
 {
 	return m_txtPulseD->get_text();
 }
-ustring VisitsWindow::getPulseE()
+ustring VisitsWindow::getPulseE() const
 {
 	return m_txtPulseE->get_text();
 }
-gint16 VisitsWindow::getBPMax()
+gint16 VisitsWindow::getBPMax() const
 {
 	gint16 val;
 	std::stringstream ss;
@@ -990,7 +1079,7 @@ gint16 VisitsWindow::getBPMax()
 	ss>>val;
 	return val;
 }
-gint16 VisitsWindow::getBPMin()
+gint16 VisitsWindow::getBPMin() const
 {
 	gint16 val;
 	std::stringstream ss;
@@ -998,7 +1087,7 @@ gint16 VisitsWindow::getBPMin()
 	ss>>val;
 	return val;
 }
-gint16 VisitsWindow::getBPM()
+gint16 VisitsWindow::getBPM() const
 {
 	gint16 val;
 	std::stringstream ss;
@@ -1006,44 +1095,44 @@ gint16 VisitsWindow::getBPM()
 	ss>>val;
 	return val;
 }
-ustring VisitsWindow::getApal()
+ustring VisitsWindow::getApal() const
 {
 	return m_txtApal->get_text();
 }
-ustring VisitsWindow::getExams()
+ustring VisitsWindow::getExams() const
 {
 	return m_txtExams->get_text();
 }
-ustring VisitsWindow::getClinicalAnalysis()
+ustring VisitsWindow::getClinicalAnalysis() const
 {
 	return m_txtClinicalAnalysis->get_text();
 }
-ustring VisitsWindow::getColor()
+ustring VisitsWindow::getColor() const
 {
 	return m_txtColor->get_text();
 }
-ustring VisitsWindow::getEscle()
+ustring VisitsWindow::getEscle() const
 {
 	return m_txtEscle->get_text();
 }
-ustring VisitsWindow::getObservations()
+ustring VisitsWindow::getObservations() const
 {
 	return m_txtObservations->get_text();
 }
-ustring VisitsWindow::getMed()
+ustring VisitsWindow::getMed() const
 {
 	return m_txtMed->get_text();
 }
-ustring VisitsWindow::getMedication()
+ustring VisitsWindow::getMedication() const
 {
 	return m_txtMedication->get_buffer()->get_text(false);
 }
-ustring VisitsWindow::getTreatment()
+ustring VisitsWindow::getTreatment() const
 {
 	return m_txtTreatment->get_buffer()->get_text(false);
 }
 
-TreeModel::Children VisitsWindow::getAllergies()
+TreeModel::Children VisitsWindow::getAllergies() const
 {
 	return m_treeAllergies->get_model()->children();
 }
@@ -1051,6 +1140,12 @@ TreeModel::Children VisitsWindow::getAllergies()
 /***********************************
  *             Setters             *
 ***********************************/
+
+void VisitsWindow::setVisitID(const guint32 val)
+{
+	m_visitID = val;
+}
+
 void VisitsWindow::setComplaint(const Glib::ustring& val)
 {
 	m_txtComplaint->set_text(val);
@@ -1086,22 +1181,22 @@ void VisitsWindow::setSmell(const Glib::ustring& val)
 void VisitsWindow::setHypertension(int val)
 {
 	m_hyper = val;
-	on_btnChangeState(BasicInfoButtons::Hypertension);
+	set_button_state(BasicInfoButtons::Hypertension);
 }
 void VisitsWindow::setCholesterol(int val)
 {
 	m_chol = val;
-	on_btnChangeState(BasicInfoButtons::Cholesterol);
+	set_button_state(BasicInfoButtons::Cholesterol);
 }
 void VisitsWindow::setTriglyceride(int val)
 {
 	m_trigl = val;
-	on_btnChangeState(BasicInfoButtons::Triglycerides);
+	set_button_state(BasicInfoButtons::Triglycerides);
 }
 void VisitsWindow::setDiabetes(int val)
 {
 	m_diabetes = val;
-	on_btnChangeState(BasicInfoButtons::Diabetes);
+	set_button_state(BasicInfoButtons::Diabetes);
 }
 void VisitsWindow::setSleepiness(const Glib::ustring& val)
 {

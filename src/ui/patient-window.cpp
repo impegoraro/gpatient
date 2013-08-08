@@ -266,7 +266,9 @@ PatientWindow::PatientWindow(Gtk::Window& parent, const std::string& title, Pati
 	m_txtBirthday.signal_icon_press().connect(sigc::mem_fun(*this, &PatientWindow::on_txtBirthday_iconPress));
 	m_btnCancel.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::activate_close), true));
 	m_btnAccept.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &PatientWindow::activate_close), false));
-
+	signal_key_press_event().connect(sigc::mem_fun(*this, &PatientWindow::close_on_esc));
+	add_events(Gdk::KEY_PRESS_MASK);
+	
 	set_skip_pager_hint();
 	set_skip_taskbar_hint();
 
@@ -288,6 +290,15 @@ PatientWindow::~PatientWindow()
 guint32 PatientWindow::get_id(void) const
 {
 	return m_id;
+}
+
+bool PatientWindow::close_on_esc(GdkEventKey* event)
+{
+	if (event->type == GDK_KEY_PRESS && event->keyval == GDK_KEY_Escape) {
+		hide();
+    	return true;
+  	}
+  		return false;
 }
 
 void PatientWindow::set_person(const Person& p)
