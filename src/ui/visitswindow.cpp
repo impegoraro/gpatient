@@ -28,10 +28,85 @@ gestao-herb is free software: you can redistribute it and/or modify it
 #include "ui/widgets/numeric-entry.h"
 #include "db/dbhandler.h"
 #include "visitswindow.h"
+#include "db/list-status.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace Glib;
+
+void VisitsWindow::set_to_garbage()
+{
+	DateTime tm = DateTime::create_now_utc();
+	RefPtr<ListStore> allergies, hereditary;
+
+	m_txtComplaint->set_text("fdsfsdgfgfdhgfdhgfdhfd");
+	m_txtDate->set_text(tm.format("%Y-%m-%d"));
+	m_txtSleepiness->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtTranspiration->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtDehydration->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtEatingHabits->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtVoice->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtSmell->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtFatigue->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtSexualActivity->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtBody->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtAbdomen->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtHead->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtCirculation->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtMenstruation->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtPregnancy->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtPainSince->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtPainObs->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtSurgery->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtPreviousTreatment->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtUrine->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtFaeces->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtTongue->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtPulseD->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtPulseE->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtBPMax->set_text("103");
+	m_txtBPMin->set_text("71");
+	m_txtBPM->set_text("111");
+	m_txtApal->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtExams->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtClinicalAnalysis->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtColor->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtEscle->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtObservations->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+	m_txtMed->set_text("sadadasdsadsadsad bvfkjhshkjfsjlk");
+
+	m_txtAnamnesis->get_buffer()->set_text("hhjlkasjhfdshjgsskbgkfdmhbkd lkmlk");
+	m_txtMedication->get_buffer()->set_text("hhjlkasjhfdshjgsskbgkfdmhbkd lkmlk");
+	m_txtTreatment->get_buffer()->set_text("hhjlkasjhfdshjgsskbgkfdmhbkd lkmlk");
+
+	m_cmbAppearance->set_active(0);
+	m_cmbMovement->set_active(0);
+	m_cmbHearing->set_active(0);
+	m_cmbThroat->set_active(0);
+	m_cmbScent->set_active(0);
+	m_cmbVision->set_active(0);
+	m_cmbPain->set_active(0);
+
+	m_txtWeight->set_value(0.0);
+
+	m_chkAnxiety->set_active(0);
+	m_chkIrrt->set_active(0);
+	m_chkFrustration->set_active(0);
+	m_chkCry->set_active(1);
+	m_chkVerm->set_active(0);
+	m_chkVed->set_active(1);
+	m_chkBrad->set_active(0);
+	m_chkPrt->set_active(1);
+	m_chkAml->set_active(1);
+	m_chkAlg->set_active(0);
+	m_chkIrritable->set_active(0);
+	m_chkSad->set_active(0);
+	m_chkMed->set_active(0);
+	m_chkMelan->set_active(0);
+	m_chkProstheses->set_active(0);
+	m_chkWeight->set_active(0);
+
+}
 
 VisitsWindow::VisitsWindow(Window& win, int personID)
 	: m_hyper(0), m_chol(0), m_trigl(0), m_diabetes(0), m_personID(personID)
@@ -40,15 +115,15 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	TreeViewColumn *col;
 
 	builder->get_widget("VisitsWindow", m_win);
-	builder->get_widget("tbAlergiesAdd", m_tbAlergiesAdd);
+	builder->get_widget("tbAllergiesAdd", m_tbAllergiesAdd);
 	builder->get_widget("txtComplaint", m_txtComplaint);
 	builder->get_widget("txtAnamnesis", m_txtAnamnesis);
 	builder->get_widget("txtSleepiness", m_txtSleepiness);
 	builder->get_widget("txtWeight", m_txtWeight);
-	builder->get_widget("tbAlergiesRemove", m_tbAlergiesRemove);
+	builder->get_widget("tbAllergiesRemove", m_tbAllergiesRemove);
 	builder->get_widget("tbHereditaryAdd", m_tbHereditaryAdd);
 	builder->get_widget("tbHereditaryRemove", m_tbHereditaryRemove);
-	builder->get_widget("treeAlergies", m_treeAlergies);
+	builder->get_widget("treeAllergies", m_treeAllergies);
 	builder->get_widget("treeHereditary", m_treeHereditary);
 	builder->get_widget("btnHypertension", m_btnHyper);
 	builder->get_widget("btnChol", m_btnChol);
@@ -61,7 +136,7 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	builder->get_widget("chkCry", m_chkCry);
 	builder->get_widget("chkVerm", m_chkVerm);
 	builder->get_widget("chkVed", m_chkVed);
-	builder->get_widget("chkBra", m_chkBra);
+	builder->get_widget("chkBrad", m_chkBrad);
 	builder->get_widget("chkPrt", m_chkPrt);
 	builder->get_widget("chkAml", m_chkAml);
 	builder->get_widget("chkAlg", m_chkAlg);
@@ -172,20 +247,32 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	
 
 	m_wincal = new Widgets::CalendarWindow(*m_win, *((Widget*)m_txtDate));
-
-	/* Tree Alergies configuration */
-	m_treeAlergies->set_model(ListStore::create(m_la));
-	col = m_treeAlergies->get_column(m_treeAlergies->append_column_numeric("ID", m_la.m_col_id, "%d")-1);
+	ListAllergies la;
+	/* Tree allergies configuration */
+	m_treeAllergies->set_model(ListStore::create(la));
+	col = m_treeAllergies->get_column(m_treeAllergies->append_column_numeric("ID", la.m_col_id, "%u")-1);
 	col->set_visible(false);
-	col = m_treeAlergies->get_column(m_treeAlergies->append_column_editable("Nome", m_la.m_col_name)-1);
-	
+	col = m_treeAllergies->get_column(m_treeAllergies->append_column_editable("Nome", la.m_col_name)-1);
+	col->set_resizable();
+	col = m_treeAllergies->get_column(m_treeAllergies->append_column_editable("Observações", la.m_col_obs)-1);
+	col->set_resizable();
+	col = m_treeAllergies->get_column(m_treeAllergies->append_column_numeric("Status", la.m_col_status,"%u")-1);
+	col->set_visible(false);
+
+
 	/* Tree Hereditary Diseases configuration */
 	m_treeHereditary->set_model(ListStore::create(m_lhd));
-	col = m_treeHereditary->get_column(m_treeHereditary->append_column_numeric("ID", m_lhd.m_col_id, "%d")-1);
+	col = m_treeHereditary->get_column(m_treeHereditary->append_column_numeric("ID", m_lhd.m_col_id, "%u")-1);
 	col->set_visible(false);
 	col = m_treeHereditary->get_column(m_treeHereditary->append_column_editable("Parente", m_lhd.m_col_parent)-1);
+	col->set_resizable();
 	col = m_treeHereditary->get_column(m_treeHereditary->append_column_editable("Nome", m_lhd.m_col_name)-1);
-	
+	col->set_resizable();
+	col = m_treeHereditary->get_column(m_treeHereditary->append_column_editable("Observações", m_lhd.m_col_obs)-1);
+	col->set_resizable();
+	col = m_treeHereditary->get_column(m_treeHereditary->append_column_numeric("Status", m_lhd.m_col_status, "%u")-1);
+	col->set_visible(false);
+
 	((Image*)m_btnHyper->get_image())->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
 	((Image*)m_btnChol->get_image())->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
 	((Image*)m_btnTrigl->get_image())->set_from_icon_name("list-remove", ICON_SIZE_BUTTON);
@@ -193,12 +280,13 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	m_txtDate->set_icon_from_icon_name("x-office-calendar", ENTRY_ICON_SECONDARY);
 	m_txtDate->set_icon_tooltip_text("Escolher data da consulta", ENTRY_ICON_SECONDARY);
 
+	m_win->signal_prepare().connect(sigc::mem_fun(*this, &VisitsWindow::next_page));
 	m_win->signal_cancel().connect(sigc::mem_fun(*m_win, &Widget::hide));
 	m_win->signal_delete_event().connect(sigc::mem_fun(*this, &VisitsWindow::on_window_closing));
-	m_tbAlergiesAdd->signal_clicked().connect(sigc::mem_fun(*this, &VisitsWindow::hlpr_list_alergies_add));
-	m_tbAlergiesRemove->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::hlpr_list_remove), m_treeAlergies));
+	m_tbAllergiesAdd->signal_clicked().connect(sigc::mem_fun(*this, &VisitsWindow::hlpr_list_allergies_add));
+	m_tbAllergiesRemove->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::hlpr_list_remove), 0));
 	m_tbHereditaryAdd->signal_clicked().connect(sigc::mem_fun(*this, &VisitsWindow::hlpr_list_hereditary_add));
-	m_tbHereditaryRemove->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::hlpr_list_remove), m_treeHereditary));
+	m_tbHereditaryRemove->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::hlpr_list_remove), 1));
 	m_btnHyper->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_btnChangeState), BasicInfoButtons::Hypertension));
 	m_btnChol->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_btnChangeState), BasicInfoButtons::Cholesterol));
 	m_btnTrigl->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_btnChangeState), BasicInfoButtons::Triglycerides));
@@ -247,6 +335,7 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	m_txtMed->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtMed));
 	m_txtMedication->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtMedication));
 	m_txtTreatment->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtTreatment));
+	m_treeAllergies->get_model()->signal_row_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_listAllergies_row_changed));
 
 	m_win->set_transient_for(win);
 	m_win->set_modal(true);
@@ -259,8 +348,36 @@ const Gtk::Window* VisitsWindow::get_window()
 
 void VisitsWindow::show()
 {
-	clear();
+	// TODO: remove gargage
+	set_to_garbage();
+//	clear();
+	get_db_data();
 	m_win->show_all();
+}
+
+void VisitsWindow::get_db_data()
+{
+	DBHandler db = DBHandler::get_instance();
+	sigc::connection conn;
+	Date date;
+	auto allergies = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
+	auto hereditary = RefPtr<ListStore>::cast_dynamic(m_treeHereditary->get_model());	
+	m_wincal->selected_date(date);
+
+	allergies->clear();
+	hereditary->clear();
+
+	//conn = db.signal_allergies().connect(sigc::mem_fun(*this, &VisitsWindow::hlpr_append_allergy));
+	db.open();
+ 	//db.get_person_allergies(m_personID, date, sigc::mem_fun(*this, &VisitsWindow::hlpr_append_allergy));
+	//conn.disconnect();
+
+	db.close();
+}
+
+void VisitsWindow::next_page(Widget* page)
+{
+	get_db_data();
 }
 
 VisitsWindow::~VisitsWindow()
@@ -276,16 +393,27 @@ bool VisitsWindow::on_window_closing(GdkEventAny* event)
 	return false;
 }
 
-void VisitsWindow::hlpr_list_alergies_add()
+void VisitsWindow::hlpr_list_allergies_add()
 {
-	RefPtr<ListStore> model = RefPtr<ListStore>::cast_dynamic(m_treeAlergies->get_model());
+	RefPtr<ListStore> model = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
+	ListAllergies la;
 	TreeIter iter = model->append();
 	TreeModel::Row row = *iter;
 
-	row[m_la.m_col_id] = -1;
-	row[m_la.m_col_name] = "<Escreva o nome da alergia>";
-	m_treeAlergies->get_selection()->select(iter);
-	m_treeAlergies->activate();
+	row[la.m_col_status] = 3;
+	row[la.m_col_id] = -1;
+	row[la.m_col_name] = "<Escreva o nome da alergia>";
+	m_treeAllergies->get_selection()->select(iter);
+	m_treeAllergies->activate();
+}
+
+void VisitsWindow::on_listAllergies_row_changed(const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter)
+{
+	TreeModel::Row row = *iter;
+	ListAllergies la;
+	if(row[la.m_col_status] == LIST_STATUS_MODIFIED || row[la.m_col_status] == LIST_STATUS_NORMAL) {
+		row[la.m_col_status] = LIST_STATUS_MODIFIED;
+	}
 }
 
 void VisitsWindow::hlpr_list_hereditary_add()
@@ -300,14 +428,30 @@ void VisitsWindow::hlpr_list_hereditary_add()
 	m_treeHereditary->get_selection()->select(iter);
 }
 
-void VisitsWindow::hlpr_list_remove(TreeView *tree)
+void VisitsWindow::hlpr_list_remove(int val)
 {
-	RefPtr<ListStore> model = RefPtr<ListStore>::cast_dynamic(tree->get_model());
-	TreeIter iter = tree->get_selection()->get_selected();
-	TreeModel::Row row = *iter;
+	if(val == 0) {
+		// Allergies' list
+		ListAllergies la;
+		RefPtr<ListStore> model = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
+		TreeIter iter = m_treeAllergies->get_selection()->get_selected();
+		TreeModel::Row row = *iter;
 
-	if(model->iter_is_valid(iter))
-		model->erase(iter);
+		if(model->iter_is_valid(iter)) 
+			if(row[la.m_col_status] == LIST_STATUS_ADDED)
+				model->erase(iter);
+			else
+				row[la.m_col_status] = LIST_STATUS_REMOVED;
+		
+	} else {
+		// Hereditary deceases' list
+		/*RefPtr<ListStore> model = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
+		TreeIter iter = m_treeAllergies->get_selection()->get_selected();
+		TreeModel::Row row = *iter;
+
+		if(model->iter_is_valid(iter))
+			row[m_la.m_col_status] = LIST_STATUS_REMOVED;*/
+	}
 		
 }
 
@@ -349,6 +493,23 @@ void VisitsWindow::on_btnChangeState(VisitsWindow::BasicInfoButtons type)
 			break;
 	}
 }
+
+void VisitsWindow::hlpr_append_allergy(const Allergy& allergy, const Glib::Date& date)
+{
+	RefPtr<ListStore> model = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
+	TreeIter iter = model->append();
+	VisitsWindow::ListAllergies la;
+	if(iter) {
+		TreeModel::Row row = *iter;
+
+		row[la.m_col_id] = allergy.m_id;
+		row[la.m_col_name] = allergy.m_name;
+		row[la.m_col_obs] = allergy.m_obs;
+		row[la.m_col_status] = allergy.m_status;
+	}
+}
+
+
 
 void VisitsWindow::setPersonID(int personID)
 {
@@ -393,7 +554,7 @@ void VisitsWindow::clear()
 	RefPtr<ListStore> allergies, hereditary;
 
 	m_txtComplaint->set_text("");
-	m_txtDate->set_text(tm.format("%d/%m/%Y"));
+	m_txtDate->set_text(tm.format("%Y-%m-%d"));
 	m_txtSleepiness->set_text("");
 	m_txtTranspiration->set_text("");
 	m_txtDehydration->set_text("");
@@ -448,7 +609,7 @@ void VisitsWindow::clear()
 	m_chkCry->set_active(0);
 	m_chkVerm->set_active(0);
 	m_chkVed->set_active(0);
-	m_chkBra->set_active(0);
+	m_chkBrad->set_active(0);
 	m_chkPrt->set_active(0);
 	m_chkAml->set_active(0);
 	m_chkAlg->set_active(0);
@@ -459,7 +620,7 @@ void VisitsWindow::clear()
 	m_chkProstheses->set_active(0);
 	m_chkWeight->set_active(0);
 
-	allergies = RefPtr<ListStore>::cast_dynamic(m_treeAlergies->get_model());
+	allergies = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
 	hereditary = RefPtr<ListStore>::cast_dynamic(m_treeHereditary->get_model());
 	allergies->clear();
 	hereditary->clear();
@@ -589,8 +750,6 @@ void VisitsWindow::on_widget_check_textview(TextView* textview)
 }
 
 
-
-
 /*****************************************
  *           Interface methods           *
  ****************************************/
@@ -610,7 +769,9 @@ ustring VisitsWindow::getAnamnesis()
 }
 ustring VisitsWindow::getDate()
 {
-	return m_txtDate->get_text();
+	Date date;
+	m_wincal->selected_date(date);
+	return date.format_string("%Y-%m-%d");
 }
 float VisitsWindow::getWeight()
 {
@@ -690,7 +851,7 @@ int VisitsWindow::isVed()
 }
 int VisitsWindow::isBrad()
 {
-	return m_chkBra->get_active();
+	return m_chkBrad->get_active();
 }
 int VisitsWindow::isPrt()
 {
@@ -882,199 +1043,274 @@ ustring VisitsWindow::getTreatment()
 	return m_txtTreatment->get_buffer()->get_text(false);
 }
 
+TreeModel::Children VisitsWindow::getAllergies()
+{
+	return m_treeAllergies->get_model()->children();
+}
+
 /***********************************
  *             Setters             *
 ***********************************/
 void VisitsWindow::setComplaint(const Glib::ustring& val)
 {
+	m_txtComplaint->set_text(val);
 }
 void VisitsWindow::setAnamnesis(const Glib::ustring& val)
 {
+	m_txtAnamnesis->get_buffer()->set_text(val);
 }
 void VisitsWindow::setDate(const Glib::ustring& val)
 {
+	m_txtDate->set_text(val);
 }
 void VisitsWindow::setWeight(float val)
 {
+	m_txtWeight->set_value(val);
 }
 void VisitsWindow::setAppearance(const Glib::ustring& val)
 {
+	//m_cmbAppearance->get_entry()->set_text(val);
 }
 void VisitsWindow::setMovement(const Glib::ustring& val)
 {
+	//m_cmbMovement->get_entry()->set_text(val);
 }
 void VisitsWindow::setVoice(const Glib::ustring& val)
 {
+	m_txtVoice->set_text(val);
 }
 void VisitsWindow::setSmell(const Glib::ustring& val)
 {
+	m_txtSmell->set_text(val);
 }
 void VisitsWindow::setHypertension(int val)
 {
+	m_hyper = val;
+	on_btnChangeState(BasicInfoButtons::Hypertension);
 }
 void VisitsWindow::setCholesterol(int val)
 {
+	m_chol = val;
+	on_btnChangeState(BasicInfoButtons::Cholesterol);
 }
 void VisitsWindow::setTriglyceride(int val)
 {
+	m_trigl = val;
+	on_btnChangeState(BasicInfoButtons::Triglycerides);
 }
 void VisitsWindow::setDiabetes(int val)
 {
+	m_diabetes = val;
+	on_btnChangeState(BasicInfoButtons::Diabetes);
 }
 void VisitsWindow::setSleepiness(const Glib::ustring& val)
 {
+	m_txtSleepiness->set_text(val);
 }
 void VisitsWindow::setTranspiration(const Glib::ustring& val)
 {
+	m_txtTranspiration->set_text(val);
 }
 void VisitsWindow::setDehydration(const Glib::ustring& val)
 {
+	m_txtDehydration->set_text(val);
 }
 void VisitsWindow::setAnxiety(int val)
 {
+	m_chkAnxiety->set_active(val);
 }
 void VisitsWindow::setIrrt(int val)
 {
+	m_chkIrrt->set_active(val);
 }
 void VisitsWindow::setFrustration(int val)
 {
+	m_chkFrustration->set_active(val);
 }
 void VisitsWindow::setCry(int val)
 {
+	m_chkCry->set_active(val);
 }
 void VisitsWindow::setVerm(int val)
 {
+	m_chkVerm->set_active(val);
 }
 void VisitsWindow::setVed(int val)
 {
+	m_chkVed->set_active(val);
 }
 void VisitsWindow::setBrad(int val)
 {
+	m_chkBrad->set_active(val);
 }
 void VisitsWindow::setPrt(int val)
 {
+	m_chkPrt->set_active(val);
 }
 void VisitsWindow::setAml(int val)
 {
+	m_chkAml->set_active(val);
 }
 void VisitsWindow::setAlg(int val)
 {
+	m_chkAlg->set_active(val);
 }
 void VisitsWindow::setIrritable(int val)
 {
+	m_chkIrritable->set_active(val);
 }
 void VisitsWindow::setSad(int val)
 {
+	m_chkSad->set_active(val);
 }
 void VisitsWindow::setMed(int val)
 {
+	m_chkMed->set_active(val);
 }
 void VisitsWindow::setMelan(int val)
 {
+	m_chkMelan->set_active(val);
 }
 void VisitsWindow::setHearing(const Glib::ustring& val)
 {
+	m_cmbHearing->get_entry()->set_text(val);
 }
 void VisitsWindow::setThroat(const Glib::ustring& val)
 {
+	m_cmbThroat->get_entry()->set_text(val);
 }
 void VisitsWindow::setScent(const Glib::ustring& val)
 {
+	m_cmbScent->get_entry()->set_text(val);
 }
 void VisitsWindow::setVision(const Glib::ustring& val)
 {
+	m_cmbVision->get_entry()->set_text(val);
 }
 void VisitsWindow::setFatigue(const Glib::ustring& val)
 {
+	m_txtFatigue->set_text(val);
 }
 void VisitsWindow::setSexualActivity(const Glib::ustring& val)
 {
+	m_txtSexualActivity->set_text(val);
 }
 void VisitsWindow::setBody(const Glib::ustring& val)
 {
+	m_txtBody->set_text(val);
 }
 void VisitsWindow::setAbdomen(const Glib::ustring& val)
 {
+	m_txtAbdomen->set_text(val);
 }
 void VisitsWindow::setHead(const Glib::ustring& val)
 {
+	m_txtHead->set_text(val);
 }
 void VisitsWindow::setCirculation(const Glib::ustring& val)
 {
+	m_txtCirculation->set_text(val);
 }
 void VisitsWindow::setEatingHabits(const Glib::ustring& val)
 {
+	m_txtEatingHabits->set_text(val);
 }
 
 void VisitsWindow::setMenstruation(const Glib::ustring& val)
 {
+	m_txtMenstruation->set_text(val);
 }
 void VisitsWindow::setPregnancy(const Glib::ustring& val)
 {
+	m_txtPregnancy->set_text(val);
 }
 void VisitsWindow::setPain(const Glib::ustring& val)
 {
+	//m_txtPain->set_text(val);
 }
 void VisitsWindow::setPainSince(const Glib::ustring& val)
 {
+	m_txtPainSince->set_text(val);
 }
 void VisitsWindow::setPainObs(const Glib::ustring& val)
 {
+	m_txtPainObs->set_text(val);
 }
 void VisitsWindow::setSurgery(const Glib::ustring& val)
 {
+	m_txtSurgery->set_text(val);
 }
 void VisitsWindow::setPreviousTreatment(const Glib::ustring& val)
 {
+	m_txtPreviousTreatment->set_text(val);
 }
 void VisitsWindow::setProstheses(bool val)
 {
+	m_chkProstheses->set_active(val);
 }
 void VisitsWindow::setWeightBool(bool val)
 {
+	m_chkWeight->set_active(val);
 }
 void VisitsWindow::setUrine(const Glib::ustring& val)
 {
+	m_txtUrine->set_text(val);
 }
 void VisitsWindow::setFaeces(const Glib::ustring& val)
 {
+	m_txtFaeces->set_text(val);
 }
 void VisitsWindow::setTongue(const Glib::ustring& val)
 {
+	m_txtTongue->set_text(val);
 }
 void VisitsWindow::setPulseD(const Glib::ustring& val)
 {
+	m_txtPulseD->set_text(val);
 }
 void VisitsWindow::setPulseE(const Glib::ustring& val)
 {
+	m_txtPulseE->set_text(val);
 }
 void VisitsWindow::setBloodPressure(gint16 high, gint16 low, gint16 bpm)
 {
+	m_txtBPMax->set_text(to_string(high));
+	m_txtBPMin->set_text(to_string(low));
+	m_txtBPM->set_text(to_string(bpm));
 }
 void VisitsWindow::setApal(const Glib::ustring& val)
 {
+	m_txtApal->set_text(val);
 }
 void VisitsWindow::setExams(const Glib::ustring& val)
 {
+	m_txtExams->set_text(val);
 }
 void VisitsWindow::setClinicalAnalysis(const Glib::ustring& val)
 {
+	m_txtClinicalAnalysis->set_text(val);
 }
 void VisitsWindow::setColor(const Glib::ustring& val)
 {
+	m_txtColor->set_text(val);
 }
 void VisitsWindow::setEscle(const Glib::ustring& val)
 {
+	m_txtEscle->set_text(val);
 }
 void VisitsWindow::setObservations(const Glib::ustring& val)
 {
+	m_txtObservations->set_text(val);
 }
 void VisitsWindow::setMed(const Glib::ustring& val)
 {
+	m_txtMed->set_text(val);
 }
 void VisitsWindow::setMedication(const Glib::ustring& val)
 {
+	m_txtMedication->get_buffer()->set_text(val);
 }
 void VisitsWindow::setTreatment(const Glib::ustring& val)
 {
+	m_txtTreatment->get_buffer()->set_text(val);
 }

@@ -37,7 +37,7 @@ Date Util::parse_date(const std::string& strdate)
 
 	if(strdate.length() > 4 && strdate.length() <= 10) {
 		std::string str = Glib::locale_from_utf8(strdate);
-		if(sscanf(str.c_str(), "%hhu/%hu/%hu", &day, &month, &year)==0)
+		if(sscanf(str.c_str(), "%hu-%hu-%hhu", &year, &month, &day)==0)
 			printf("Warning Util::parse_date...\n");
 	}
 	return Date(day, helper_get_month(month), year);

@@ -17,6 +17,9 @@
 
 #include "util.h"
 #include "dbhandler.h"
+#include "list-status.h"
+ #include "allergy.h"
+#include "../ui/visitswindow.h"
 #include "../exceptions/sql-connection.h"
 
 using namespace Glib;
@@ -137,7 +140,7 @@ int DBHandler::person_insert(const Person& p) const
 			sqlite3_bind_text(stmt, 5, p.get_locality().c_str(), p.get_locality().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 6, p.get_sex() ? 1:0);
 			sqlite3_bind_double(stmt, 7, p.get_height());
-			sqlite3_bind_text(stmt, 8, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, p.get_birthday().format_string((ustring)"%Y-%m-%d").c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 9, p.get_birthplace().c_str(), p.get_birthplace().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 10, p.get_nationality().c_str(), p.get_nationality().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 11, p.get_profession().c_str(), p.get_profession().bytes(), SQLITE_TRANSIENT);
@@ -376,6 +379,67 @@ int DBHandler::visit_insert(VisitInterface& v) const
 			
 			/************************  end of blood pressure info  ************************/
 
+			/****************************** updating allergies ****************************/
+			VisitsWindow::ListAllergies i;
+			string qAllAdd = "INSERT INTO Allergies (Name, Observation, RefVisitID) VALUES(?,?,?);";
+			string qAllMod = "UPDATE Allergies SET Name = ?, Observation = ? WHERE AllergyID = ?";
+			string qAllRem = "UPDATE Allergies SET DeleteDate = ? WHERE AllergyID = ?";
+			
+			for(auto iter = v.getAllergies().begin(); iter; iter++) {
+				Gtk::TreeRow row = *iter;
+				ustring allName = row[i.m_col_name];
+				ustring allObs = row[i.m_col_obs];
+				guint32 rstatus;
+
+				// the name is mandatory
+				if(allName.length() == 0) 
+					continue;
+				rstatus = row[i.m_col_status];
+				cout<<"here: "<< allName<< " - " << rstatus << endl;
+				if(rstatus == LIST_STATUS_ADDED) {
+					if(sqlite3_prepare_v2(m_db, qAllAdd.c_str(), qAllAdd.size(), &stmt, NULL) == SQLITE_OK) {
+						sqlite3_bind_text(stmt, 1, allName.c_str(), allName.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_text(stmt, 2, allObs.c_str(), allObs.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_int(stmt, 3, visitID);
+					} else {
+						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						shouldRollback = true;
+						break;
+					}
+				} else if(rstatus == LIST_STATUS_MODIFIED) {
+					if(sqlite3_prepare_v2(m_db, qAllMod.c_str(), qAllMod.size(), &stmt, NULL) == SQLITE_OK) {
+						sqlite3_bind_text(stmt, 1, allName.c_str(), allName.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_text(stmt, 2, allObs.c_str(), allObs.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_int(stmt, 3, row[i.m_col_id]);
+					} else {
+						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						shouldRollback = true;
+						break;
+					}
+				} else if(rstatus == LIST_STATUS_REMOVED) {
+					DateTime tm = DateTime::create_now_utc();
+					ustring now = tm.format("%Y-%m-%d");
+
+					if(sqlite3_prepare_v2(m_db, qAllRem.c_str(), qAllRem.size(), &stmt, NULL) == SQLITE_OK) {
+						sqlite3_bind_text(stmt, 1, now.c_str(), now.bytes(), SQLITE_TRANSIENT);
+						sqlite3_bind_int(stmt, 2, row[i.m_col_id]);
+					} else {
+						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						shouldRollback = true;
+						break;
+					}
+				}
+
+				if(sqlite3_step(stmt) == SQLITE_DONE)
+					res = 1;
+				else {
+					std::cerr<< "Error executing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+					shouldRollback = true;
+					break;
+				}
+				sqlite3_finalize(stmt);
+			}
+			/**************************** end updating allergies **************************/
 
 			if(shouldRollback)
 				qFinish = "ROLLBACK TRANSACTION;";
@@ -445,7 +509,7 @@ int DBHandler::person_update(const Person& p) const
 			sqlite3_bind_text(stmt, 5, p.get_locality().c_str(), p.get_locality().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 6, p.get_sex() ? 1:0);
 			sqlite3_bind_double(stmt, 7, p.get_height());
-			sqlite3_bind_text(stmt, 8, p.get_birthday().format_string((ustring)"%d/%m/%Y").c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, p.get_birthday().format_string((ustring)"%Y-%m-%d").c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 9, p.get_birthplace().c_str(), p.get_birthplace().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 10, p.get_nationality().c_str(), p.get_nationality().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmt, 11, p.get_profession().c_str(), p.get_profession().bytes(), SQLITE_TRANSIENT);
@@ -991,7 +1055,6 @@ bool DBHandler::get_visit(int id, VisitInterface &v) const
 	return res;
 }
 
-
 sigc::signal<void, guint32, const ustring&, guint32>& DBHandler::signal_person_added()
 {
 	return m_signal_person_added;
@@ -1007,9 +1070,14 @@ sigc::signal<void, const Person&> DBHandler::signal_person_edited()
 	return m_signal_person_edit;
 }
 
+sigc::signal<void, const Allergy&, const Glib::Date&> DBHandler::signal_allergies()
+{
+	return m_signal_allergies;
+}
+
+/* Protected methods */
 
 inline bool DBHandler::user_has_contact(const Person& p) const
-/* Protected methods */
 {
 	sqlite3_stmt *stmt;
 	bool hasContactInfo = false;
@@ -1035,9 +1103,9 @@ inline bool DBHandler::user_has_contact(const Person& p) const
 					break;
 				}
 			}
+
+			sqlite3_finalize(stmt);
 		}
-	
-		sqlite3_finalize(stmt);
 	} else
 		throw (SqlConnectionClosedException());
 
@@ -1078,4 +1146,47 @@ guint DBHandler::get_visit_from_person(gint PersonID) const
 		throw (SqlConnectionClosedException());
 
 	return res;
+}
+
+void DBHandler::get_person_allergies(guint32 personID, const Glib::Date& date, SlotAppendAllergy cb) const
+{
+	string query = "SELECT A.AllergyID, A.Name, A.Observation, V.VisitDate FROM Person P " \
+		"INNER JOIN Visits V ON V.RefPersonID = P.PersonID " \
+		"INNER JOIN Allergies A ON A.RefVisitID = V.VisitID " \
+		"WHERE V.VisitDate <= ? AND (DeleteDate IS NULL || DeleteDate <= ?) AND V.RefPersonID = ?";
+	sqlite3_stmt *stmt = NULL;
+
+	if(m_db != NULL) {
+		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
+			int val(SQLITE_ROW);
+			ustring now = date.format_string("%Y-%m-%d");
+
+			sqlite3_bind_text(stmt, 1, now.c_str(), now.size(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, now.c_str(), now.size(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 3, personID);
+			while(val == SQLITE_ROW) {
+				val = sqlite3_step(stmt);
+				switch(val) {
+					case SQLITE_ROW: {
+						guint32 id(sqlite3_column_int(stmt, 0));
+						const char* strObs = (sqlite3_column_text(stmt, 2) == NULL) ? "" : (const char*)sqlite3_column_text(stmt, 2);
+						ustring name((const char*)sqlite3_column_text(stmt, 1)), obs(strObs);
+						Date date(Util::parse_date((const char*)sqlite3_column_text(stmt, 3)));
+						Allergy a(id, name, obs);
+
+						cb(a, date);
+						break;
+					}
+					case SQLITE_DONE: 
+					case SQLITE_ERROR:
+						break;
+				}
+			}
+			sqlite3_finalize(stmt);
+		} else
+			cerr<< "Warning: something went wrong."<<
+				endl<< "\tLast database error: "<< sqlite3_errmsg(m_db);
+	} else
+		throw (SqlConnectionClosedException());
+
 }

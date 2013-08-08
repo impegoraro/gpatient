@@ -21,13 +21,12 @@
     <property name="can_focus">False</property>
     <child>
       <object class="GtkScrolledWindow" id="scrolledwindow1">
-        <property name="width_request">260</property>
+        <property name="width_request">275</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">6</property>
-        <property name="margin_top">4</property>
-        <property name="margin_bottom">20</property>
+        <property name="margin_left">4</property>
+        <property name="margin_right">4</property>
+        <property name="margin_bottom">4</property>
         <property name="shadow_type">in</property>
         <child>
           <object class="GtkTreeView" id="treeVisits">
@@ -53,9 +52,8 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="halign">end</property>
-        <property name="margin_right">12</property>
+        <property name="margin_right">10</property>
         <property name="margin_top">4</property>
-        <property name="spacing">10</property>
         <child>
           <object class="GtkButton" id="btnViewPatient">
             <property name="label" translatable="yes">Ficha Clinica</property>
@@ -115,6 +113,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Voltar à lista de pacientes</property>
             <property name="halign">start</property>
             <property name="valign">end</property>
             <property name="image">image1</property>
@@ -1826,7 +1825,7 @@
                                     <property name="vexpand">True</property>
                                     <property name="shadow_type">in</property>
                                     <child>
-                                      <object class="GtkTreeView" id="treeview1">
+                                      <object class="GtkTreeView" id="treeAllergies">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <child internal-child="selection">
@@ -1877,7 +1876,7 @@
                                     <property name="vexpand">True</property>
                                     <property name="shadow_type">in</property>
                                     <child>
-                                      <object class="GtkTreeView" id="treeview2">
+                                      <object class="GtkTreeView" id="treeHereditary">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <child internal-child="selection">

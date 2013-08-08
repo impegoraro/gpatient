@@ -1,0 +1,13 @@
+#ifndef LIST_STATUS_H
+#define LIST_STATUS_H
+
+enum ListItemStatus
+{
+	LIST_STATUS_ADDED = 15,
+	LIST_STATUS_MODIFIED,
+	LIST_STATUS_REMOVED,
+	LIST_STATUS_NORMAL
+};
+
+
+#endif

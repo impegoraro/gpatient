@@ -184,7 +184,7 @@ void Widgets::CalendarWindow::on_selected_day(void)
 	Date tmp;
 
 	m_cal.get_date(tmp);
-	((Entry*)m_wDate)->set_text(tmp.format_string((ustring)"%d/%m/%Y"));
+	((Entry*)m_wDate)->set_text(tmp.format_string((ustring)"%Y-%m-%d"));
 
 	response(RESPONSE_ACCEPT);
 	hide();
@@ -195,7 +195,7 @@ bool Widgets::CalendarWindow::on_focus_out_event(GdkEventFocus *focus)
 	Date tmp;
 
 	m_cal.get_date(tmp);
-	((Entry*)m_wDate)->set_text(tmp.format_string((ustring)"%d/%m/%Y"));
+	((Entry*)m_wDate)->set_text(tmp.format_string((ustring)"%Y-%m-%d"));
 
 	return true;
 }

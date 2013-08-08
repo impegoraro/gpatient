@@ -98,7 +98,6 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> m_modelPatients;
 	Glib::RefPtr<Gtk::ListStore> m_modelVisits;
 
-
 	Gtk::Label *m_lblComplaint;
 	Gtk::Label *m_lblAnamnesis;
 	Gtk::Label *m_lblDate;
@@ -169,10 +168,13 @@ protected:
 	Gtk::Label *m_lblMedication;
 	Gtk::Label *m_lblTreatment;
 
+	Gtk::TreeView *m_treeAllergies;
+
 	//Glib::SignalTimeout m_searchTimeout;
 	sigc::connection m_connSearch;
 	Glib::Timer m_timerSearch;
 
+	guint32 m_personID;
 	bool m_entryPatientStatus;
 	bool m_fireSearch;
 	Glib::RefPtr<Gtk::Application> m_app;
@@ -190,6 +192,7 @@ public:
 	void hlpr_append_patient(guint32 id, const Glib::ustring& name, guint32 nif);
 	void hlpr_append_visit(guint32 id, const Glib::ustring& complaint, const Glib::ustring& date);
 
+	void hlpr_append_allergy(const Allergy& allergy, const Glib::Date& date);
 protected:
 	void get_visits_widgets(void);
 
@@ -204,7 +207,6 @@ protected:
 	void on_btnToolRemove_clicked(void);
 	void on_window_show(void);
 	void on_treeVisit_activated(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
-
 	void on_btnRemoveVisit(void);
 
 	bool on_entryPatient_focusIn(GdkEventFocus *focus); 
@@ -307,7 +309,8 @@ public:
 	virtual Glib::ustring getMed();
 	virtual Glib::ustring getMedication();
 	virtual Glib::ustring getTreatment();
-
+	virtual Gtk::TreeModel::Children getAllergies();
+	
 	virtual void setPersonID(int val);
 	virtual void setComplaint(const Glib::ustring& val);
 	virtual void setAnamnesis(const Glib::ustring& val);

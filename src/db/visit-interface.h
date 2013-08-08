@@ -1,5 +1,8 @@
 #include <glibmm/date.h>
 #include <glibmm/ustring.h>
+#include <gtkmm/treeview.h>
+
+#include "allergy.h"
 
 #ifndef _VISIT_INTERFACE_H
 #define _VISIT_INTERFACE_H
@@ -74,7 +77,7 @@ public:
 	virtual Glib::ustring getMed() = 0;
 	virtual Glib::ustring getMedication() = 0;
 	virtual Glib::ustring getTreatment() = 0;
-
+	virtual Gtk::TreeModel::Children getAllergies() = 0;
 
 
 	/* Setters */

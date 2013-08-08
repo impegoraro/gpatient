@@ -35,6 +35,7 @@ gestao-herb is free software: you can redistribute it and/or modify it
 
 #include "ui/widgets/widgets.h"
 #include "db/visit-interface.h"
+#include "db/list-status.h"
 
 class VisitsWindow : public VisitInterface
 {
@@ -43,23 +44,29 @@ public:
 	~VisitsWindow();
 
 	const Gtk::Window* get_window();
-	
+
+	//TODO: Remove garbage
+	void set_to_garbage();
 	virtual void setPersonID(int personID);
 	virtual void set_sex_widgets(bool sex);
 	void show();	
-private:
-	class ListAlergies : public Gtk::TreeModel::ColumnRecord
+
+	class ListAllergies : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
 
-		ListAlergies()
+		ListAllergies()
 		{
 			add(m_col_id);
 			add(m_col_name);
+			add(m_col_obs);
+			add(m_col_status);
 		}
 
-		Gtk::TreeModelColumn<unsigned int> m_col_id;
+		Gtk::TreeModelColumn<guint32> m_col_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+		Gtk::TreeModelColumn<Glib::ustring> m_col_obs;
+		Gtk::TreeModelColumn<guint32> m_col_status;
 	};
 	class ListHereditary : public Gtk::TreeModel::ColumnRecord
 	{
@@ -70,13 +77,18 @@ private:
 			add(m_col_id);
 			add(m_col_parent);
 			add(m_col_name);
+			add(m_col_obs);
+			add(m_col_status);
 		}
 
-		Gtk::TreeModelColumn<unsigned int> m_col_id;
+		Gtk::TreeModelColumn<guint32> m_col_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_parent;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+		Gtk::TreeModelColumn<Glib::ustring> m_col_obs;
+		Gtk::TreeModelColumn<guint32> m_col_status;
 	};
-
+	
+private:
 	enum BasicInfoButtons
 	{
 		Hypertension,
@@ -84,7 +96,6 @@ private:
 		Triglycerides,
 		Diabetes
 	};
-	
 	
 	Gtk::Assistant *m_win;
 
@@ -97,9 +108,9 @@ private:
 	Gtk::Button *m_btnDiabetes;
 	int m_diabetes;
 	
-	Gtk::ToolButton *m_tbAlergiesAdd;
-	Gtk::ToolButton *m_tbAlergiesRemove;
-	Gtk::TreeView *m_treeAlergies;
+	Gtk::ToolButton *m_tbAllergiesAdd;
+	Gtk::ToolButton *m_tbAllergiesRemove;
+	Gtk::TreeView *m_treeAllergies;
 
 	Gtk::ToolButton *m_tbHereditaryAdd;
 	Gtk::ToolButton *m_tbHereditaryRemove;
@@ -118,7 +129,7 @@ private:
 	Gtk::CheckButton *m_chkCry;
 	Gtk::CheckButton *m_chkVerm;
 	Gtk::CheckButton *m_chkVed;
-	Gtk::CheckButton *m_chkBra;
+	Gtk::CheckButton *m_chkBrad;
 	Gtk::CheckButton *m_chkPrt;
 	Gtk::CheckButton *m_chkAml;
 	Gtk::CheckButton *m_chkAlg;
@@ -174,25 +185,31 @@ private:
 	Gtk::TextView *m_txtMedication;
 	Gtk::TextView *m_txtTreatment;
 
-	ListAlergies m_la;
 	ListHereditary m_lhd;
 	
 	Widgets::CalendarWindow *m_wincal;	
 	
-	int m_personID;
+	guint32 m_personID;
 
 	bool on_window_closing(GdkEventAny*);
 	void on_btnChangeState(BasicInfoButtons);
-	void hlpr_list_alergies_add();
+	void hlpr_list_allergies_add();
 	void hlpr_list_hereditary_add();
-	void hlpr_list_remove(Gtk::TreeView *);
+	void hlpr_list_remove(int);
+	void hlpr_append_allergy(const Allergy& allergy, const Glib::Date& date);
+
 	void on_txtDate_iconPress(Gtk::EntryIconPosition, const GdkEventButton*);
 	void on_treeVisit_activate(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 	void on_apply();
 
+	void on_listAllergies_row_changed(const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter);
+
+	void next_page(Gtk::Widget* page);
 	void on_widget_check(Gtk::Entry* entry);
 	void on_widget_check_textview(Gtk::TextView* txtview);
 	void inline clear();
+
+	void get_db_data();
 
 public:
 /*****************************************
@@ -266,6 +283,7 @@ public:
 	virtual Glib::ustring getMed();
 	virtual Glib::ustring getMedication();
 	virtual Glib::ustring getTreatment();
+	virtual Gtk::TreeModel::Children getAllergies();
 
 	virtual void setComplaint(const Glib::ustring& val);
 	virtual void setAnamnesis(const Glib::ustring& val);

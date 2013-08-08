@@ -15,8 +15,10 @@
 #include "exceptions/sql-connection.h"
 #include "main-window.h"
 #include "patient-window.h"
+#include "visitswindow.h"
 #include "db/dbhandler.h"
 #include "person.h"
+#include "util.h"
 
 
 using namespace std;
@@ -255,6 +257,21 @@ void MainWindow::hlpr_append_visit(guint32 id, const ustring& complaint, const u
 	row[m_lvCols.m_col_date] = date;
 }
 
+void MainWindow::hlpr_append_allergy(const Allergy& allergy, const Glib::Date& date)
+{
+	RefPtr<ListStore> model = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
+	TreeIter iter = model->append();
+	VisitsWindow::ListAllergies la;
+	if(iter) {
+		TreeModel::Row row = *iter;
+
+		row[la.m_col_id] = allergy.m_id;
+		row[la.m_col_name] = allergy.m_name;
+		row[la.m_col_obs] = allergy.m_obs;
+		//row[la.m_col_status] = LIST_STATUS_NORMAL;
+	}
+}
+
 
 
 /* Signal Handlers */
@@ -304,16 +321,11 @@ void MainWindow::on_btnToolAdd_clicked(void)
 
 void MainWindow::on_btnToolAddVisit_clicked(void)
 {
-	if(!m_vw) {
-		RefPtr<TreeSelection> sel = m_treePatients.get_selection();
-		TreeModel::iterator iter = sel->get_selected();
-		ListPatientsCols cols;
-		TreeModel::Row row = *iter;
-
-		m_vw = new VisitsWindow(*this, row[cols.m_col_id]);
+	if(m_vw == NULL) {
+		m_vw = new VisitsWindow(*this, m_personID);
 		m_app->add_window((Window&)*m_vw->get_window());
 	}
-
+	m_vw->setPersonID(m_personID);
 	m_vw->set_sex_widgets(!(m_lblPSex->get_text().substr(0,1) == (ustring)"M"));
 	m_vw->show();
 }
@@ -436,11 +448,13 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		} catch(SqlConnectionOpenedException& ex) {
 			close = false;
 		}
+
 		m_modelVisits->clear();
 		db.get_person((*row)[m_lpCols.m_col_id], p);
 		db.get_visits((*row)[m_lvCols.m_col_id]);
 		if(close)
 			db.close();
+		m_personID = p.get_id();
 		m_lblPName->set_text(ustring("<b><i><span size=\"x-large\">" + p.get_name() + "</span></i></b>"));
 		m_lblPName->set_use_markup();
 		age = today.get_year() - p.get_birthday().get_year();
@@ -642,6 +656,8 @@ void MainWindow::on_btnBack_clicked(void)
 void MainWindow::get_visits_widgets(void)
 {
 	RefPtr<Builder> builder = Builder::create_from_file(GLADE_VISITS);
+	TreeViewColumn *col;
+	VisitsWindow::ListAllergies m_la;
 
 	builder->get_widget("treeVisits", m_treeVisits);
 	builder->get_widget("btnBack", m_btnBack);
@@ -654,7 +670,6 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("gridVisits", m_gridVisits);
 	builder->get_widget("btnNewVisit", m_btnNewVisit);
 	builder->get_widget("btnRemoveVisit", m_btnRemoveVisit);
-
 
 	builder->get_widget("lblComplaint", m_lblComplaint);
 	builder->get_widget("lblAnamnesis", m_lblAnamnesis);
@@ -724,6 +739,18 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("lblMenstruation", m_lblMenstruation);
 	builder->get_widget("lblPregnancyStr", m_lblPregnancyStr);
 	builder->get_widget("lblPregnancy", m_lblPregnancy);
+	builder->get_widget("treeAllergies", m_treeAllergies);
+
+	/* Tree allergies configuration */
+	m_treeAllergies->set_model(ListStore::create(m_la));
+	col = m_treeAllergies->get_column(m_treeAllergies->append_column_numeric("ID", m_la.m_col_id, "%u")-1);
+	col->set_visible(false);
+	col = m_treeAllergies->get_column(m_treeAllergies->append_column_editable("Nome", m_la.m_col_name)-1);
+	col->set_resizable();
+	col = m_treeAllergies->get_column(m_treeAllergies->append_column_editable("Observações", m_la.m_col_obs)-1);
+	col->set_resizable();
+	//col = m_treeAllergies->get_column(m_treeAllergies->append_column_numeric_editable("Status", m_la.m_col_status,"%u")-1);
+	
 }
 
 void MainWindow::on_btnRemoveVisit(void)
@@ -771,12 +798,12 @@ void MainWindow::on_treeVisit_activated(const TreeModel::Path& path, TreeViewCol
 	TreeModel::iterator row = sel->get_selected();
 	DBHandler db = DBHandler::get_instance();
 	bool close = true;
-
+	RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model())->clear();
 	if(*row) {
 		try{
 			db.open();	
 			db.get_visit((*row)[m_lvCols.m_col_id], *this);
-			
+			db.get_person_allergies(m_personID, Util::parse_date(m_lblDate->get_text()), sigc::mem_fun(*this, &MainWindow::hlpr_append_allergy));	
 			m_lblSuggestions->hide();
 			m_boxVisitInfo->show();
 		}
@@ -1049,6 +1076,9 @@ ustring MainWindow::getMedication()
 ustring MainWindow::getTreatment()
 {
 }
+TreeModel::Children MainWindow::getAllergies()
+{}
+
 
 /***********************************
  *             Setters             *

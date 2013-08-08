@@ -104,6 +104,7 @@
                   <object class="GtkEntry" id="txtDate">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="editable">False</property>
                     <property name="max_length">10</property>
                     <property name="invisible_char">•</property>
                     <property name="width_chars">13</property>
@@ -719,8 +720,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="chkBra">
-                    <property name="label" translatable="yes">Bra</property>
+                  <object class="GtkCheckButton" id="chkBrad">
+                    <property name="label" translatable="yes">Brad</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
@@ -1533,7 +1534,7 @@
                     <property name="margin_top">4</property>
                     <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkTreeView" id="treeAlergies">
+                      <object class="GtkTreeView" id="treeAllergies">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <child internal-child="selection">
@@ -1557,7 +1558,7 @@
                       <class name="inline-toolbar"/>
                     </style>
                     <child>
-                      <object class="GtkToolButton" id="tbAlergiesAdd">
+                      <object class="GtkToolButton" id="tbAllergiesAdd">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="has_tooltip">True</property>
@@ -1573,7 +1574,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="tbAlergiesRemove">
+                      <object class="GtkToolButton" id="tbAllergiesRemove">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Remover</property>

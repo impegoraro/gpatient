@@ -11,11 +11,13 @@
 #include <string>
 #include <vector>
 #include <sqlite3.h>
-
+#include <sigc++/sigc++.h>
 #include "../person.h"
 #include "../visit.h"
 #include "visit-interface.h"
 #include "../configuration.h"
+
+typedef sigc::slot<void, const Allergy&, const Glib::Date&> SlotAppendAllergy;
 
 /*
  * This class is a singleton to the proxy that interacts with the database.
@@ -38,6 +40,7 @@ protected:
 
 	sigc::signal<void, guint32, const Glib::ustring&, guint32> m_signal_person_added;
 	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_visit_added;
+	sigc::signal<void, const Allergy&, const Glib::Date&> m_signal_allergies;
 	sigc::signal<void, const Person&> m_signal_person_edit;
 public:
 
@@ -57,7 +60,7 @@ public:
 	bool exists_person_by_identification_card(const guint32 ic, guint32 *personID = NULL) const;
 	void get_visits(guint32 personID) const;
 	bool get_visit(int id, VisitInterface &v) const;
-
+	void get_person_allergies(guint32 personID, const Glib::Date& date, SlotAppendAllergy) const;
 	const Glib::ustring& get_database_path(void) const;
 
 	bool open(void);
@@ -66,6 +69,7 @@ public:
 	sigc::signal<void, guint32, const Glib::ustring&, guint32>& signal_person_added();
 	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&>& signal_visit_added();
 	sigc::signal<void, const Person&> signal_person_edited();
+	sigc::signal<void, const Allergy&, const Glib::Date&> signal_allergies();
 };
 
 #endif /* DBHANDLER_H_ */
