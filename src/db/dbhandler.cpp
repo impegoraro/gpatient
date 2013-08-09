@@ -948,7 +948,6 @@ bool DBHandler::exists_person_by_tax_number(const guint32 tax, guint32 *personID
 
 		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
 			int val(SQLITE_ROW);
-			guint16 zip1, zip2;
 			sqlite3_bind_int(stmt, 1, tax);
 
 			while(val == SQLITE_ROW) {
@@ -987,7 +986,6 @@ bool DBHandler::exists_person_by_identification_card(const guint32 ic, guint32 *
 
 		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
 			int val(SQLITE_ROW);
-			guint16 zip1, zip2;
 			sqlite3_bind_int(stmt, 1, ic);
 
 			while(val == SQLITE_ROW) {
@@ -999,11 +997,9 @@ bool DBHandler::exists_person_by_identification_card(const guint32 ic, guint32 *
 					break;
 				}
 				case SQLITE_DONE: {
-
 					break;
 				}
 				case SQLITE_ERROR:
-					res = false;
 					break;
 				}
 			}

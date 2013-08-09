@@ -3,6 +3,7 @@
 *.bak
 *.exe
 src/herbanaria
+src/pacientes
 Makefile.in
 Makefile
 INSTALL

@@ -7,51 +7,43 @@
 	},
 	"buffers":
 	[
-		{
-			"file": "src/configuration.cpp",
-			"settings":
-			{
-				"buffer_size": 2913,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/configuration.h",
-			"settings":
-			{
-				"buffer_size": 806,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/main.cpp",
-			"settings":
-			{
-				"buffer_size": 1585,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/main.h",
-			"settings":
-			{
-				"buffer_size": 140,
-				"line_ending": "Unix"
-			}
-		}
 	],
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 51.0,
+		"height": 361.0,
 		"selected_items":
 		[
 			[
-				"packa",
+				"pack",
 				"Package Control: Install Package"
+			],
+			[
+				"packa",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			],
+			[
+				"git push ",
+				"Git: Push"
+			],
+			[
+				"git status",
+				"Git: Status"
+			],
+			[
+				"git sta",
+				"Git: Show Tags"
+			],
+			[
+				"git staus",
+				"Git: Status"
 			]
 		],
-		"width": 400.0
+		"width": 386.0
 	},
 	"console":
 	{
@@ -68,8 +60,14 @@
 	},
 	"file_history":
 	[
-		"/home/ilan/Dropbox/websites.txt",
+		"/home/ilan/Projects/gestao-herb/patient.sublime-project",
 		"/home/ilan/.config/sublime-text-2/Packages/User/Preferences.sublime-settings",
+		"/home/ilan/Projects/gestao-herb/src/configuration.h",
+		"/home/ilan/Projects/gestao-herb/src/Makefile",
+		"/home/ilan/Projects/gestao-herb/src/main.h",
+		"/home/ilan/Projects/gestao-herb/src/main.cpp",
+		"/home/ilan/Projects/gestao-herb/src/configuration.cpp",
+		"/home/ilan/Dropbox/websites.txt",
 		"/home/ilan/.config/sublime-text-2/Packages/Default/Preferences.sublime-settings",
 		"/home/ilan/Dropbox/Documents/Sublime-License",
 		"/home/ilan/tmp/Music"
@@ -107,116 +105,8 @@
 	"groups":
 	[
 		{
-			"selected": 3,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "src/configuration.cpp",
-					"settings":
-					{
-						"buffer_size": 2913,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "src/configuration.h",
-					"settings":
-					{
-						"buffer_size": 806,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "src/main.cpp",
-					"settings":
-					{
-						"buffer_size": 1585,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "src/main.h",
-					"settings":
-					{
-						"buffer_size": 140,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				}
 			]
 		}
 	],
@@ -251,6 +141,10 @@
 		]
 	},
 	"menu_visible": true,
+	"output.git":
+	{
+		"height": 102.0
+	},
 	"replace":
 	{
 		"height": 0.0
@@ -266,11 +160,11 @@
 	},
 	"select_project":
 	{
-		"height": 0.0,
+		"height": 500.0,
 		"selected_items":
 		[
 		],
-		"width": 0.0
+		"width": 380.0
 	},
 	"show_minimap": true,
 	"show_open_files": true,

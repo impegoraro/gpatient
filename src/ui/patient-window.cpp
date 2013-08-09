@@ -9,7 +9,6 @@
 	#include <config.h>
 #endif
 
-#include <gtkmm.h>
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
@@ -295,6 +294,7 @@ guint32 PatientWindow::get_id(void) const
 bool PatientWindow::close_on_esc(GdkEventKey* event)
 {
 	if (event->type == GDK_KEY_PRESS && event->keyval == GDK_KEY_Escape) {
+		clean();
 		hide();
     	return true;
   	}
@@ -453,6 +453,7 @@ bool PatientWindow::on_delete_event(GdkEventAny *event)
 void PatientWindow::clean()
 {
 	m_id = 0;
+
 	m_txtName.set_text("");
 	m_txtHeight.set_value(1.00f);
 	m_rbMale.set_active();
@@ -479,38 +480,67 @@ void PatientWindow::clean()
 
 	m_txtName.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtName.unset_color(STATE_FLAG_NORMAL);
+	m_txtName.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtHeight.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtHeight.unset_color(STATE_FLAG_NORMAL);
+	m_txtHeight.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtZip1.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtZip1.unset_color(STATE_FLAG_NORMAL);
+	m_txtZip1.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtZip2.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtZip2.unset_color(STATE_FLAG_NORMAL);
+	m_txtZip2.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtNationality.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtNationality.unset_color(STATE_FLAG_NORMAL);
+	m_txtNationality.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtBirthday.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtBirthday.unset_color(STATE_FLAG_NORMAL);
+	m_txtBirthday.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtBirthplace.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtBirthplace.unset_color(STATE_FLAG_NORMAL);
+	m_txtBirthplace.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtProfession.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtProfession.unset_color(STATE_FLAG_NORMAL);
+	m_txtProfession.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtAddress.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtAddress.unset_color(STATE_FLAG_NORMAL);
+	m_txtAddress.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtLocation.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtLocation.unset_color(STATE_FLAG_NORMAL);
+	m_txtLocation.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtPhone.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtPhone.unset_color(STATE_FLAG_NORMAL);
+	m_txtPhone.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtCellphone.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtCellphone.unset_color(STATE_FLAG_NORMAL);
+	m_txtCellphone.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtIdentificationCard.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtIdentificationCard.unset_color(STATE_FLAG_NORMAL);
+	m_txtIdentificationCard.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtEmail.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtEmail.unset_color(STATE_FLAG_NORMAL);
+	m_txtEmail.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtReferer.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtReferer.unset_color(STATE_FLAG_NORMAL);
+	m_txtReferer.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtTaxNumber.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtTaxNumber.unset_color(STATE_FLAG_NORMAL);
+	m_txtTaxNumber.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtIdentificationCard.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtIdentificationCard.unset_color(STATE_FLAG_NORMAL);
+	m_txtIdentificationCard.unset_icon(ENTRY_ICON_SECONDARY);
+}
+
+void PatientWindow::show()
+{
+	m_txtName.grab_focus();
+	return Window::show();
+}
+
+void PatientWindow::show_all()
+{
+	m_txtName.grab_focus();
+	return Window::show_all();
 }
 
 sigc::signal<void, PatientWindow &>& PatientWindow::signal_add()
@@ -551,7 +581,6 @@ void PatientWindow::activate_close(bool val)
 			validate_entry(m_txtBirthday, false);
 			validate_entry(m_txtProfession);
 			validate_entry(m_txtBirthplace);
-			validate_entry(m_txtTaxNumber);
 			validate_entry(m_txtAddress);
 			validate_entry(m_txtLocation);
 			validate_entry(m_txtZip1);
@@ -559,11 +588,12 @@ void PatientWindow::activate_close(bool val)
 			validate_entry(m_txtCellphone, cell);
 			validate_entry(m_txtPhone, phone);
 			validate_entry(m_txtEmail);
-			validate_entry(m_txtIdentificationCard);
+			validate_entry(m_txtTaxNumber, true, &m_txtIdentificationCard);
+			validate_entry(m_txtIdentificationCard, true, &m_txtTaxNumber);
 
 			msgbox.set_title("Validação dos dados");
 			//msgbox.set_secondary_text("Todos os campos são de preenchimento obrigatório, com a excepção do campo <i>Enviado Por</i>.", true);
-			msgbox.set_secondary_text("Falta preencher os campos asinalados a vermelho.\nO bilhete de identidade só é obrigatório se a pessoa não tiver NIF.", true);
+			msgbox.set_secondary_text("Falta preencher os campos asinalados.\nO bilhete de identidade só é obrigatório se a pessoa não tiver NIF.", true);
 			msgbox.run();
 		}
 	}
@@ -685,21 +715,27 @@ bool PatientWindow::on_taxNumber_focus_out(GdkEventFocus *event)
 	DBHandler db = DBHandler::get_instance();
 	guint32 *id = (m_type == PW_TYPE_EDIT ? &m_id : NULL);
 
-	db.open();
-	if(db.exists_person_by_tax_number(m_txtTaxNumber.get_value(), id)) {
-		m_txtTaxNumber.override_background_color(Gdk::RGBA("Red"), STATE_FLAG_NORMAL);
-		//m_txtTaxNumber.override_color(Gdk::RGBA("White"), STATE_FLAG_NORMAL);
-		m_txtTaxNumber.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
-		m_txtTaxNumber.set_icon_sensitive(ENTRY_ICON_SECONDARY, false);
-		m_txtTaxNumber.set_icon_tooltip_text("O Número de Identificação Fiscal já existe!", ENTRY_ICON_SECONDARY);
-		m_tnUnique = false;
+	if(m_txtTaxNumber.get_text_length() > 0) {
+		db.open();
+		if(db.exists_person_by_tax_number(m_txtTaxNumber.get_value(), id)) {
+			m_txtTaxNumber.override_background_color(Gdk::RGBA("Red"), STATE_FLAG_NORMAL);
+			//m_txtTaxNumber.override_color(Gdk::RGBA("White"), STATE_FLAG_NORMAL);
+			m_txtTaxNumber.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
+			m_txtTaxNumber.set_icon_tooltip_text("O Número de Identificação Fiscal já existe!", ENTRY_ICON_SECONDARY);
+			m_tnUnique = false;
+		} else {
+			m_txtTaxNumber.unset_background_color(STATE_FLAG_NORMAL);
+			m_txtTaxNumber.unset_color(STATE_FLAG_NORMAL);
+			m_txtTaxNumber.unset_icon(ENTRY_ICON_SECONDARY);
+			m_tnUnique = true;
+		}
+		db.close();
 	} else {
-		m_txtTaxNumber.unset_background_color(STATE_FLAG_NORMAL);
-		m_txtTaxNumber.unset_color(STATE_FLAG_NORMAL);
-		m_txtTaxNumber.unset_icon(ENTRY_ICON_SECONDARY);
-		m_tnUnique = true;
+		//m_txtTaxNumber.unset_background_color(STATE_FLAG_NORMAL);
+		//m_txtTaxNumber.unset_color(STATE_FLAG_NORMAL);
+		//m_txtTaxNumber.unset_icon(ENTRY_ICON_SECONDARY);
+		m_tnUnique = false;
 	}
-	db.close();
 	return false;
 }
 
@@ -708,33 +744,35 @@ bool PatientWindow::on_identificationCard_focus_out(GdkEventFocus *event)
 	DBHandler db = DBHandler::get_instance();
 	guint32 *id = (m_type == PW_TYPE_EDIT ? &m_id : NULL);
 
-	db.open();
-	if(db.exists_person_by_identification_card(m_txtTaxNumber.get_value(), id)) {
-		m_txtIdentificationCard.override_background_color(Gdk::RGBA("Red"), STATE_FLAG_NORMAL);
-		//m_txtIdentificationCard.override_color(Gdk::RGBA("White"), STATE_FLAG_NORMAL);
-		m_txtIdentificationCard.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
-		m_txtIdentificationCard.set_icon_sensitive(ENTRY_ICON_SECONDARY, false);
-		m_txtIdentificationCard.set_icon_tooltip_text("O bilhete de identidade já existe!", ENTRY_ICON_SECONDARY);
-		m_icUnique = false;
+	if(m_txtIdentificationCard.get_text_length() > 0){
+		db.open();
+		if(db.exists_person_by_identification_card(m_txtIdentificationCard.get_value(), id)) {
+			m_txtIdentificationCard.override_background_color(Gdk::RGBA("Red"), STATE_FLAG_NORMAL);
+			//m_txtIdentificationCard.override_color(Gdk::RGBA("White"), STATE_FLAG_NORMAL);
+			m_txtIdentificationCard.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
+			m_txtIdentificationCard.set_icon_tooltip_text("O bilhete de identidade já existe!", ENTRY_ICON_SECONDARY);
+			m_icUnique = false;
+		} else {
+			m_txtIdentificationCard.unset_background_color(STATE_FLAG_NORMAL);
+			m_txtIdentificationCard.unset_color(STATE_FLAG_NORMAL);
+			m_txtIdentificationCard.unset_icon(ENTRY_ICON_SECONDARY);
+			m_icUnique = true;
+		}
+		db.close();
 	} else {
-		m_txtIdentificationCard.unset_background_color(STATE_FLAG_NORMAL);
-		m_txtIdentificationCard.unset_color(STATE_FLAG_NORMAL);
-		m_txtIdentificationCard.unset_icon(ENTRY_ICON_SECONDARY);
-		m_icUnique = true;
+		//m_txtIdentificationCard.unset_background_color(STATE_FLAG_NORMAL);
+		//m_txtIdentificationCard.unset_color(STATE_FLAG_NORMAL);
+		//m_txtIdentificationCard.unset_icon(ENTRY_ICON_SECONDARY);
+		m_icUnique = false;
 	}
-	db.close();
 	return false;
 }
 
-inline void PatientWindow::validate_entry(Entry& entry, bool set_icon)
+inline void PatientWindow::validate_entry(Entry& entry, bool set_icon, Entry* other)
 {
-	if(entry.get_text_length() == 0) {
-		entry.override_background_color(Gdk::RGBA("Red"), STATE_FLAG_NORMAL);
-		//entry.override_color(Gdk::RGBA("White"), STATE_FLAG_NORMAL);
-		if(set_icon) {
-			entry.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
-			entry.set_icon_tooltip_text("O campo é de preenchimento obrigatório!", ENTRY_ICON_SECONDARY);
-		}
+	if(entry.get_text_length() == 0 && (other == NULL || (other != NULL && other->get_text_length() == 0))) {
+		entry.set_icon_from_stock(Stock::CAPS_LOCK_WARNING, ENTRY_ICON_SECONDARY);
+		entry.set_icon_tooltip_text("O campo é de preenchimento obrigatório!", ENTRY_ICON_SECONDARY);
 	} else {
 		entry.unset_background_color(STATE_FLAG_NORMAL);
 		entry.unset_color(STATE_FLAG_NORMAL);

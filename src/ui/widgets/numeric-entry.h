@@ -8,7 +8,9 @@
 #ifndef NUMERICENTRY_H_
 #define NUMERICENTRY_H_
 
-#include <gtkmm.h>
+#include <gtkmm/entry.h>
+#include <glibmm/ustring.h>
+
 
 namespace Widgets
 {

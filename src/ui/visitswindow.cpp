@@ -19,7 +19,6 @@ gestao-herb is free software: you can redistribute it and/or modify it
 
 #include <iostream>
 #include <glibmm/datetime.h>
-#include <gtkmm.h>
 
 #include <exception>
 #include <sstream>
@@ -365,6 +364,7 @@ const Gtk::Window* VisitsWindow::get_window()
 
 void VisitsWindow::show()
 {
+	m_txtComplaint->grab_focus();
 	get_db_data();
 	m_win->show_all();
 }
@@ -631,7 +631,7 @@ void VisitsWindow::clear()
 {
 	DateTime tm = DateTime::create_now_utc();
 	RefPtr<ListStore> allergies, hereditary;
-
+	
 	m_txtComplaint->set_text("");
 	m_txtDate->set_text(tm.format("%Y-%m-%d"));
 	m_txtSleepiness->set_text("");

@@ -8,14 +8,37 @@
 #ifndef MAIN_WINDOW_H_
 #define MAIN_WINDOW_H_
 
-#include <gtkmm.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/treemodelfilter.h>
+#include <gtkmm/treeselection.h>
+#include <gtkmm/treeiter.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/toolbar.h>
+#include <gtkmm/toolbutton.h>
+#include <gtkmm/toolitem.h>
+#include <gtkmm/window.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/box.h>
+#include <gtkmm/grid.h>
+#include <gtkmm/table.h>
+#include <gtkmm/scrolledwindow.h> 
+#include <gtkmm/aboutdialog.h>
+#include <gtkmm/main.h>
+#include <gtkmm/separatortoolitem.h>
+#include <gtkmm/image.h>
 
+
+#include "../person.h"
+#include "../configuration.h"
+#include "../db/dbhandler.h"
 #include "patient-window.h"
 #include "view-patient.h"
-#include "../person.h"
-#include "../db/dbhandler.h"
 #include "visitswindow.h"
-#include "../configuration.h"
 
 #define GLADE_VISITS "src/ui/main-visit.glade"
 

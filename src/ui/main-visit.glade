@@ -48,63 +48,6 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="box2">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="halign">end</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">4</property>
-        <child>
-          <object class="GtkButton" id="btnViewPatient">
-            <property name="label" translatable="yes">Ficha Clinica</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Ver ficha clinica completa do paciente</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="btnNewVisit">
-            <property name="label" translatable="yes">Nova visita</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="image">image2</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="btnRemoveVisit">
-            <property name="label" translatable="yes">Remover</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="image">image3</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="left_attach">1</property>
-        <property name="top_attach">0</property>
-        <property name="width">2</property>
-        <property name="height">1</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkBox" id="box3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -115,7 +58,7 @@
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Voltar à lista de pacientes</property>
             <property name="halign">start</property>
-            <property name="valign">end</property>
+            <property name="valign">center</property>
             <property name="image">image1</property>
           </object>
           <packing>
@@ -128,6 +71,7 @@
           <object class="GtkLabel" id="label4">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="valign">center</property>
             <property name="margin_left">8</property>
             <property name="label" translatable="yes">&lt;b&gt;&lt;span size="x-large"&gt;Visitas&lt;/span&gt;&lt;/b&gt;</property>
             <property name="use_markup">True</property>
@@ -2906,7 +2850,7 @@
             <property name="margin_right">35</property>
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
-            <property name="label" translatable="yes">&lt;span size="xx-large"&gt;&lt;b&gt;Para começar selecione uma visita na lista de visitas. Pode registar novas visitas se clicar no botão Nova Visita.&lt;/b&gt;&lt;/span&gt;</property>
+            <property name="label" translatable="yes">&lt;span size="xx-large"&gt;Para começar selecione uma visita na lista de visitas. Pode registar novas visitas se clicar no botão &lt;b&gt;Nova Visita.&lt;/b&gt;&lt;/span&gt;</property>
             <property name="use_markup">True</property>
             <property name="wrap">True</property>
           </object>
@@ -2922,6 +2866,63 @@
         <property name="top_attach">1</property>
         <property name="width">1</property>
         <property name="height">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="box2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="margin_right">10</property>
+        <property name="margin_top">4</property>
+        <child>
+          <object class="GtkButton" id="btnViewPatient">
+            <property name="label" translatable="yes">Ficha Clinica</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Ver ficha clinica completa do paciente</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="btnNewVisit">
+            <property name="label" translatable="yes">Nova visita</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image2</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="btnRemoveVisit">
+            <property name="label" translatable="yes">Remover</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image3</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">0</property>
+        <property name="width">2</property>
+        <property name="height">1</property>
       </packing>
     </child>
   </object>

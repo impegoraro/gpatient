@@ -1,13 +1,13 @@
-bin_PROGRAMS = herbanaria
+bin_PROGRAMS = pacientes
 
 # For Windows compilantion use the folling settings
 #AM_CXXFLAGS=-mwindows
 
 # for Unixx compilation
 AM_CPPFLAGS=$(DEPS_CFLAGS) -std=c++0x -O3
-herbanaria_LDADD=$(DEPS_LIBS)
+pacientes_LDADD=$(DEPS_LIBS)
 
-herbanaria_SOURCES = util.h util.cpp \
+pacientes_SOURCES = util.h util.cpp \
                      exceptions/sql-connection.h exceptions/sql-connection.cpp \
                      ui/widgets/widgets.h ui/widgets/numeric-entry.h ui/widgets/numeric-entry.cpp \
                      ui/widgets/date-entry.h ui/widgets/date-entry.cpp \

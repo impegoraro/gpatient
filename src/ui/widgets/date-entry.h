@@ -8,7 +8,8 @@
 #ifndef DATEENTRY_H_
 #define DATEENTRY_H_
 
-#include <gtkmm.h>
+#include <gtkmm/entry.h>
+#include <glibmm/ustring.h>
 
 namespace Widgets
 {

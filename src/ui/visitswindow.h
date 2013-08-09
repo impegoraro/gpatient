@@ -20,11 +20,13 @@ gestao-herb is free software: you can redistribute it and/or modify it
 #ifndef _VISITSWINDOW_H_
 #define _VISITSWINDOW_H_
 
-#include <gtkmm.h>
 
+#include <gtkmm/window.h>
 #include <gtkmm/assistant.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/toolbar.h>
 #include <gtkmm/toolbutton.h>
 #include <gtkmm/label.h>
@@ -32,6 +34,9 @@ gestao-herb is free software: you can redistribute it and/or modify it
 #include <gtkmm/textview.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/comboboxtext.h>
+
 
 #include "ui/widgets/widgets.h"
 #include "db/visit-interface.h"

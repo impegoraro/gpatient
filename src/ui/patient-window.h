@@ -8,7 +8,18 @@
 #ifndef PATIENT_WINDOW_H_
 #define PATIENT_WINDOW_H_
 
-#include <gtkmm.h>
+#include <gtkmm/button.h>
+#include <gtkmm/radiobutton.h> 
+#include <gtkmm/radiobuttongroup.h> 
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/label.h>
+#include <gtkmm/window.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/messagedialog.h>
+
+
 #include "widgets/widgets.h"
 #include "../person.h"
 
@@ -93,6 +104,8 @@ public:
 
 	sigc::signal<void, PatientWindow &>& signal_add();
 
+	virtual void show();
+	virtual void show_all();
 	void clean();
 	int run();
 
@@ -111,8 +124,8 @@ protected:
 	bool on_identificationCard_focus_out(GdkEventFocus *event);
 	void activate_close(bool);
 
+	inline void validate_entry(Gtk::Entry& entry, bool set_icon = true, Gtk::Entry* other = NULL);
 	inline void validate_entry(Gtk::Entry& entry, guint32 val, bool set_icon = true);
-	inline void validate_entry(Gtk::Entry& entry, bool set_icon = true);
 	virtual bool on_delete_event(GdkEventAny *);
 };
 
