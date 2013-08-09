@@ -204,7 +204,7 @@ int DBHandler::person_insert(const Person& p) const
 			sqlite3_finalize(stmtB);
 			sqlite3_finalize(stmtE);
 		} else {
-			std::cout<< "Error (" << res <<") while inserting..."<< std::endl<< "'" << query <<"'"<<endl;
+			std::cout<< "Error (" << res <<") while inserting..."<< std::endl<<"Message: "<< sqlite3_errmsg(m_db)<<std::endl<<std::endl<< "'" << query <<"'"<<endl;
 			sqlite3_finalize(stmtB);
 		}
 	} else
@@ -225,28 +225,24 @@ int DBHandler::visit_insert(VisitInterface& v) const
 	if(m_db != NULL) {
 		int visitID;
 		string qBegin = "BEGIN IMMEDIATE TRANSACTION;";
-		string query = "INSERT INTO Visits( " \
-						"RefPersonID, Complaint, Anamnesis, VisitDate, Weight, PhysicalAppearance, " \
-						"Movement, Voice, Smell, Hypertension, Cholesterol, Triglyceride, " \
-						"Diabetes, Sleepiness, Transpiration, Dehydration, Anxiety, Irrt, " \
-						"Frustration, Cry, Verm, Ved, Brad, Prt, Aml, Alg, Irritable, Sad, " \
-						"Med, Melan, Hearing, Throat, Scent, Vision, Fatigue, SexualActivity, " \
-						"Body, Abdomen, Head, Circulation, EatingHabits," \
-						"Menstruation,Pregnancy,Surgery," \
-						"PreviousTreatment,Prostheses,Weight2,Urine,Faeces,Tongue," \
-						"PulseD,PulseE,Apal,Exams,ClinicalAnalysis,Color," \
-						"Escle,Observations,MedTxt,Medication,Treatment) " \
-						"VALUES(?, ?, ?, ?, ?, ?, " \
-								"?, ?, ?, ?, ?, ?, ?, ?, " \
-								"?, ?, ?, ?, ?, ?, ?, ?, " \
-								"?, ?, ?, ?, ?, ?, ?, ?, " \
-								"?, ?, ?, ?, ?, ?, ?, ?, " \
-								"?, ?, ?, ?, ?, ?, ?, ?, " \
-								"?, ?, ?, ?, ?, ?, ?, ?, " \
-								"?, ?, ?, ?, ?, ?, ?); ";
-		string queryPain = "INSERT INTO Pain(Type,Since,Observation,RefVisitID)" \
+		string query = "INSERT INTO Visits(RefPersonID, VisitDate, Sleepiness, Fatigue, Head, Tongue, " \
+					"Urine, Faeces, Menstruation, PulseD, PulseE, Apal, Observations) " \
+					"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
+		string qDetailed = "INSERT INTO DetailedVisits(RefVisitID, Complaint, Anamnesis, Weight, " \
+					"PhysicalAppearance, Movement, Voice, Smell, Hypertension,  " \
+					"Cholesterol, Triglyceride, Diabetes, Transpiration, Dehydration, Anxiety, Irrt, Frustration,  " \
+					"Cry, Verm, Ved, Brad, Prt, Aml, Alg, Irritable, Sad, Med, Melan, Hearing, Throat, Scent, Vision,  " \
+					"SexualActivity, Body, Abdomen, Circulation, EatingHabits, Prostheses, Surgery, Weight2,  " \
+					"PreviousTreatment, Pregnancy, Exams, ClinicalAnalysis, Medication, Color, Escle, MedTxt, Treatment) " \
+					"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, " \
+					"?, ?, ?, ?, ?, ?, ?, ?, ?, " \
+					"?, ?, ?, ?, ?, ?, ?, ?, ?, " \
+					"?, ?, ?, ?, ?, ?, ?, ?, ?, " \
+					"?, ?, ?, ?, ?, ?, ?, ?, ?, " \
+					"?, ?, ?, ?); ";
+		string queryPain = "INSERT INTO Pain(Type,Since,Observation,RefVisitID) " \
 						" VALUES(?, ?, ?, ?);";
-		string queryBP = "INSERT INTO BloodPressure(High, Low, BPM, RefVisitID)" \
+		string queryBP = "INSERT INTO BloodPressure(High, Low, BPM, RefVisitID) " \
 						" VALUES(?, ?, ?, ?);";
 		string qFinish = "COMMIT TRANSACTION;";
 
@@ -259,85 +255,95 @@ int DBHandler::visit_insert(VisitInterface& v) const
 			return -1;
 		}
 
-		if((res = sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
+		if((res = sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL)) == SQLITE_OK) {
 			
 			sqlite3_bind_int(stmt, 1, v.getPersonID());
-			sqlite3_bind_text(stmt, 2, v.getComplaint().c_str(), v.getComplaint().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 3, v.getAnamnesis().c_str(), v.getAnamnesis().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 4, v.getDate().c_str(), v.getDate().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_double(stmt, 5, v.getWeight());
-
-			sqlite3_bind_text(stmt, 6, v.getAppearance().c_str(), v.getAppearance().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 7, v.getMovement().c_str(), v.getMovement().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 8, v.getVoice().c_str(), v.getVoice().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 9, v.getSmell().c_str(), v.getSmell().bytes(), SQLITE_TRANSIENT);
-
-			sqlite3_bind_int(stmt, 10, v.getHypertension());
-			sqlite3_bind_int(stmt, 11, v.getCholesterol());
-			sqlite3_bind_int(stmt, 12, v.getTriglyceride());
-			sqlite3_bind_int(stmt, 13, v.getDiabetes());
-
-			sqlite3_bind_text(stmt, 14, v.getSleepiness().c_str(), v.getSleepiness().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 15, v.getTranspiration().c_str(), v.getTranspiration().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 16, v.getDehydration().c_str(), v.getDehydration().bytes(), SQLITE_TRANSIENT);
-
-			sqlite3_bind_int(stmt, 17, v.isAnxiety());
-			sqlite3_bind_int(stmt, 18, v.isIrrt());
-			sqlite3_bind_int(stmt, 19, v.isFrustration());
-			sqlite3_bind_int(stmt, 20, v.isCry());
-			sqlite3_bind_int(stmt, 21, v.isVerm());
-			sqlite3_bind_int(stmt, 22, v.isVed());
-			sqlite3_bind_int(stmt, 23, v.isBrad());
-			sqlite3_bind_int(stmt, 24, v.isPrt());
-			sqlite3_bind_int(stmt, 25, v.isAml());
-			sqlite3_bind_int(stmt, 26, v.isAlg());
-			sqlite3_bind_int(stmt, 27, v.isIrritable());
-			sqlite3_bind_int(stmt, 28, v.isSad());
-			sqlite3_bind_int(stmt, 29, v.isMed());
-			sqlite3_bind_int(stmt, 30, v.isMelan());
-
-			sqlite3_bind_text(stmt, 31, v.getHearing().c_str(), v.getHearing().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 32, v.getThroat().c_str(), v.getThroat().bytes(), SQLITE_TRANSIENT); 
-			sqlite3_bind_text(stmt, 33, v.getScent().c_str(), v.getScent().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 34, v.getVision().c_str(), v.getVision().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 35, v.getFatigue().c_str(), v.getFatigue().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 36, v.getSexualActivity().c_str(), v.getSexualActivity().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 37, v.getBody().c_str(), v.getBody().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 38, v.getAbdomen().c_str(), v.getAbdomen().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 39, v.getHead().c_str(), v.getHead().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 40, v.getCirculation().c_str(), v.getCirculation().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 41, v.getEatingHabits().c_str(), v.getEatingHabits().bytes(), SQLITE_TRANSIENT);
-
-			sqlite3_bind_text(stmt, 42, v.getMenstruation().c_str(), v.getMenstruation().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 43, v.getPregnancy().c_str(), v.getPregnancy().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 44, v.getSurgery().c_str(), v.getSurgery().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 45, v.getPreviousTreatment().c_str(), v.getPreviousTreatment().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 46, v.getProstheses());
-			sqlite3_bind_int(stmt, 47, v.getWeightBool());
-			sqlite3_bind_text(stmt, 48, v.getUrine().c_str(), v.getUrine().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 49, v.getFaeces().c_str(), v.getFaeces().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 50, v.getTongue().c_str(), v.getTongue().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 51, v.getPulseD().c_str(), v.getPulseD().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 52, v.getPulseE().c_str(), v.getPulseE().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 53, v.getApal().c_str(), v.getApal().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 54, v.getExams().c_str(), v.getExams().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 55, v.getClinicalAnalysis().c_str(), v.getClinicalAnalysis().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 56, v.getColor().c_str(), v.getColor().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 57, v.getEscle().c_str(), v.getEscle().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 58, v.getObservations().c_str(), v.getObservations().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 59, v.getMed().c_str(), v.getMed().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 60, v.getMedication().c_str(), v.getMedication().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 61, v.getTreatment().c_str(), v.getTreatment().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, v.getDate().c_str(), v.getDate().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, v.getSleepiness().c_str(), v.getSleepiness().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 4, v.getFatigue().c_str(), v.getFatigue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 5, v.getHead().c_str(), v.getHead().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 6, v.getTongue().c_str(), v.getTongue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 7, v.getUrine().c_str(), v.getUrine().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, v.getFaeces().c_str(), v.getFaeces().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, v.getMenstruation().c_str(), v.getMenstruation().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, v.getPulseD().c_str(), v.getPulseD().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 11, v.getPulseE().c_str(), v.getPulseE().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 12, v.getApal().c_str(), v.getApal().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 13, v.getObservations().c_str(), v.getObservations().bytes(), SQLITE_TRANSIENT);
 
 			if(sqlite3_step(stmt) == SQLITE_DONE) {
 				res = 1;
 			} else {
 				shouldRollback = true;
-				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+				std::cerr<< "Error preparing the statement for the visit: "<< sqlite3_errmsg(m_db)<<std::endl;
 			}
 			sqlite3_finalize(stmt);
 
 			visitID = get_visit_from_person(v.getPersonID());
+			/************************ inserting detailed visit info ************************/
+			if((res = sqlite3_prepare_v2(m_db, qDetailed.c_str(), qDetailed.size(), &stmt, NULL)) == SQLITE_OK) {
+				sqlite3_bind_int(stmt, 1, visitID);
+				sqlite3_bind_text(stmt, 2, v.getComplaint().c_str(), v.getComplaint().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 3, v.getAnamnesis().c_str(), v.getAnamnesis().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_double(stmt, 4, v.getWeight());
+				sqlite3_bind_text(stmt, 5, v.getAppearance().c_str(), v.getAppearance().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 6, v.getMovement().c_str(), v.getMovement().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 7, v.getVoice().c_str(), v.getVoice().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 8, v.getSmell().c_str(), v.getSmell().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 9, v.getHypertension());
+				sqlite3_bind_int(stmt, 10, v.getCholesterol());
+				sqlite3_bind_int(stmt, 11, v.getTriglyceride());
+				sqlite3_bind_int(stmt, 12, v.getDiabetes());
+				sqlite3_bind_text(stmt, 13, v.getTranspiration().c_str(), v.getTranspiration().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 14, v.getDehydration().c_str(), v.getDehydration().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 15, v.isAnxiety());
+				sqlite3_bind_int(stmt, 16, v.isIrrt());
+				sqlite3_bind_int(stmt, 17, v.isFrustration());
+				sqlite3_bind_int(stmt, 18, v.isCry ());
+				sqlite3_bind_int(stmt, 19, v.isVerm());
+				sqlite3_bind_int(stmt, 20, v.isVed());
+				sqlite3_bind_int(stmt, 21, v.isBrad());
+				sqlite3_bind_int(stmt, 22, v.isPrt());
+				sqlite3_bind_int(stmt, 23, v.isAml());
+				sqlite3_bind_int(stmt, 24, v.isAlg());
+				sqlite3_bind_int(stmt, 25, v.isIrritable());
+				sqlite3_bind_int(stmt, 26, v.isSad());
+				sqlite3_bind_int(stmt, 27, v.isMed());
+				sqlite3_bind_int(stmt, 28, v.isMelan());
+				sqlite3_bind_text(stmt, 29, v.getHearing().c_str(), v.getHearing().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 30, v.getThroat().c_str(), v.getThroat().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 31, v.getScent().c_str(), v.getScent().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 32, v.getVision().c_str(), v.getVision().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 33, v.getSexualActivity().c_str(), v.getSexualActivity().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 34, v.getBody().c_str(), v.getBody().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 35, v.getAbdomen().c_str(), v.getAbdomen().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 36, v.getCirculation().c_str(), v.getCirculation().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 37, v.getEatingHabits().c_str(), v.getEatingHabits().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 38, v.getProstheses());
+				sqlite3_bind_text(stmt, 39, v.getSurgery().c_str(), v.getSurgery().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 40, v.getWeightBool());
+				sqlite3_bind_text(stmt, 41, v.getPreviousTreatment().c_str(), v.getPreviousTreatment().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 42, v.getPregnancy().c_str(), v.getPregnancy().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 43, v.getExams().c_str(), v.getExams().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 44, v.getClinicalAnalysis().c_str(), v.getClinicalAnalysis().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 45, v.getMedication().c_str(), v.getMedication().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 46, v.getColor().c_str(), v.getColor().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 47, v.getEscle().c_str(), v.getEscle().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 48, v.getMedication().c_str(), v.getMedication().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 49, v.getTreatment().c_str(), v.getTreatment().bytes(), SQLITE_TRANSIENT);
+
+				if(sqlite3_step(stmt) == SQLITE_DONE)
+					res = 1;
+				else {
+					cout<< "Warning: could not insert detailed view"<< endl<< sqlite3_errmsg(m_db)<<std::endl;
+					shouldRollback = true;
+				}	
+				sqlite3_finalize(stmt);
+			} else {
+				shouldRollback = true;
+				std::cerr<< "Error preparing the statement for detailed visit: "<< sqlite3_errmsg(m_db)<<std::endl;
+			}
+			/************************  end of detailed visit info  ************************/
 
 			/************************ inserting pain info ************************/
 			if((res = sqlite3_prepare_v2(m_db, queryPain.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
@@ -352,8 +358,7 @@ int DBHandler::visit_insert(VisitInterface& v) const
 				sqlite3_finalize(stmt);
 			} else {
 				shouldRollback = true;
-				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
-				sqlite3_finalize(stmt);
+				std::cerr<< "Error preparing the statement for pain: "<< sqlite3_errmsg(m_db)<<std::endl;
 			}
 			
 			/************************  end of pain info  ************************/
@@ -367,14 +372,13 @@ int DBHandler::visit_insert(VisitInterface& v) const
 				if(sqlite3_step(stmt) == SQLITE_DONE)
 					res = 1;
 				else {
-					std::cerr<< "Error executing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+					std::cerr<< "Error executing the statement for blood pressure: "<< sqlite3_errmsg(m_db)<<std::endl;
 					shouldRollback = true;
 				}
 				sqlite3_finalize(stmt);
 			} else {
 				shouldRollback = true;
-				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
-				sqlite3_finalize(stmt);
+				std::cerr<< "Error preparing the statement for blood pressure: "<< sqlite3_errmsg(m_db)<<std::endl;
 			}
 			
 			/************************  end of blood pressure info  ************************/
@@ -402,7 +406,7 @@ int DBHandler::visit_insert(VisitInterface& v) const
 						sqlite3_bind_text(stmt, 2, allObs.c_str(), allObs.bytes(), SQLITE_TRANSIENT);
 						sqlite3_bind_int(stmt, 3, visitID);
 					} else {
-						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						std::cerr<< "Error preparing the statement for allergies: "<< sqlite3_errmsg(m_db)<<std::endl;
 						shouldRollback = true;
 						break;
 					}
@@ -412,7 +416,7 @@ int DBHandler::visit_insert(VisitInterface& v) const
 						sqlite3_bind_text(stmt, 2, allObs.c_str(), allObs.bytes(), SQLITE_TRANSIENT);
 						sqlite3_bind_int(stmt, 3, row[i.m_col_id]);
 					} else {
-						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						std::cerr<< "Error preparing the statement for allergies: "<< sqlite3_errmsg(m_db)<<std::endl;
 						shouldRollback = true;
 						break;
 					}
@@ -424,7 +428,7 @@ int DBHandler::visit_insert(VisitInterface& v) const
 						sqlite3_bind_text(stmt, 1, now.c_str(), now.bytes(), SQLITE_TRANSIENT);
 						sqlite3_bind_int(stmt, 2, row[i.m_col_id]);
 					} else {
-						std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+						std::cerr<< "Error preparing the statement for allergies: "<< sqlite3_errmsg(m_db)<<std::endl;
 						shouldRollback = true;
 						break;
 					}
@@ -433,7 +437,7 @@ int DBHandler::visit_insert(VisitInterface& v) const
 				if(sqlite3_step(stmt) == SQLITE_DONE)
 					res = 1;
 				else {
-					std::cerr<< "Error executing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+					std::cerr<< "Error executing the statement for allergies: "<< sqlite3_errmsg(m_db)<<std::endl;
 					shouldRollback = true;
 					break;
 				}
@@ -459,6 +463,11 @@ int DBHandler::visit_insert(VisitInterface& v) const
 		} else {
 			std::cout<< "Error (" << res <<") while inserting" <<endl <<"Message: "<< sqlite3_errmsg(m_db) << std::endl<< "'" << query <<"'"<<endl;
 			sqlite3_finalize(stmtB);
+			qFinish = "ROLLBACK TRANSACTION;";
+			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
+				if(stmtB != NULL)
+					sqlite3_finalize(stmtB); // clean up
+			}
 		}
 	} else
 		throw (SqlConnectionClosedException());
@@ -477,21 +486,17 @@ int DBHandler::visit_update(VisitInterface& v) const
 
 	if(m_db != NULL) {
 		string qBegin = "BEGIN IMMEDIATE TRANSACTION;";
-		string query = "UPDATE Visits SET " \
-						"Complaint = ?, Anamnesis = ?, VisitDate = ?, Weight = ?, PhysicalAppearance = ?, " \
-						"Movement = ?, Voice = ?, Smell = ?, Hypertension = ?, Cholesterol = ?, Triglyceride = ?, " \
-						"Diabetes = ?, Sleepiness = ?, Transpiration = ?, Dehydration = ?, Anxiety = ?, Irrt = ?, " \
-						"Frustration = ?, Cry = ?, Verm = ?, Ved = ?, Brad = ?, Prt = ?, Aml = ?, Alg = ?, Irritable = ?, Sad = ?, " \
-						"Med = ?, Melan = ?, Hearing = ?, Throat = ?, Scent = ?, Vision = ?, Fatigue = ?, SexualActivity = ?, " \
-						"Body = ?, Abdomen = ?, Head = ?, Circulation = ?, EatingHabits = ?," \
-						"Menstruation = ?, Pregnancy = ?, Surgery = ?," \
-						"PreviousTreatment = ?, Prostheses = ?, Weight2 = ?, Urine = ?, Faeces = ?, Tongue = ?," \
-						"PulseD = ?, PulseE = ?, Apal = ?, Exams = ?, ClinicalAnalysis = ?, Color = ?," \
-						"Escle = ?, Observations = ?, MedTxt = ?, Medication = ?, Treatment = ? WHERE VisitID = ?";
-		string queryPain = "INSERT INTO Pain(Type,Since,Observation,RefVisitID)" \
+		string query = "UPDATE Visits SET VisitDate = ?, Sleepiness = ?, Fatigue = ?, Head = ?, Tongue = ?, " \
+				"Urine = ?, Faeces = ?, Menstruation = ?, PulseD = ?, PulseE = ?, Apal = ?, Observations = ? WHERE VisitID = ?";
+		string qDetailed = "UPDATE DetailedVisits SET Complaint = ?, Anamnesis = ?, Weight = ?, " \
+					"PhysicalAppearance = ?, Movement = ?, Voice = ?, Smell = ?, Hypertension = ?,  " \
+					"Cholesterol = ?, Triglyceride = ?, Diabetes = ?, Transpiration = ?, Dehydration = ?, Anxiety = ?, Irrt = ?, Frustration = ?,  " \
+					"Cry = ?, Verm = ?, Ved = ?, Brad = ?, Prt = ?, Aml = ?, Alg = ?, Irritable = ?, Sad = ?, Med = ?, Melan = ?, Hearing = ?, Throat = ?, Scent = ?, Vision = ?,  " \
+					"SexualActivity = ?, Body = ?, Abdomen = ?, Circulation = ?, EatingHabits = ?, Prostheses = ?, Surgery = ?, Weight2 = ?,  " \
+					"PreviousTreatment = ?, Pregnancy = ?, Exams = ?, ClinicalAnalysis = ?, Medication = ?, Color = ?, Escle = ?, MedTxt = ?, Treatment = ? WHERE RefVisitID = ? ";
+		string queryPain = "INSERT INTO Pain(Type,Since,Observation,RefVisitID) " \
 						" VALUES(?, ?, ?, ?);";
-		string queryBP = "INSERT INTO BloodPressure(High, Low, BPM, RefVisitID)" \
-						" VALUES(?, ?, ?, ?);";
+		string queryBP = "UPDATE BloodPressure High = ?, Low = ?, BPM = ? WHERE  RefVisitID = ? ";
 		string qFinish = "COMMIT TRANSACTION;";
 
 		sqlite3_stmt *stmt, *stmtB, *stmtE;
@@ -505,73 +510,19 @@ int DBHandler::visit_update(VisitInterface& v) const
 
 		if((res = sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
 			
-			sqlite3_bind_text(stmt, 1, v.getComplaint().c_str(), v.getComplaint().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 2, v.getAnamnesis().c_str(), v.getAnamnesis().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 3, v.getDate().c_str(), v.getDate().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_double(stmt, 4, v.getWeight());
-
-			sqlite3_bind_text(stmt, 5, v.getAppearance().c_str(), v.getAppearance().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 6, v.getMovement().c_str(), v.getMovement().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 7, v.getVoice().c_str(), v.getVoice().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 8, v.getSmell().c_str(), v.getSmell().bytes(), SQLITE_TRANSIENT);
-
-			sqlite3_bind_int(stmt, 9, v.getHypertension());
-			sqlite3_bind_int(stmt, 10, v.getCholesterol());
-			sqlite3_bind_int(stmt, 11, v.getTriglyceride());
-			sqlite3_bind_int(stmt, 12, v.getDiabetes());
-
-			sqlite3_bind_text(stmt, 13, v.getSleepiness().c_str(), v.getSleepiness().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 14, v.getTranspiration().c_str(), v.getTranspiration().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 15, v.getDehydration().c_str(), v.getDehydration().bytes(), SQLITE_TRANSIENT);
-
-			sqlite3_bind_int(stmt, 16, v.isAnxiety());
-			sqlite3_bind_int(stmt, 17, v.isIrrt());
-			sqlite3_bind_int(stmt, 18, v.isFrustration());
-			sqlite3_bind_int(stmt, 19, v.isCry());
-			sqlite3_bind_int(stmt, 20, v.isVerm());
-			sqlite3_bind_int(stmt, 21, v.isVed());
-			sqlite3_bind_int(stmt, 22, v.isBrad());
-			sqlite3_bind_int(stmt, 23, v.isPrt());
-			sqlite3_bind_int(stmt, 24, v.isAml());
-			sqlite3_bind_int(stmt, 25, v.isAlg());
-			sqlite3_bind_int(stmt, 26, v.isIrritable());
-			sqlite3_bind_int(stmt, 27, v.isSad());
-			sqlite3_bind_int(stmt, 28, v.isMed());
-			sqlite3_bind_int(stmt, 29, v.isMelan());
-
-			sqlite3_bind_text(stmt, 30, v.getHearing().c_str(), v.getHearing().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 31, v.getThroat().c_str(), v.getThroat().bytes(), SQLITE_TRANSIENT); 
-			sqlite3_bind_text(stmt, 32, v.getScent().c_str(), v.getScent().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 33, v.getVision().c_str(), v.getVision().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 34, v.getFatigue().c_str(), v.getFatigue().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 35, v.getSexualActivity().c_str(), v.getSexualActivity().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 36, v.getBody().c_str(), v.getBody().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 37, v.getAbdomen().c_str(), v.getAbdomen().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 38, v.getHead().c_str(), v.getHead().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 39, v.getCirculation().c_str(), v.getCirculation().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 40, v.getEatingHabits().c_str(), v.getEatingHabits().bytes(), SQLITE_TRANSIENT);
-
-			sqlite3_bind_text(stmt, 41, v.getMenstruation().c_str(), v.getMenstruation().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 42, v.getPregnancy().c_str(), v.getPregnancy().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 43, v.getSurgery().c_str(), v.getSurgery().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 44, v.getPreviousTreatment().c_str(), v.getPreviousTreatment().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 45, v.getProstheses());
-			sqlite3_bind_int(stmt, 46, v.getWeightBool());
-			sqlite3_bind_text(stmt, 47, v.getUrine().c_str(), v.getUrine().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 48, v.getFaeces().c_str(), v.getFaeces().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 49, v.getTongue().c_str(), v.getTongue().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 50, v.getPulseD().c_str(), v.getPulseD().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 51, v.getPulseE().c_str(), v.getPulseE().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 52, v.getApal().c_str(), v.getApal().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 53, v.getExams().c_str(), v.getExams().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 54, v.getClinicalAnalysis().c_str(), v.getClinicalAnalysis().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 55, v.getColor().c_str(), v.getColor().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 56, v.getEscle().c_str(), v.getEscle().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 57, v.getObservations().c_str(), v.getObservations().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 58, v.getMed().c_str(), v.getMed().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 59, v.getMedication().c_str(), v.getMedication().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 60, v.getTreatment().c_str(), v.getTreatment().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_int(stmt, 61, v.getVisitID());
+			sqlite3_bind_text(stmt, 1, v.getDate().c_str(), v.getDate().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, v.getSleepiness().c_str(), v.getSleepiness().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, v.getFatigue().c_str(), v.getFatigue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 4, v.getHead().c_str(), v.getHead().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 5, v.getTongue().c_str(), v.getTongue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 6, v.getUrine().c_str(), v.getUrine().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 7, v.getFaeces().c_str(), v.getFaeces().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, v.getMenstruation().c_str(), v.getMenstruation().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, v.getPulseD().c_str(), v.getPulseD().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, v.getPulseE().c_str(), v.getPulseE().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 11, v.getApal().c_str(), v.getApal().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 12, v.getObservations().c_str(), v.getObservations().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 13, v.getVisitID());
 
 			if(sqlite3_step(stmt) == SQLITE_DONE) {
 				res = 1;
@@ -580,6 +531,73 @@ int DBHandler::visit_update(VisitInterface& v) const
 				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
 			}
 			sqlite3_finalize(stmt);
+
+			/************************ inserting detailed visit info ************************/
+			if((res = sqlite3_prepare_v2(m_db, qDetailed.c_str(), qDetailed.size(), &stmt, NULL)) == SQLITE_OK) {
+				
+				sqlite3_bind_text(stmt, 1, v.getComplaint().c_str(), v.getComplaint().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 2, v.getAnamnesis().c_str(), v.getAnamnesis().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_double(stmt, 3, v.getWeight());
+				sqlite3_bind_text(stmt, 4, v.getAppearance().c_str(), v.getAppearance().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 5, v.getMovement().c_str(), v.getMovement().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 6, v.getVoice().c_str(), v.getVoice().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 7, v.getSmell().c_str(), v.getSmell().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 8, v.getHypertension());
+				sqlite3_bind_int(stmt, 9, v.getCholesterol());
+				sqlite3_bind_int(stmt, 10, v.getTriglyceride());
+				sqlite3_bind_int(stmt, 11, v.getDiabetes());
+				sqlite3_bind_text(stmt, 12, v.getTranspiration().c_str(), v.getTranspiration().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 13, v.getDehydration().c_str(), v.getDehydration().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 14, v.isAnxiety());
+				sqlite3_bind_int(stmt, 15, v.isIrrt());
+				sqlite3_bind_int(stmt, 16, v.isFrustration());
+				sqlite3_bind_int(stmt, 17, v.isCry ());
+				sqlite3_bind_int(stmt, 18, v.isVerm());
+				sqlite3_bind_int(stmt, 19, v.isVed());
+				sqlite3_bind_int(stmt, 20, v.isBrad());
+				sqlite3_bind_int(stmt, 21, v.isPrt());
+				sqlite3_bind_int(stmt, 22, v.isAml());
+				sqlite3_bind_int(stmt, 23, v.isAlg());
+				sqlite3_bind_int(stmt, 24, v.isIrritable());
+				sqlite3_bind_int(stmt, 25, v.isSad());
+				sqlite3_bind_int(stmt, 26, v.isMed());
+				sqlite3_bind_int(stmt, 27, v.isMelan());
+				sqlite3_bind_text(stmt, 28, v.getHearing().c_str(), v.getHearing().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 29, v.getThroat().c_str(), v.getThroat().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 30, v.getScent().c_str(), v.getScent().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 31, v.getVision().c_str(), v.getVision().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 32, v.getSexualActivity().c_str(), v.getSexualActivity().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 33, v.getBody().c_str(), v.getBody().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 34, v.getAbdomen().c_str(), v.getAbdomen().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 35, v.getCirculation().c_str(), v.getCirculation().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 36, v.getEatingHabits().c_str(), v.getEatingHabits().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 37, v.getProstheses());
+				sqlite3_bind_text(stmt, 38, v.getSurgery().c_str(), v.getSurgery().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 39, v.getWeightBool());
+				sqlite3_bind_text(stmt, 40, v.getPreviousTreatment().c_str(), v.getPreviousTreatment().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 41, v.getPregnancy().c_str(), v.getPregnancy().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 42, v.getExams().c_str(), v.getExams().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 43, v.getClinicalAnalysis().c_str(), v.getClinicalAnalysis().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 44, v.getMedication().c_str(), v.getMedication().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 45, v.getColor().c_str(), v.getColor().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 46, v.getEscle().c_str(), v.getEscle().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 47, v.getMedication().c_str(), v.getMedication().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 48, v.getTreatment().c_str(), v.getTreatment().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 49, v.getVisitID());
+
+				if(sqlite3_step(stmt) == SQLITE_DONE)
+					res = 1;
+				else {
+					cout<< "Warning: could not insert detailed view"<< endl<< sqlite3_errmsg(m_db)<<std::endl;
+					shouldRollback = true;
+				}	
+				sqlite3_finalize(stmt);
+			} else {
+				shouldRollback = true;
+				std::cerr<< "Error preparing the statement for detailed visit: "<< sqlite3_errmsg(m_db)<<std::endl;
+			}
+			/************************  end of detailed visit info  ************************/
+			
 
 			/************************ inserting pain info ************************/
 			//if((res = sqlite3_prepare_v2(m_db, queryPain.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
@@ -601,23 +619,23 @@ int DBHandler::visit_update(VisitInterface& v) const
 			/************************  end of pain info  ************************/
 
 			/************************ inserting blood pressure info ************************/
-			//if((res = sqlite3_prepare_v2(m_db, queryBP.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
-			//	sqlite3_bind_int(stmt, 1, v.getBPMax());
-			//	sqlite3_bind_int(stmt, 2, v.getBPMin());
-			//	sqlite3_bind_int(stmt, 3, v.getBPM());
-			//	sqlite3_bind_int(stmt, 4, v.getVisitID());
-			//	if(sqlite3_step(stmt) == SQLITE_DONE)
-			//		res = 1;
-			//	else {
-			//		std::cerr<< "Error executing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
-			//		shouldRollback = true;
-			//	}
-			//	sqlite3_finalize(stmt);
-			//} else {
-			//	shouldRollback = true;
-			//	std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
-			//	sqlite3_finalize(stmt);
-			//}
+			if((res = sqlite3_prepare_v2(m_db, queryBP.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
+				sqlite3_bind_int(stmt, 1, v.getBPMax());
+				sqlite3_bind_int(stmt, 2, v.getBPMin());
+				sqlite3_bind_int(stmt, 3, v.getBPM());
+				sqlite3_bind_int(stmt, 4, v.getVisitID());
+				if(sqlite3_step(stmt) == SQLITE_DONE)
+					res = 1;
+				else {
+					std::cerr<< "Error executing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+					shouldRollback = true;
+				}
+				sqlite3_finalize(stmt);
+			} else {
+				shouldRollback = true;
+				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+				sqlite3_finalize(stmt);
+			}
 			
 			/************************  end of blood pressure info  ************************/
 
@@ -1146,12 +1164,10 @@ void DBHandler::get_patients(const ustring *name) const
 void DBHandler::get_visits(guint32 personID) const
 {
 	/*TODO: throw exception if db is not opened*/
-	ustring query = "SELECT VisitID, Complaint, VisitDate FROM Visits ";
+	ustring query = "SELECT VisitID, Complaint, VisitDate FROM Visits V INNER JOIN DetailedVisits Dv ON V.VisitID = Dv.RefVisitID WHERE RefPersonID = ? AND Active = 1 ORDER BY VisitDate ASC;";
 
 	if(m_db != NULL) {
 		sqlite3_stmt *stmt;
-		
-		query += " WHERE RefPersonID = ? ORDER BY VisitDate ASC;";
 		
 		if(sqlite3_prepare_v2(m_db, query.c_str(), query.bytes(), &stmt, NULL) == SQLITE_OK) {
 			int res;
@@ -1193,6 +1209,7 @@ bool DBHandler::get_visit(int id, VisitInterface &v) const
 						"Apal, Exams, ClinicalAnalysis, Color, Escle, Observations, " \
 						"MedTxt, Medication, Treatment, High, Low, BPM " \
 						"FROM Visits V INNER JOIN Pain P ON P.RefVisitID = V.VisitID " \
+						"INNER JOIN DetailedVisits Dv ON V.VisitID = Dv.RefVisitID " \
 						"INNER JOIN BloodPressure BP ON BP.RefVisitID = V.VisitID " \
 						"WHERE V.VisitID = ?";
 		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
@@ -1204,7 +1221,6 @@ bool DBHandler::get_visit(int id, VisitInterface &v) const
 				val = sqlite3_step(stmt);
 				switch(val) {
 				case SQLITE_ROW: {
-
 					v.setComplaint(ustring((const char*)sqlite3_column_text(stmt, 0)));
 					v.setAnamnesis(ustring((const char*)sqlite3_column_text(stmt, 1)));
 					v.setDate(ustring((const char*)sqlite3_column_text(stmt, 2)));
@@ -1252,9 +1268,14 @@ bool DBHandler::get_visit(int id, VisitInterface &v) const
 					v.setWeightBool((bool)sqlite3_column_int(stmt, 44));
 					v.setProstheses((bool)sqlite3_column_int(stmt, 45));
 					v.setPreviousTreatment(ustring((const char*)sqlite3_column_text(stmt, 46)));
-
-					v.setMenstruation(ustring((const char*)sqlite3_column_text(stmt, 47)));
-					v.setPregnancy(ustring((const char*)sqlite3_column_text(stmt, 48)));
+					if(sqlite3_column_text(stmt, 47) != NULL)
+						v.setMenstruation(ustring((const char*)sqlite3_column_text(stmt, 47)));
+					else
+						v.setMenstruation("");
+					if(sqlite3_column_text(stmt, 48) != NULL)
+						v.setPregnancy(ustring((const char*)sqlite3_column_text(stmt, 48)));
+					else
+						v.setPregnancy("");
 					v.setUrine(ustring((const char*)sqlite3_column_text(stmt, 49)));
 					v.setFaeces(ustring((const char*)sqlite3_column_text(stmt, 50)));
 					v.setTongue(ustring((const char*)sqlite3_column_text(stmt, 51)));
@@ -1265,7 +1286,10 @@ bool DBHandler::get_visit(int id, VisitInterface &v) const
 					v.setClinicalAnalysis(ustring((const char*)sqlite3_column_text(stmt, 56)));
 					v.setColor(ustring((const char*)sqlite3_column_text(stmt, 57)));
 					v.setEscle(ustring((const char*)sqlite3_column_text(stmt, 58)));
-					v.setObservations(ustring((const char*)sqlite3_column_text(stmt, 59)));
+					if(sqlite3_column_text(stmt, 59) != NULL)
+						v.setObservations(ustring((const char*)sqlite3_column_text(stmt, 59)));
+					else
+						v.setObservations("");
 					v.setMed(ustring((const char*)sqlite3_column_text(stmt, 60)));
 					v.setMedication(ustring((const char*)sqlite3_column_text(stmt, 61)));
 					v.setTreatment(ustring((const char*)sqlite3_column_text(stmt, 62)));
@@ -1393,7 +1417,7 @@ guint DBHandler::get_visit_from_person(gint PersonID) const
 
 void DBHandler::get_person_allergies(guint32 personID, const Glib::Date& date, SlotAppendAllergy cb) const
 {
-	string query = "SELECT A.AllergyID, A.Name, A.Observation, V.VisitDate FROM Person P " \
+	string query = "SELECT A.AllergyID, A.Name, A.Observations, V.VisitDate FROM Person P " \
 		"INNER JOIN Visits V ON V.RefPersonID = P.PersonID " \
 		"INNER JOIN Allergies A ON A.RefVisitID = V.VisitID " \
 		"WHERE V.VisitDate <= ? AND (DeleteDate IS NULL || DeleteDate <= ?) AND V.RefPersonID = ?";

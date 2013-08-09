@@ -3,10 +3,74 @@
 	{
 		"selected_items":
 		[
+			[
+				"SQLITE",
+				"SQLITE_TRANSIENT"
+			],
+			[
+				"Obv",
+				"Observations"
+			],
+			[
+				"show",
+				"show_all"
+			],
+			[
+				"get_text",
+				"get_text_length"
+			]
 		]
 	},
 	"buffers":
 	[
+		{
+			"file": "src/database/02-visists.sql",
+			"settings":
+			{
+				"buffer_size": 3606,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/database/Update 02.sql",
+			"settings":
+			{
+				"buffer_size": 1092,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/db/dbhandler.cpp",
+			"settings":
+			{
+				"buffer_size": 55979,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "INSERT INTO Visits(RefPersonID, VisitDate, Sleepiness, Fatigue, Head, Tongue,\nUrine, Faeces, Menstruation, PulseD, PulseE, Apal, Observations) \nVALUES(1, '2013-05-06', 'muito sono', 'muito cansado', 'dores de cabeça', 'linga boa', 'unirna normal', 'fezes feias', NULL, 'PUlso D', 'E', 'apala', 'obss')",
+			"settings":
+			{
+				"buffer_size": 301,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/ui/visitswindow.cpp",
+			"settings":
+			{
+				"buffer_size": 45947,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/ui/main-window.cpp",
+			"settings":
+			{
+				"buffer_size": 42811,
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -60,12 +124,29 @@
 	},
 	"file_history":
 	[
+		"/home/ilan/Projects/gestao-herb/src/ui/patient-window.cpp",
+		"/home/ilan/tmp.txt",
+		"/home/ilan/Projects/gestao-herb/src/main.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/main-window.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/patient-window.h",
+		"/home/ilan/Projects/gestao-herb/src/database/Update 01.sql",
+		"/home/ilan/Projects/gestao-herb/src/database/test-person.sql",
+		"/home/ilan/Projects/gestao-herb/src/db/dbhandler.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/view-patient.cpp",
+		"/home/ilan/Projects/gestao-herb/src/db/visit-interface.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/main-window.h",
+		"/home/ilan/Projects/gestao-herb/src/db/visit-interface.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/widgets/date-entry.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/widgets/numeric-entry.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/widgets/widgets.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/view-patient.h",
 		"/home/ilan/Projects/gestao-herb/patient.sublime-project",
 		"/home/ilan/.config/sublime-text-2/Packages/User/Preferences.sublime-settings",
 		"/home/ilan/Projects/gestao-herb/src/configuration.h",
 		"/home/ilan/Projects/gestao-herb/src/Makefile",
 		"/home/ilan/Projects/gestao-herb/src/main.h",
-		"/home/ilan/Projects/gestao-herb/src/main.cpp",
 		"/home/ilan/Projects/gestao-herb/src/configuration.cpp",
 		"/home/ilan/Dropbox/websites.txt",
 		"/home/ilan/.config/sublime-text-2/Packages/Default/Preferences.sublime-settings",
@@ -88,6 +169,39 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"format_strin",
+			"query",
+			"Visit",
+			"db",
+			"db.",
+			"'Os",
+			"s' ",
+			"[a-zA-Z]'[^,]",
+			",,",
+			"[0-9]+/[0-9]+/",
+			"[0-9]+/",
+			"VALUES",
+			"app",
+			"get",
+			"SMALLINT",
+			"INTEGER",
+			"VARCHAR",
+			"[A-Za-z]+",
+			"^[A-Za-z]+",
+			"[A-Za-z]+",
+			"^[A-Za-z]+",
+			"RefPersonID",
+			"^[A-Za-z]+",
+			"cout",
+			"^[A-Za-Z]+",
+			"CREATE",
+			"CREATE TABLE",
+			"unset_color",
+			"clean();",
+			"h",
+			"button",
+			"#include <gtkmm/button.h>",
+			"Visits"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -105,8 +219,170 @@
 	"groups":
 	[
 		{
+			"selected": 4,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "src/database/02-visists.sql",
+					"settings":
+					{
+						"buffer_size": 3606,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								140,
+								140
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/database/Update 02.sql",
+					"settings":
+					{
+						"buffer_size": 1092,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1083,
+								1083
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/db/dbhandler.cpp",
+					"settings":
+					{
+						"buffer_size": 55979,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								19565,
+								19565
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 6225.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"settings":
+					{
+						"buffer_size": 301,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								301,
+								301
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 30.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/ui/visitswindow.cpp",
+					"settings":
+					{
+						"buffer_size": 45947,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4165,
+								4165
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1080.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/ui/main-window.cpp",
+					"settings":
+					{
+						"buffer_size": 42811,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								13030,
+								13030
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 5363.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -170,6 +446,6 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 150.0,
+	"side_bar_width": 198.0,
 	"status_bar_visible": true
 }

@@ -36,7 +36,7 @@ void remove_window(Window& win)
 int main(int argc, char** argv)
 {
 	Main kit(argc, argv);
-	app = Application::create("org.herbanaria.base");
+	app = Application::create("org.pacientes.base");
 	ustring dbpath;
 	RefPtr<Gio::File> fdb;
 	

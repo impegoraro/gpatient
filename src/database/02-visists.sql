@@ -1,10 +1,17 @@
+DROP TABLE Visits;
+DROP TABLE DetailedVisits;
+DROP TABLE Pain;
+DROP TABLE BloodPressure;
+DROP TABLE Allergies;
+DROP TABLE GeneticDisorder;
+
 CREATE TABLE Visits
 (
 	VisitID INTEGER PRIMARY KEY AUTOINCREMENT,
 	ParentVisit INTEGER,
 	RefPersonID INTEGER NOT NULL,
 	
-	--VisitDate DATE NOT NULL,
+	VisitDate DATE NOT NULL,
 	Sleepiness VARCHAR(100) NOT NULL,
 	Fatigue VARCHAR(70) NOT NULL,
 	Head VARCHAR(70) NOT NULL,
@@ -16,10 +23,11 @@ CREATE TABLE Visits
 	PulseE VARCHAR(100) NOT NULL,
 	Apal VARCHAR(10) NOT NULL,
 	Observations VARCHAR(300),
+	Active SMALLINT DEFAULT(1) NOT NULL,
 
 	-- Keys
 	FOREIGN KEY(RefPersonID) REFERENCES Person(PersonID),
-	FOREIGN KEY(ParentVisit) REFERENCES Visit(VisitID)
+	FOREIGN KEY(ParentVisit) REFERENCES Visits(VisitID)
 
 );
 
@@ -30,7 +38,6 @@ CREATE TABLE DetailedVisits
 
 	Complaint VARCHAR(100) NOT NULL,
 	Anamnesis VARCHAR(300) NOT NULL,
-	VisitDate DATE NOT NULL,
 	Weight FLOAT NOT NULL,
 	PhysicalAppearance VARCHAR(30) NOT NULL,
 	Movement VARCHAR(30) NOT NULL,
@@ -88,20 +95,20 @@ CREATE TABLE DetailedVisits
 CREATE TABLE Pain
 (
 	PainID INTEGER PRIMARY KEY AUTOINCREMENT,
+	RefVisitID INTEGER NOT NULL,
 	Type VARCHAR(50) NOT NULL,
 	Observation VARCHAR(100) NOT NULL,
 	Since VARCHAR(50) NOT NULL,
-	RefVisitID INTEGER NOT NULL,
 
 	FOREIGN KEY(RefVisitID) REFERENCES Visits(VisitID)
 );
 
 CREATE TABLE BloodPressure
 (
+	RefVisitID INTEGER PRIMARY KEY NOT NULL,
 	High SMALLINT NOT NULL,
 	Low SMALLINT NOT NULL,
 	BPM SMALLINT NOT NULL,
-	RefVisitID INTEGER PRIMARY KEY NOT NULL,
 
 	FOREIGN KEY(RefVisitID) REFERENCES Visits(VisitID)
 );
@@ -111,25 +118,34 @@ CREATE TABLE Allergies
 	AllergyID INTEGER PRIMARY KEY AUTOINCREMENT,
 	RefVisitID INTEGER NOT NULL,
 	Name VARCHAR(255) NOT NULL,
+	Observations VARCHAR(300),
+	DeleteDate DATE,
 
+	-- keys
 	FOREIGN KEY(RefVisitID) REFERENCES Visits(VisitID)
 );
 
 CREATE TABLE GeneticDisorder
 (
+	RefVisitID INTEGER NOT NULL,
 	GeneticDisorderID INTEGER PRIMARY KEY AUTOINCREMENT,
-	Name VARCHAR(100) NOT NULL
-);
-
-CREATE TABLE EatingHabits 
-(
+	Parent VARCHAR(60) NOT NULL,
 	Name VARCHAR(100) NOT NULL,
-	RefVisitID INTEGER,
-	Comment VARCHAR(255),
-		
-	UNIQUE(Name, RefVisitID),
+	Observations VARCHAR(300),
+
+	-- keys
 	FOREIGN KEY(RefVisitID) REFERENCES Visits(VisitID)
 );
+
+--CREATE TABLE EatingHabits 
+--(
+--	Name VARCHAR(100) NOT NULL,
+--	RefVisitID INTEGER,
+--	Comment VARCHAR(255),
+--		
+--	UNIQUE(Name, RefVisitID),
+--	FOREIGN KEY(RefVisitID) REFERENCES Visits(VisitID)
+--);
 
 
 

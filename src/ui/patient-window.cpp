@@ -313,7 +313,7 @@ void PatientWindow::set_person(const Person& p)
 	m_txtZip1.set_text(zip1);
 	m_txtZip2.set_text(zip2);
 	m_txtNationality.set_text(p.get_nationality());
-	m_txtBirthday.set_text(p.get_birthday().format_string("%d/%m/%Y"));
+	m_txtBirthday.set_text(p.get_birthday().format_string("%Y-%m-%d"));
 	m_txtBirthplace.set_text(p.get_birthplace());
 	m_txtProfession.set_text(p.get_profession());
 	m_cmbBlood.set_active(p.get_blood_type() - 1);
@@ -495,7 +495,6 @@ void PatientWindow::clean()
 	m_txtNationality.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtBirthday.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtBirthday.unset_color(STATE_FLAG_NORMAL);
-	m_txtBirthday.unset_icon(ENTRY_ICON_SECONDARY);
 	m_txtBirthplace.unset_background_color(STATE_FLAG_NORMAL);
 	m_txtBirthplace.unset_color(STATE_FLAG_NORMAL);
 	m_txtBirthplace.unset_icon(ENTRY_ICON_SECONDARY);
