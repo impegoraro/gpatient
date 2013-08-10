@@ -30,7 +30,7 @@ using namespace Gtk;
 #define SEARCH_TIMEOUT 0.325
 
 MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(WINDOW_TOPLEVEL),
-	m_app(app), m_vp(NULL), m_vw(NULL), m_visitID(0),
+	m_app(app), m_vp(NULL), m_vw(NULL), m_svw(NULL), m_visitID(0),
 	m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
 	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true), m_maximized(false)
@@ -171,6 +171,10 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_treeVisits->signal_row_activated().connect(sigc::mem_fun(*this, &MainWindow::on_treeVisit_activated));
 	m_treeVisits->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_visits_selection_changed));
 	m_btnVisitEdit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_visitEdit_clicked));
+	m_btnNewSubvisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_newSubVisit_clicked));
+
+
+
 	/************************************
 	 *    Setting up some properties    *
 	 ***********************************/
@@ -233,6 +237,10 @@ MainWindow::~MainWindow()
 	if(m_pw) {
 		m_app->remove_window(*m_pw);
 		delete m_pw;
+	}
+	if(m_svw) {
+		m_app->remove_window((Window&)*m_svw->get_window());
+		delete m_svw;
 	}
 		
 }
@@ -781,6 +789,8 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("lblPregnancyStr", m_lblPregnancyStr);
 	builder->get_widget("lblPregnancy", m_lblPregnancy);
 	builder->get_widget("treeAllergies", m_treeAllergies);
+	builder->get_widget("btnNewSubvisit", m_btnNewSubvisit);
+
 
 	/* Tree allergies configuration */
 	m_treeAllergies->set_model(ListStore::create(m_la));
@@ -877,6 +887,18 @@ bool MainWindow::on_maximized_change(GdkEventWindowState *state)
 
 
 	return false;
+}
+
+void MainWindow::on_newSubVisit_clicked(void)
+{
+	if(m_svw == NULL) {
+		m_svw = new SubVisitWindow(*this);
+		m_app->add_window((Window&)*m_svw->get_window());
+	}
+	m_svw->clean();
+	m_svw->setParentVisitID(m_visitID);
+	m_svw->setPersonID(m_personID);
+	m_svw->show_all();
 }
 
 /***********************************

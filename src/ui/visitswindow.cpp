@@ -298,48 +298,48 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	m_btnDiabetes->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_btnChangeState), BasicInfoButtons::Diabetes));
 	m_txtDate->signal_icon_press().connect(sigc::mem_fun(*this, &VisitsWindow::on_txtDate_iconPress));
 	m_win->signal_apply().connect(sigc::mem_fun(*this, &VisitsWindow::on_apply));
-	m_txtComplaint->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtComplaint));
-	m_txtDate->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtDate));
-	m_txtSleepiness->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtSleepiness));
-	m_txtEatingHabits->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtEatingHabits));
-	m_txtAnamnesis->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtAnamnesis));
-	m_txtTranspiration->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtTranspiration));
-	m_txtDehydration->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtDehydration));
-	m_txtVoice->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtVoice));
-	m_txtSmell->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtSmell));
-	m_txtFatigue->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtFatigue));
-	m_txtSexualActivity->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtSexualActivity));
-	m_txtBody->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtBody));
-	m_txtAbdomen->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtAbdomen));
-	m_txtHead->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtHead));
-	m_txtCirculation->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtCirculation));
-	m_cmbHearing->get_entry()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_cmbHearing->get_entry()));
-	m_cmbThroat->get_entry()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_cmbThroat->get_entry()));
-	m_cmbScent->get_entry()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_cmbScent->get_entry()));
-	m_cmbVision->get_entry()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_cmbVision->get_entry()));
-	m_txtPainSince->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtPainSince));
-	m_txtPainObs->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtPainObs));
-	m_txtSurgery->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtSurgery));
-	m_txtPreviousTreatment->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtPreviousTreatment));
-	m_txtMenstruation->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtMenstruation));
-	m_txtPregnancy->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtPregnancy));
-	m_txtUrine->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtUrine));
-	m_txtFaeces->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtFaeces));
-	m_txtTongue->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtTongue));
-	m_txtPulseD->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtPulseD));
-	m_txtPulseE->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtPulseE));
-	m_txtBPMax->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtBPMax));
-	m_txtBPMin->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtBPMin));
-	m_txtBPM->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtBPM));
-	m_txtApal->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtApal));
-	m_txtExams->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtExams));
-	m_txtClinicalAnalysis->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtClinicalAnalysis));
-	m_txtColor->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtColor));
-	m_txtEscle->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtEscle));
-	m_txtObservations->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtObservations));
-	m_txtMed->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check), m_txtMed));
-	m_txtMedication->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtMedication));
-	m_txtTreatment->get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &VisitsWindow::on_widget_check_textview), m_txtTreatment));
+	m_txtComplaint->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtDate->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtSleepiness->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtEatingHabits->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtAnamnesis->get_buffer()->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtTranspiration->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtDehydration->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtVoice->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtSmell->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtFatigue->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtSexualActivity->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtBody->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtAbdomen->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtHead->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtCirculation->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_cmbHearing->get_entry()->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_cmbThroat->get_entry()->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_cmbScent->get_entry()->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_cmbVision->get_entry()->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtPainSince->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtPainObs->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtSurgery->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtPreviousTreatment->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtMenstruation->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtPregnancy->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtUrine->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtFaeces->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtTongue->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtPulseD->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtPulseE->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtBPMax->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtBPMin->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtBPM->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtApal->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtExams->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtClinicalAnalysis->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtColor->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtEscle->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtObservations->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtMed->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtMedication->get_buffer()->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
+	m_txtTreatment->get_buffer()->signal_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_widget_check));
 	m_treeAllergies->get_model()->signal_row_changed().connect(sigc::mem_fun(*this, &VisitsWindow::on_listAllergies_row_changed));
 	m_win->signal_key_press_event().connect(sigc::mem_fun(*this, &VisitsWindow::close_on_esc));
 	m_win->add_events(Gdk::KEY_PRESS_MASK);
@@ -631,7 +631,8 @@ void VisitsWindow::clear()
 {
 	DateTime tm = DateTime::create_now_utc();
 	RefPtr<ListStore> allergies, hereditary;
-	
+
+	m_personID = m_visitID = 0;	
 	m_txtComplaint->set_text("");
 	m_txtDate->set_text(tm.format("%Y-%m-%d"));
 	m_txtSleepiness->set_text("");
@@ -711,7 +712,7 @@ void VisitsWindow::clear()
 }
 
 
-void VisitsWindow::on_widget_check(Entry* entry)
+void VisitsWindow::on_widget_check()
 {
 	bool complete = false;
 
@@ -771,68 +772,6 @@ void VisitsWindow::on_widget_check(Entry* entry)
 
 	m_win->set_page_complete(*m_win->get_nth_page(m_win->get_current_page()), complete);
 }
-
-void VisitsWindow::on_widget_check_textview(TextView* textview)
-{
-	bool complete = false;
-
-	switch(m_win->get_current_page())
-	{
-		case 0:
-			complete = ((m_txtComplaint->get_text_length() > 0) &&
-				(m_txtDate->get_text_length() > 0) &&
-				(m_txtSleepiness->get_text_length() > 0) &&
-				(m_txtEatingHabits->get_text_length() > 0) &&
-				(m_txtAnamnesis->get_buffer()->size() > 0));
-			break;	
-		case 1:
-			complete = ((m_txtTranspiration->get_text_length() > 0) &&
-				(m_txtDehydration->get_text_length() > 0) &&
-				(m_txtVoice->get_text_length() > 0) &&
-				(m_txtSmell->get_text_length() > 0) &&
-				(m_txtFatigue->get_text_length() > 0) &&
-				(m_txtSexualActivity->get_text_length() > 0) &&
-				(m_txtBody->get_text_length() > 0) &&
-				(m_txtAbdomen->get_text_length() > 0) &&
-				(m_txtHead->get_text_length() > 0) &&
-				(m_txtCirculation->get_text_length() > 0) &&
-				(m_cmbHearing->get_entry()->get_text_length() > 0) &&
-				(m_cmbThroat->get_entry()->get_text_length() > 0) &&
-				(m_cmbScent->get_entry()->get_text_length() > 0) &&
-				(m_cmbVision->get_entry()->get_text_length() > 0));
-			break;	
-		case 2:
-			complete = ((m_txtPainSince->get_text_length() > 0) &&
-				(m_txtPainObs->get_text_length() > 0) &&
-				(m_txtSurgery->get_text_length() > 0) &&
-				(m_txtPreviousTreatment->get_text_length() > 0));
-			break;	
-		case 3:
-			complete = ((m_txtMenstruation->get_visible() && m_txtMenstruation->get_text_length() > 0) || !m_txtMenstruation->get_visible()) &&
-				((m_txtPregnancy->get_visible() && m_txtPregnancy->get_text_length() > 0) || !m_txtPregnancy->get_visible()) &&
-				(m_txtUrine->get_text_length() > 0) &&
-				(m_txtFaeces->get_text_length() > 0) &&
-				(m_txtTongue->get_text_length() > 0) &&
-				(m_txtPulseD->get_text_length() > 0) &&
-				(m_txtPulseE->get_text_length() > 0) &&
-				(m_txtBPMax->get_text_length() > 0) &&
-				(m_txtBPMin->get_text_length() > 0) &&
-				(m_txtBPM->get_text_length() > 0) &&
-				(m_txtApal->get_text_length() > 0) &&
-				(m_txtExams->get_text_length() > 0) &&
-				(m_txtClinicalAnalysis->get_text_length() > 0) &&
-				(m_txtColor->get_text_length() > 0) &&
-				(m_txtEscle->get_text_length() > 0) &&
-				(m_txtObservations->get_text_length() > 0) &&
-				(m_txtMed->get_text_length() > 0) &&
-				(m_txtMedication->get_buffer()->size() > 0)&&
-				(m_txtTreatment->get_buffer()->size() > 0);
-			break;	
-	}
-
-	m_win->set_page_complete(*m_win->get_nth_page(m_win->get_current_page()), complete);
-}
-
 
 /*****************************************
  *           Interface methods           *

@@ -14,6 +14,7 @@
 #include <sigc++/sigc++.h>
 #include "../person.h"
 #include "../visit.h"
+#include "subvisit-interface.h"
 #include "visit-interface.h"
 #include "../configuration.h"
 
@@ -60,6 +61,7 @@ public:
 	bool visit_remove(unsigned int id) const;
 	int visit_insert(VisitInterface& visit) const;
 	int visit_update(VisitInterface& v) const;
+	int subvisit_insert(SubVisitInterface& v) const;
 	void get_visits(guint32 personID) const;
 	bool get_visit(int id, VisitInterface &v) const;
 	

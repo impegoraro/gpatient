@@ -224,8 +224,7 @@ private:
 	void on_listAllergies_row_changed(const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter);
 	bool close_on_esc(GdkEventKey* event);
 	void next_page(Gtk::Widget* page);
-	void on_widget_check(Gtk::Entry* entry);
-	void on_widget_check_textview(Gtk::TextView* txtview);
+	void on_widget_check();
 	void inline clear();
 
 	void get_db_data();

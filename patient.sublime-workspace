@@ -43,31 +43,23 @@
 			"file": "src/db/dbhandler.cpp",
 			"settings":
 			{
-				"buffer_size": 55979,
+				"buffer_size": 56712,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "INSERT INTO Visits(RefPersonID, VisitDate, Sleepiness, Fatigue, Head, Tongue,\nUrine, Faeces, Menstruation, PulseD, PulseE, Apal, Observations) \nVALUES(1, '2013-05-06', 'muito sono', 'muito cansado', 'dores de cabeça', 'linga boa', 'unirna normal', 'fezes feias', NULL, 'PUlso D', 'E', 'apala', 'obss')",
+			"file": "src/ui/subvisit-window.cpp",
 			"settings":
 			{
-				"buffer_size": 301,
+				"buffer_size": 1658,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "src/ui/visitswindow.cpp",
+			"file": "src/ui/subvisit-window.h",
 			"settings":
 			{
-				"buffer_size": 45947,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/ui/main-window.cpp",
-			"settings":
-			{
-				"buffer_size": 42811,
+				"buffer_size": 1091,
 				"line_ending": "Unix"
 			}
 		}
@@ -124,20 +116,21 @@
 	},
 	"file_history":
 	[
+		"/home/ilan/Projects/gestao-herb/src/ui/subvisit-window.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/patient-window.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/view-patient.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/main-window.cpp",
 		"/home/ilan/tmp.txt",
 		"/home/ilan/Projects/gestao-herb/src/main.cpp",
-		"/home/ilan/Projects/gestao-herb/src/ui/main-window.cpp",
 		"/home/ilan/Projects/gestao-herb/src/ui/patient-window.h",
 		"/home/ilan/Projects/gestao-herb/src/database/Update 01.sql",
 		"/home/ilan/Projects/gestao-herb/src/database/test-person.sql",
 		"/home/ilan/Projects/gestao-herb/src/db/dbhandler.cpp",
-		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.cpp",
-		"/home/ilan/Projects/gestao-herb/src/ui/view-patient.cpp",
 		"/home/ilan/Projects/gestao-herb/src/db/visit-interface.cpp",
 		"/home/ilan/Projects/gestao-herb/src/ui/main-window.h",
 		"/home/ilan/Projects/gestao-herb/src/db/visit-interface.h",
-		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/widgets/date-entry.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/widgets/numeric-entry.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/widgets/widgets.h",
@@ -169,6 +162,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"Entry",
+			"[a-zA-A]+,",
 			"format_strin",
 			"query",
 			"Visit",
@@ -206,7 +201,7 @@
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": false,
+		"regex": true,
 		"replace_history":
 		[
 		],
@@ -234,8 +229,72 @@
 						"selection":
 						[
 							[
-								140,
-								140
+								170,
+								170
+							],
+							[
+								218,
+								218
+							],
+							[
+								240,
+								240
+							],
+							[
+								261,
+								261
+							],
+							[
+								271,
+								271
+							],
+							[
+								298,
+								298
+							],
+							[
+								330,
+								330
+							],
+							[
+								358,
+								358
+							],
+							[
+								388,
+								388
+							],
+							[
+								418,
+								418
+							],
+							[
+								449,
+								449
+							],
+							[
+								486,
+								486
+							],
+							[
+								508,
+								508
+							],
+							[
+								539,
+								539
+							],
+							[
+								568,
+								568
+							],
+							[
+								604,
+								604
+							],
+							[
+								626,
+								626
 							]
 						],
 						"settings":
@@ -281,15 +340,15 @@
 					"file": "src/db/dbhandler.cpp",
 					"settings":
 					{
-						"buffer_size": 55979,
+						"buffer_size": 56712,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								19565,
-								19565
+								28309,
+								28309
 							]
 						],
 						"settings":
@@ -298,24 +357,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 6225.0,
+						"translation.y": 6782.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 3,
+					"file": "src/ui/subvisit-window.cpp",
 					"settings":
 					{
-						"buffer_size": 301,
+						"buffer_size": 1658,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								301,
-								301
+								74,
+								74
 							]
 						],
 						"settings":
@@ -324,25 +384,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 30.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 4,
-					"file": "src/ui/visitswindow.cpp",
+					"file": "src/ui/subvisit-window.h",
 					"settings":
 					{
-						"buffer_size": 45947,
+						"buffer_size": 1091,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4165,
-								4165
+								0,
+								0
 							]
 						],
 						"settings":
@@ -351,34 +411,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1080.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "src/ui/main-window.cpp",
-					"settings":
-					{
-						"buffer_size": 42811,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								13030,
-								13030
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 5363.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -423,7 +456,7 @@
 	},
 	"replace":
 	{
-		"height": 0.0
+		"height": 64.0
 	},
 	"save_all_on_build": true,
 	"select_file":

@@ -38,6 +38,7 @@
 #include "../db/dbhandler.h"
 #include "patient-window.h"
 #include "view-patient.h"
+#include "subvisit-window.h"
 #include "visitswindow.h"
 
 #define GLADE_VISITS "src/ui/main-visit.glade"
@@ -115,6 +116,7 @@ protected:
 	Gtk::Button *m_btnViewPatient;
 	Gtk::Button *m_btnRemoveVisit;
 	Gtk::Button *m_btnNewVisit;
+	Gtk::Button *m_btnNewSubvisit;
 	Gtk::Grid *m_gridVisits;
 
 	Glib::RefPtr<Gtk::TreeModelFilter> m_treeFilter;
@@ -209,7 +211,7 @@ protected:
 	ViewPatientWindow *m_vp;
 	PatientWindow *m_pw;
 	VisitsWindow *m_vw;
-	
+	SubVisitWindow *m_svw;
 	bool m_maximized;
 public:
 
@@ -254,6 +256,8 @@ protected:
 
 	void on_visits_selection_changed(void);
 	bool on_maximized_change(GdkEventWindowState *state);
+
+	void on_newSubVisit_clicked(void);
 public:
 
 /***********************************

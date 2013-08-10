@@ -15,10 +15,12 @@ pacientes_SOURCES = util.h util.cpp \
                      ui/visitswindow.cpp ui/visitswindow.h \
                      ui/patient-window.h ui/patient-window.cpp \
                      ui/main-window.h ui/main-window.cpp \
+                     ui/subvisit-windo.h ui/subvisit-window.cpp \
                      ui/view-patient.cpp ui/view-patient.h \
                      db/dbhandler.h db/dbhandler.cpp \
                      db/allergy.h db/allergy.cpp \
                      db/visit-interface.h db/visit-interface.cpp \
+                     db/subvisit-interface.h db/subvisit-interface.cpp \
                      person.h person.cpp \
                      main.cpp main.h \
                      configuration.h configuration.cpp
