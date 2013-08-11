@@ -118,7 +118,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 
 	/* Setting up columns in list patients */
 	TreeViewColumn *col;
-	m_modelVisits = ListStore::create(m_lvCols);
+	m_modelVisits = TreeStore::create(m_lvCols);
 
 	col = m_treePatients.get_column(m_treePatients.append_column("id", m_lpCols.m_col_id) -1);
 	col->set_visible(false);
@@ -150,6 +150,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 
 	db.signal_person_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_patient));
 	db.signal_visit_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_visit));
+	db.signal_subvisit_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_subvisit));
 	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
 	db.signal_visit_edited().connect(sigc::mem_fun(*this, &MainWindow::on_visitEdited));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
@@ -249,16 +250,26 @@ MainWindow::~MainWindow()
 void MainWindow::hlpr_append_patient(guint32 id, const ustring& name, guint32 nif)
 {
 	//m_treePatients.unset_model();
-	TreeModel::Row row = *(m_modelPatients->append());
+	TreeModel::Row row =  *m_modelPatients->append();
 
 	row[m_lpCols.m_col_id] = id;
 	row[m_lpCols.m_col_name] = name;
 	row[m_lpCols.m_col_nif] = nif;
 }
 
+void MainWindow::hlpr_append_subvisit(guint32 id, const Glib::ustring& complaint, const Glib::ustring& date)
+{
+	TreeModel::Row row = *(m_modelVisits->append((*m_visitSelected).children()));
+
+	row[m_lvCols.m_col_id] = id;
+	row[m_lvCols.m_col_complaint] = complaint;
+	row[m_lvCols.m_col_date] = date;
+}
+
 void MainWindow::hlpr_append_visit(guint32 id, const ustring& complaint, const ustring& date)
 {
-	TreeModel::Row row = *(m_modelVisits->append());
+	m_visitSelected = m_modelVisits->append();
+	TreeModel::Row row = *m_visitSelected;
 
 	row[m_lvCols.m_col_id] = id;
 	row[m_lvCols.m_col_complaint] = complaint;
@@ -421,21 +432,28 @@ void MainWindow::on_btnToolRemove_clicked()
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator iter = sel->get_selected();
 	DBHandler db = DBHandler::get_instance();
+	MessageDialog msg(*this, "Tem a certeza que pretende remover o paciente", true, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
 
-	if(*iter) {
-		iter = m_treeFilter->convert_iter_to_child_iter(iter);
+	msg.set_title("Remover paciente");
+	msg.set_secondary_text("Se continuar com esta operação não poderá ver mais o histórico do paciente.");
+	if(msg.run() == RESPONSE_YES) {
+		if(*iter) {
+			iter = m_treeFilter->convert_iter_to_child_iter(iter);
 
-		db.open();
-		if(db.person_remove((*iter)[m_lpCols.m_col_id]))
-			m_modelPatients->erase(iter);
-		else {
-			MessageDialog dlg((string)"Não foi possível remover o paciente selecionado", false, MESSAGE_ERROR, BUTTONS_OK, true);
+			db.open();
+			if(db.person_remove((*iter)[m_lpCols.m_col_id]))
+				m_modelPatients->erase(iter);
+			else {
+				MessageDialog dlg((string)"Não foi possível remover o paciente selecionado", false, MESSAGE_ERROR, BUTTONS_OK, true);
+				dlg.set_title("Remover paciente");
+				dlg.run();
+			}
+			db.close();
+		} else {
+			MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
+			dlg.set_title("Remover paciente");
 			dlg.run();
 		}
-		db.close();
-	} else {
-		MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
-		dlg.run();
 	}
 }
 
@@ -806,40 +824,45 @@ void MainWindow::get_visits_widgets(void)
 
 void MainWindow::on_btnRemoveVisit(void)
 {
-	RefPtr<TreeSelection> sel = m_treeVisits->get_selection();
-	TreeModel::iterator row = sel->get_selected();
+	TreeModel::iterator row = m_treeVisits->get_selection()->get_selected();
 	DBHandler db = DBHandler::get_instance();
 	bool closed = true;
+	MessageDialog msg(*this, "Tem a certeza que pretende remover a visita", true, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
 
-	if(*row) {
-		try {
-			db.open();
-			if(db.visit_remove((*row)[m_lvCols.m_col_id])) {
-				gint n_rows;
+	msg.set_title("Remover visita");
+	msg.set_secondary_text("Se continuar com esta operação perderá a informação relativa a esta visita.");
+	if(msg.run() == RESPONSE_YES) {
+		if(*row) {
+			try {
+				db.open();
+				if(db.visit_remove((*row)[m_lvCols.m_col_id])) {
+					gint n_rows;
 
-				m_modelVisits->erase(row);
-
-				n_rows = gtk_tree_model_iter_n_children(RefPtr<TreeModel>::cast_dynamic(m_modelVisits)->gobj(), NULL);
-				if(n_rows <= 0) {
-					m_lblSuggestions->show();
-					m_boxVisitInfo->hide();
+					m_modelVisits->erase(row);
+					n_rows = m_modelVisits->children().size();
+					if(n_rows <= 0) {
+						m_lblSuggestions->show();
+						m_boxVisitInfo->hide();
+					} else {
+						m_lblSuggestions->hide();
+						m_boxVisitInfo->show();
+					}
 				} else {
-					m_lblSuggestions->hide();
-					m_boxVisitInfo->show();
+					MessageDialog dlg((ustring) "Não foi possível remover a visita!", false, MESSAGE_ERROR, BUTTONS_OK, true);
+					dlg.set_title("Remover visita");
+					dlg.run();
 				}
-			} else {
-				MessageDialog dlg((ustring) "Não foi possível remover a visita!", false, MESSAGE_ERROR, BUTTONS_OK, true);
-				dlg.run();
+			} catch(SqlConnectionOpenedException& ex) {
+				closed = false;
 			}
-		} catch(SqlConnectionOpenedException& ex) {
-			closed = false;
-		}
 
-		if(closed)
-			db.close();
-	} else {
-		MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
-		dlg.run();
+			if(closed)
+				db.close();
+		} else {
+			MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
+			dlg.set_title("Remover visita");
+			dlg.run();
+		}
 	}
 }
 

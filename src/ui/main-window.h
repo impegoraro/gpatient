@@ -15,6 +15,7 @@
 #include <gtkmm/treemodelfilter.h>
 #include <gtkmm/treeselection.h>
 #include <gtkmm/treeiter.h>
+#include <gtkmm/treestore.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/toolbar.h>
@@ -121,7 +122,7 @@ protected:
 
 	Glib::RefPtr<Gtk::TreeModelFilter> m_treeFilter;
 	Glib::RefPtr<Gtk::ListStore> m_modelPatients;
-	Glib::RefPtr<Gtk::ListStore> m_modelVisits;
+	Glib::RefPtr<Gtk::TreeStore> m_modelVisits;
 
 	Gtk::Button *m_btnVisitEdit;
 	Gtk::Label *m_lblComplaint;
@@ -220,7 +221,7 @@ public:
 	/* Helper Functions */
 	void hlpr_append_patient(guint32 id, const Glib::ustring& name, guint32 nif);
 	void hlpr_append_visit(guint32 id, const Glib::ustring& complaint, const Glib::ustring& date);
-
+	void hlpr_append_subvisit(guint32 id, const Glib::ustring& complaint, const Glib::ustring& date);
 	void hlpr_append_allergy(const Allergy& allergy, const Glib::Date& date);
 protected:
 	void get_visits_widgets(void);

@@ -41,6 +41,7 @@ protected:
 
 	sigc::signal<void, guint32, const Glib::ustring&, guint32> m_signal_person_added;
 	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_visit_added;
+	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_subvisit_added;
 	sigc::signal<void, const VisitInterface&> m_signal_visit_edited;
 	sigc::signal<void, const Allergy&, const Glib::Date&> m_signal_allergies;
 	sigc::signal<void, const Person&> m_signal_person_edit;
@@ -74,6 +75,7 @@ public:
 
 	sigc::signal<void, guint32, const Glib::ustring&, guint32>& signal_person_added();
 	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&>& signal_visit_added();
+	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&>& signal_subvisit_added();
 	sigc::signal<void, const VisitInterface&>& signal_visit_edited();
 	sigc::signal<void, const Person&>& signal_person_edited();
 	sigc::signal<void, const Allergy&, const Glib::Date&>& signal_allergies();

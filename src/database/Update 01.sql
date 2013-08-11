@@ -45,11 +45,12 @@ CREATE TABLE Person
 	Email VARCHAR(256) NOT NULL,
 	RefBloodTypeID INTEGER NOT NULL,
 	RefMaritalStatusID INTEGER NOT NULL, 
+	Active smallint not null default(1),
 	
 	FOREIGN KEY (RefMaritalStatusID) REFERENCES MaritalStatus(MaritalStatusID),	
 	FOREIGN KEY(RefBloodTypeID) REFERENCES Blood(BloodID) 
 );
-
+-- alter table person add Active smallint not null default(1)
 insert into Person(PersonID,Name,Address,Zip1,Zip2,Location,Sex,Height,Birthday,Birthplace,Nationality,Profession,TaxNumber,Referer,Email,RefBloodTypeID,RefMaritalStatusID) 
 select PersonID,Name,Address,Zip1,Zip2,Location,Sex,Height,Birthday,Birthplace,Nationality,Profession,TaxNumber,Referer,Email,RefBloodTypeID,RefMaritalStatusID from personBk;
 drop table PersonBk;

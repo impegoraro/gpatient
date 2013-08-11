@@ -561,6 +561,7 @@ int DBHandler::subvisit_insert(SubVisitInterface& v) const
 				qFinish = "ROLLBACK TRANSACTION;";
 			else 
 				//TODO: Add signal to update the user interface...
+				m_signal_subvisit_added.emit(visitID, v.getHead(), v.getDate().format_string("%Y-%m-%d"));
 
 			// End the transaction... either by issuing a rollback or commit.
 			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
@@ -1150,7 +1151,7 @@ bool DBHandler::person_remove(unsigned int id) const
 
 	if(m_db != NULL) {
 		sqlite3_stmt *stmt;
-		string query = "DELETE FROM Person WHERE (PersonID = ?)";
+		string query = "UPDATE Person SET Active = 0 WHERE (PersonID = ?)";
 
 
 		if(sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
@@ -1174,40 +1175,7 @@ bool DBHandler::visit_remove(unsigned int id) const
 
 	if(m_db != NULL) {
 		sqlite3_stmt *stmt;
-		string queryTransact = "BEGIN IMMEDIATE TRANSACTION;";
-		string queryPain = "DELETE FROM Pain WHERE (RefVisitID = ?);";
-		string queryBP = "DELETE FROM BloodPressure WHERE (RefVisitID = ?);";
-		string query = "DELETE FROM Visits WHERE (VisitID = ?);";
-
-		if(sqlite3_prepare_v2(m_db, queryTransact.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
-			if(sqlite3_step(stmt) == SQLITE_DONE)
-				res = true;
-			sqlite3_finalize(stmt);
-		} else {
-			std::cout<< "Error while removing (init transaction) " <<endl <<"Message: "<< sqlite3_errmsg(m_db) << std::endl<< "'" << query <<"'"<<endl;
-			return false;
-		}
-		if(sqlite3_prepare_v2(m_db, queryPain.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
-			sqlite3_bind_int(stmt, 1, id);
-
-			if(sqlite3_step(stmt) == SQLITE_DONE)
-				res = true;
-			sqlite3_finalize(stmt);
-		} else {
-			std::cout<< "Error while removing" <<endl <<"Message: "<< sqlite3_errmsg(m_db) << std::endl<< "'" << query <<"'"<<endl;
-			goto cleanup;
-		}
-
-		if(sqlite3_prepare_v2(m_db, queryBP.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
-			sqlite3_bind_int(stmt, 1, id);
-
-			if(sqlite3_step(stmt) == SQLITE_DONE)
-				res = true;
-			sqlite3_finalize(stmt);
-		} else {
-			std::cout<< "Error while removing" <<endl <<"Message: "<< sqlite3_errmsg(m_db) << std::endl<< "'" << query <<"'"<<endl;
-			goto cleanup;
-		}
+		string query = "UPDATE Visits SET Active = 0 WHERE (VisitID = ?);";
 
 		if(sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
 			sqlite3_bind_int(stmt, 1, id);
@@ -1215,22 +1183,8 @@ bool DBHandler::visit_remove(unsigned int id) const
 			if(sqlite3_step(stmt) == SQLITE_DONE)
 				res = true;
 			sqlite3_finalize(stmt);
-		} else {
+		} else
 			std::cout<< "Error while removing" <<endl <<"Message: "<< sqlite3_errmsg(m_db) << std::endl<< "'" << query <<"'"<<endl;
-			goto cleanup;
-		}
-
-cleanup:
-		if(!res)
-			queryTransact = "rollback transaction;";
-		else
-			queryTransact = "commit transaction;";
-
-		if(sqlite3_prepare_v2(m_db, queryTransact.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
-			sqlite3_step(stmt);
-			sqlite3_finalize(stmt);
-		}
-
 	} else
 		throw (SqlConnectionClosedException());
 
@@ -1277,10 +1231,12 @@ void DBHandler::get_patients(const ustring *name) const
 void DBHandler::get_visits(guint32 personID) const
 {
 	/*TODO: throw exception if db is not opened*/
-	ustring query = "SELECT VisitID, Complaint, VisitDate FROM Visits V INNER JOIN DetailedVisits Dv ON V.VisitID = Dv.RefVisitID WHERE RefPersonID = ? AND Active = 1 ORDER BY VisitDate ASC;";
+	ustring query = "SELECT VisitID, Complaint, VisitDate FROM Visits V INNER JOIN DetailedVisits Dv ON V.VisitID = Dv.RefVisitID WHERE RefPersonID = ? AND Active = 1 ORDER BY VisitDate ASC, ParentVisit";
+	ustring query2 = "SELECT VisitID, Head, VisitDate FROM Visits V WHERE ParentVisit = ? AND Active = 1 ORDER BY VisitDate DESC;";
+	guint32 visit = 0;
 
 	if(m_db != NULL) {
-		sqlite3_stmt *stmt;
+		sqlite3_stmt *stmt, *stmt2;
 		
 		if(sqlite3_prepare_v2(m_db, query.c_str(), query.bytes(), &stmt, NULL) == SQLITE_OK) {
 			int res;
@@ -1292,8 +1248,24 @@ void DBHandler::get_visits(guint32 personID) const
 					guint32 id = sqlite3_column_int(stmt, 0);
 					ustring complaint = ustring((char *)sqlite3_column_text(stmt, 1));
 					ustring date = ustring((char *)sqlite3_column_text(stmt, 2));
+					
+					m_signal_visit_added(id, complaint, date);
+					
+					if(sqlite3_prepare_v2(m_db, query2.c_str(), query2.bytes(), &stmt2, NULL) == SQLITE_OK) {
+						sqlite3_bind_int(stmt2, 1, id);
+						while(true) {
+							if(sqlite3_step(stmt2) == SQLITE_ROW) {
+								id = sqlite3_column_int(stmt2, 0);
+								complaint = ustring((char *)sqlite3_column_text(stmt2, 1));
+								date = ustring((char *)sqlite3_column_text(stmt2, 2));
+								
+								m_signal_subvisit_added(id, complaint, date);	
+							} else
+								break; // Nothing else to do.
+						}
+						sqlite3_finalize(stmt2);
+					}
 
-					m_signal_visit_added.emit(id, complaint, date);
 				} else
 					break; // Nothing else to do.
 			sqlite3_finalize(stmt);
@@ -1438,6 +1410,11 @@ sigc::signal<void, guint32, const ustring&, guint32>& DBHandler::signal_person_a
 sigc::signal<void, guint32, const ustring&, const ustring&>& DBHandler::signal_visit_added()
 {
 	return m_signal_visit_added;
+}
+
+sigc::signal<void, guint32, const ustring&, const ustring&>& DBHandler::signal_subvisit_added()
+{
+	return m_signal_subvisit_added;
 }
 
 sigc::signal<void, const VisitInterface&>& DBHandler::signal_visit_edited()
