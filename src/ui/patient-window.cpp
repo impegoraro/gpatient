@@ -574,7 +574,7 @@ void PatientWindow::activate_close(bool val)
 			hide();
 			clean();
 		} else {
-			MessageDialog msgbox("Não é possível adicionar o novo paciente.", true, MESSAGE_ERROR, BUTTONS_OK, true);
+			MessageDialog msgbox(*this, "Não é possível adicionar o novo paciente.", false, MESSAGE_ERROR, BUTTONS_OK, true);
 			validate_entry(m_txtName);
 			validate_entry(m_txtNationality);
 			validate_entry(m_txtBirthday, false);

@@ -32,6 +32,7 @@
 #include <gtkmm/main.h>
 #include <gtkmm/separatortoolitem.h>
 #include <gtkmm/image.h>
+#include <gtkmm/statusbar.h>
 
 
 #include "../person.h"
@@ -99,6 +100,8 @@ protected:
 	Gtk::TreeView m_treePatients;
 
 	Gtk::Toolbar m_tbVisits;
+
+	Gtk::Statusbar m_statusbar;
 
 	ListPatientsCols m_lpCols;
 	ListVisitsCols m_lvCols;

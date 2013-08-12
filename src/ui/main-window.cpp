@@ -73,7 +73,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 
 	m_actionGroup->add(Action::create("MenuFile", "_Ficheiro"));
 	m_actionGroup->add(Action::create("MenuQuit", Gtk::Stock::QUIT), 
-	                      sigc::ptr_fun(&Main::quit));
+						  sigc::ptr_fun(&Main::quit));
 	m_actionGroup->add(Action::create("MenuHelp", "_Ajuda"));
 	m_actionGroup->add(Action::create("MenuAbout", Stock::ABOUT), sigc::mem_fun(*this, &MainWindow::on_mhAbout_activate));
 
@@ -111,7 +111,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	mbox->pack_start(*pwidget, PACK_SHRINK);
 	mbox->pack_start(m_mainToolbar, PACK_SHRINK);
 	mbox->pack_start(m_nb, true, true, 0);
-	
+	mbox->pack_end(m_statusbar, false, true, 0);
 
 	/*pbox3->pack_start(m_frpinfo, false, true, 1);
 	pbox3->pack_start(*swVisits, true, true, 2);
@@ -251,29 +251,43 @@ void MainWindow::hlpr_append_patient(guint32 id, const ustring& name, guint32 ni
 {
 	//m_treePatients.unset_model();
 	TreeModel::Row row =  *m_modelPatients->append();
+	ustring msg;
 
 	row[m_lpCols.m_col_id] = id;
 	row[m_lpCols.m_col_name] = name;
 	row[m_lpCols.m_col_nif] = nif;
+
+	if(m_nb.get_current_page() == 0)
+		msg = ustring::compose("Pacientes registados: %1", m_modelPatients->children().size());
+	else 
+		msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), m_modelVisits->children().size());
+	m_statusbar.push(msg);
 }
 
 void MainWindow::hlpr_append_subvisit(guint32 id, const Glib::ustring& complaint, const Glib::ustring& date)
 {
+	ustring msg;
 	TreeModel::Row row = *(m_modelVisits->append((*m_visitSelected).children()));
 
 	row[m_lvCols.m_col_id] = id;
 	row[m_lvCols.m_col_complaint] = complaint;
 	row[m_lvCols.m_col_date] = date;
+	msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), m_modelVisits->children().size());
+	m_statusbar.push(msg);
 }
 
 void MainWindow::hlpr_append_visit(guint32 id, const ustring& complaint, const ustring& date)
 {
+	ustring msg;
+
 	m_visitSelected = m_modelVisits->append();
 	TreeModel::Row row = *m_visitSelected;
 
 	row[m_lvCols.m_col_id] = id;
 	row[m_lvCols.m_col_complaint] = complaint;
 	row[m_lvCols.m_col_date] = date;
+	msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), m_modelVisits->children().size());
+	m_statusbar.push(msg);
 }
 
 void MainWindow::hlpr_append_allergy(const Allergy& allergy, const Glib::Date& date)
@@ -306,7 +320,11 @@ void MainWindow::on_window_show(void)
 {
 	DBHandler db = DBHandler::get_instance();
 	if(db.open()) {
+		ustring msg;
+
 		db.get_patients(NULL);
+		msg = ustring::compose("Pacientes registados: %1", m_modelPatients->children().size());
+		m_statusbar.push(msg);
 		db.close();
 	} else
 		cout<< "Error while opening the database..."<< endl;
@@ -369,7 +387,7 @@ void MainWindow::on_btnShPatient_clicked(void)
 			db.close();
 
 			if(m_vp == NULL) {
-				MessageDialog msgbox("<b>Não é possível abrir a ficha do paciente</b>", true, MESSAGE_ERROR, BUTTONS_OK, true);
+				MessageDialog msgbox(*this, "<b>Não é possível abrir a ficha do paciente</b>", false, MESSAGE_ERROR, BUTTONS_OK, true);
 				msgbox.set_title("Erro na abertura da ficha do paciente");
 				try {
 					m_vp = new ViewPatientWindow(* ((Window*)this));
@@ -424,6 +442,11 @@ void MainWindow::on_btnToolEdit_clicked(void)
 			m_pw->set_person(p);
 			m_pw->show();
 		}
+	} else {
+		MessageDialog dlg(*this, "Não é possivel editar paciente.", false, MESSAGE_INFO, BUTTONS_OK, true);
+		dlg.set_secondary_text("Deve selecionar um paciente antes de editar.");
+		dlg.set_title("Editar paciente");
+		dlg.run();
 	}
 }
 
@@ -432,28 +455,38 @@ void MainWindow::on_btnToolRemove_clicked()
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator iter = sel->get_selected();
 	DBHandler db = DBHandler::get_instance();
-	MessageDialog msg(*this, "Tem a certeza que pretende remover o paciente", true, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
+	MessageDialog msg(*this, "Tem a certeza que pretende remover o paciente", false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
 
 	msg.set_title("Remover paciente");
 	msg.set_secondary_text("Se continuar com esta operação não poderá ver mais o histórico do paciente.");
-	if(msg.run() == RESPONSE_YES) {
-		if(*iter) {
+	
+	if(*iter) {
+		if(msg.run() == RESPONSE_YES) {
 			iter = m_treeFilter->convert_iter_to_child_iter(iter);
 
 			db.open();
-			if(db.person_remove((*iter)[m_lpCols.m_col_id]))
+			if(db.person_remove((*iter)[m_lpCols.m_col_id])) {
+				ustring msg;
+
 				m_modelPatients->erase(iter);
+				if(m_nb.get_current_page() == 0)
+					msg = ustring::compose("Pacientes registados: %1", m_modelPatients->children().size());
+				else 
+					msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), m_modelVisits->children().size());
+				m_statusbar.push(msg);
+			}
 			else {
-				MessageDialog dlg((string)"Não foi possível remover o paciente selecionado", false, MESSAGE_ERROR, BUTTONS_OK, true);
+				MessageDialog dlg(*this, "Não foi possível remover o paciente selecionado.", false, MESSAGE_ERROR, BUTTONS_OK, true);
 				dlg.set_title("Remover paciente");
 				dlg.run();
 			}
 			db.close();
-		} else {
-			MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
-			dlg.set_title("Remover paciente");
-			dlg.run();
 		}
+	} else {
+		MessageDialog dlg(*this, "Não é possível eliminar um paciente.", false, MESSAGE_INFO, BUTTONS_OK, true);
+		dlg.set_secondary_text("Deve selecionar um paciente antes de eliminar.");
+		dlg.set_title("Remover paciente");
+		dlg.run();
 	}
 }
 
@@ -469,6 +502,7 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 	TreeModel::iterator row = sel->get_selected();
 	DBHandler db = DBHandler::get_instance();
 	gint n_rows;
+	ustring msg;
 
 	today.set_time_current();
 
@@ -514,7 +548,8 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		m_boxVisitInfo->hide();
 		
 		m_nb.set_current_page(1);
-
+		msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), m_modelVisits->children().size());
+		m_statusbar.push(msg);
 	}
 }
 
@@ -594,7 +629,6 @@ void MainWindow::on_db_person_edited(const Person &p)
 	sprintf(tmp, "%.2f cm", p.get_height());
 	m_lblPHeight->set_text(tmp);
 	m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
-
 }
 
 void MainWindow::patient_window_add(PatientWindow &pw)
@@ -680,8 +714,11 @@ bool MainWindow::filter_patient_by_name(const TreeModel::const_iterator& iter)
 
 void MainWindow::on_btnBack_clicked(void)
 {
+	ustring msg;
 	m_entryPatients.show();
 	m_nb.set_current_page(0);
+	msg = ustring::compose("Pacientes registados: %1", m_modelPatients->children().size());
+	m_statusbar.push(msg);
 }
 
 void MainWindow::on_visitEdit_clicked(void)
@@ -827,7 +864,7 @@ void MainWindow::on_btnRemoveVisit(void)
 	TreeModel::iterator row = m_treeVisits->get_selection()->get_selected();
 	DBHandler db = DBHandler::get_instance();
 	bool closed = true;
-	MessageDialog msg(*this, "Tem a certeza que pretende remover a visita", true, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
+	MessageDialog msg(*this, "Tem a certeza que pretende remover a visita", false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
 
 	msg.set_title("Remover visita");
 	msg.set_secondary_text("Se continuar com esta operação perderá a informação relativa a esta visita.");
@@ -837,6 +874,7 @@ void MainWindow::on_btnRemoveVisit(void)
 				db.open();
 				if(db.visit_remove((*row)[m_lvCols.m_col_id])) {
 					gint n_rows;
+					ustring msg;
 
 					m_modelVisits->erase(row);
 					n_rows = m_modelVisits->children().size();
@@ -847,8 +885,10 @@ void MainWindow::on_btnRemoveVisit(void)
 						m_lblSuggestions->hide();
 						m_boxVisitInfo->show();
 					}
+					msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), n_rows);
+					m_statusbar.push(msg);
 				} else {
-					MessageDialog dlg((ustring) "Não foi possível remover a visita!", false, MESSAGE_ERROR, BUTTONS_OK, true);
+					MessageDialog dlg(*this, "Não foi possível remover a visita!", false, MESSAGE_ERROR, BUTTONS_OK, true);
 					dlg.set_title("Remover visita");
 					dlg.run();
 				}
@@ -859,7 +899,7 @@ void MainWindow::on_btnRemoveVisit(void)
 			if(closed)
 				db.close();
 		} else {
-			MessageDialog dlg((string)"Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
+			MessageDialog dlg(*this, "Deve selecionar um item para eliminar", false, MESSAGE_INFO, BUTTONS_OK, true);
 			dlg.set_title("Remover visita");
 			dlg.run();
 		}
