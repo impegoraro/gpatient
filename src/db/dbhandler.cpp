@@ -991,7 +991,7 @@ bool DBHandler::get_person(const guint32 id, Person& p) const
 
 	if(m_db != NULL) {
 		string query = "SELECT Name, Address, Zip1, Zip2, Location, Sex, Height, Birthday, Birthplace, Nationality, " \
-					"Profession, TaxNumber, Referer, Email, RefBloodTypeID, RefMaritalStatusID,IdentificationCard FROM Person WHERE PersonID=?";
+					"Profession, TaxNumber, Referer, Email, RefBloodTypeID, RefMaritalStatusID,IdentificationCard FROM Person WHERE Active = 1 AND PersonID=?";
 
 		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
 			int val(SQLITE_ROW);
@@ -1194,14 +1194,14 @@ bool DBHandler::visit_remove(unsigned int id) const
 void DBHandler::get_patients(const ustring *name) const
 {
 	/*TODO: throw exception if db is not opened*/
-	ustring query = "SELECT PersonID, Name, TaxNumber FROM Person";
+	ustring query = "SELECT PersonID, Name, TaxNumber FROM Person WHERE Active = 1 ";
 
 	if(m_db != NULL) {
 		sqlite3_stmt *stmt;
 		ustring t_name("%");
 
 		if(name != NULL) {
-			query += " WHERE Name LIKE ? ORDER BY Name ASC;";
+			query += " AND Name LIKE ? ORDER BY Name ASC;";
 		} else
 			query += " ORDER BY Name ASC;";
 
