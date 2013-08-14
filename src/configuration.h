@@ -20,11 +20,15 @@ public:
 	virtual bool get_window_maximized() = 0;
 	//bool get_maximize() const = 0;
 
+	virtual int get_visit_paned_position() = 0;
+
 	virtual void set_window_maximized(bool maximized = true) = 0;
 
 	virtual void set_window_resize(int width, int height) = 0;
 
 	virtual void set_window_move(int posx, int posy) = 0;
+
+	virtual void set_visit_paned_position(int &val) = 0;
 
 	virtual void store();
 

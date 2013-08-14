@@ -23,7 +23,15 @@
 
 class SubVisitWindow : public SubVisitInterface
 {
+public:
+	enum WindowType
+	{
+		WINDOW_TYPE_ADD,
+		WINDOW_TYPE_EDIT
+	};
+
 private:
+	WindowType m_type;
 	guint32 m_visitID;
 	guint32 m_parentVisitID;
 	guint32 m_personID;
@@ -59,6 +67,8 @@ public:
 	void show();
 	void show_all();
 	void clean(void);
+	void set_sex_widgets(bool sex);
+	void set_window_type(SubVisitWindow::WindowType type, guint32 visitID = -1);
 
 	Gtk::Window* get_window(void);
 
@@ -67,54 +77,53 @@ public:
 	/********** Setters **********/
 	virtual guint32 getPersonID();
 	virtual guint32 getPersonID() const;
-	virtual guint32 getVisitID();
-	virtual guint32 getVisitID() const;
+	virtual guint32 getSubVisitID();
+	virtual guint32 getSubVisitID() const;
 	virtual guint32 getParentVisitID();
 	virtual guint32 getParentVisitID() const;
-	virtual const Glib::Date getDate();
-	virtual const Glib::Date getDate() const;
-	virtual const Glib::ustring getSleepiness();
-	virtual const Glib::ustring getSleepiness() const;
-	virtual const Glib::ustring getFatigue();
-	virtual const Glib::ustring getFatigue() const;
-	virtual const Glib::ustring getHead();
-	virtual const Glib::ustring getHead() const;
-	virtual const Glib::ustring getTongue();
-	virtual const Glib::ustring getTongue() const;
-	virtual const Glib::ustring getUrine();
-	virtual const Glib::ustring getUrine() const;
-	virtual const Glib::ustring getFaeces();
-	virtual const Glib::ustring getFaeces() const;
-	virtual const Glib::ustring getMenstruation();
-	virtual const Glib::ustring getMenstruation() const;
-	virtual const Glib::ustring getPulseD();
-	virtual const Glib::ustring getPulseD() const;
-	virtual const Glib::ustring getPulseE();
-	virtual const Glib::ustring getPulseE() const;
-	virtual const Glib::ustring getApal();
-	virtual const Glib::ustring getApal() const;
-	virtual const Glib::ustring getObservations();
-	virtual const Glib::ustring getObservations() const;
-	virtual const void getBloodPressure(guint16& max, guint16& min, guint16& bpm);
-	virtual const void getBloodPressure(guint16& max, guint16& min, guint16& bpm) const;
-
+	virtual const Glib::Date getSubVisitDate();
+	virtual const Glib::Date getSubVisitDate() const;
+	virtual const Glib::ustring getSubVisitSleepiness();
+	virtual const Glib::ustring getSubVisitSleepiness() const;
+	virtual const Glib::ustring getSubVisitFatigue();
+	virtual const Glib::ustring getSubVisitFatigue() const;
+	virtual const Glib::ustring getSubVisitHead();
+	virtual const Glib::ustring getSubVisitHead() const;
+	virtual const Glib::ustring getSubVisitTongue();
+	virtual const Glib::ustring getSubVisitTongue() const;
+	virtual const Glib::ustring getSubVisitUrine();
+	virtual const Glib::ustring getSubVisitUrine() const;
+	virtual const Glib::ustring getSubVisitFaeces();
+	virtual const Glib::ustring getSubVisitFaeces() const;
+	virtual const Glib::ustring getSubVisitMenstruation();
+	virtual const Glib::ustring getSubVisitMenstruation() const;
+	virtual const Glib::ustring getSubVisitPulseD();
+	virtual const Glib::ustring getSubVisitPulseD() const;
+	virtual const Glib::ustring getSubVisitPulseE();
+	virtual const Glib::ustring getSubVisitPulseE() const;
+	virtual const Glib::ustring getSubVisitApal();
+	virtual const Glib::ustring getSubVisitApal() const;
+	virtual const Glib::ustring getSubVisitObservations();
+	virtual const Glib::ustring getSubVisitObservations() const;
+	virtual const void getSubVisitBloodPressure(guint16& max, guint16& min, guint16& bpm);
+	virtual const void getSubVisitBloodPressure(guint16& max, guint16& min, guint16& bpm) const;
 
 	virtual void setPersonID(guint32 val);
-	virtual void setVisitID(guint32 val);
 	virtual void setParentVisitID(guint32 val);
-	virtual void setDate(const Glib::Date& val);
-	virtual void setSleepiness(const Glib::ustring& val);
-	virtual void setFatigue(const Glib::ustring& val);
-	virtual void setHead(const Glib::ustring& val);
-	virtual void setTongue(const Glib::ustring& val);
-	virtual void setUrine(const Glib::ustring& val);
-	virtual void setFaeces(const Glib::ustring& val);
-	virtual void setMenstruation(const Glib::ustring& val);
-	virtual void setPulseD(const Glib::ustring& val);
-	virtual void setPulseE(const Glib::ustring& val);
-	virtual void setApal(const Glib::ustring& val);
-	virtual void setObservations(const Glib::ustring& val);
-	virtual void setBloodPressure(guint16 max, guint16 min, guint16 bpm);
+	virtual void setSubVisitID(guint32 val);
+	virtual void setSubVisitDate(const Glib::Date& val);
+	virtual void setSubVisitSleepiness(const Glib::ustring& val);
+	virtual void setSubVisitFatigue(const Glib::ustring& val);
+	virtual void setSubVisitHead(const Glib::ustring& val);
+	virtual void setSubVisitTongue(const Glib::ustring& val);
+	virtual void setSubVisitUrine(const Glib::ustring& val);
+	virtual void setSubVisitFaeces(const Glib::ustring& val);
+	virtual void setSubVisitMenstruation(const Glib::ustring& val);
+	virtual void setSubVisitPulseD(const Glib::ustring& val);
+	virtual void setSubVisitPulseE(const Glib::ustring& val);
+	virtual void setSubVisitApal(const Glib::ustring& val);
+	virtual void setSubVisitObservations(const Glib::ustring& val);
+	virtual void setSubVisitBloodPressure(guint16 max, guint16 min, guint16 bpm);
 
 
 };

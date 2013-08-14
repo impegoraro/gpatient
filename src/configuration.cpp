@@ -41,7 +41,8 @@ void Configuration::store()
 	root["Size"][(Json::UInt)0] = width;
 	root["Size"][(Json::UInt)1] = height;
 	root["Maximized"] = get_window_maximized();
-	
+	root["PanedVisitSize"] = get_visit_paned_position();
+
 	tmp = writer.write(root);
 	fstream.open(m_fpath);
 	fstream<< tmp;
@@ -58,7 +59,8 @@ bool Configuration::parse()
 	Json::Features features;
 	Json::Reader reader(features);
 	Json::Value jdefault;
-	int posx(0), posy(0), width(860), height(640), maximized(0);
+	int posx(0), posy(0), width(860), height(640), maximized(0), panedVisits(-1);
+
 
 	text = read_input_file();
 	parsing = reader.parse(text, root);
@@ -91,6 +93,10 @@ bool Configuration::parse()
 			height = jval[(Json::UInt)1].asInt();
 		}
 	}
+
+	panedVisits = root.get("PanedVisitSize", -1).asInt();
+	if(panedVisits > 0)
+		set_visit_paned_position(panedVisits);
 
 	set_window_resize(width, height);
 	//set_window_move(posx, posy);

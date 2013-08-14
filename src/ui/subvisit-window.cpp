@@ -12,7 +12,7 @@ using namespace Glib;
 
 #define GLADE_FILE_UI "src/ui/subvisits-window.glade"
 
-SubVisitWindow::SubVisitWindow(Window& parent)
+SubVisitWindow::SubVisitWindow(Window& parent) : m_type(WINDOW_TYPE_ADD)
 {
 	RefPtr<Builder> builder = Builder::create_from_file(GLADE_FILE_UI);
 	Box *pboxBP;
@@ -50,6 +50,7 @@ SubVisitWindow::SubVisitWindow(Window& parent)
 	pboxBP->reorder_child(*m_txtBPMax, 0);
 	pboxBP->reorder_child(*m_txtBPMin, 2);
 	pboxBP->reorder_child(*m_txtBPM, 4);
+	pboxBP->show_all();
 
 	m_txtVisitDate->set_icon_tooltip_text("Escolher data da consulta", ENTRY_ICON_SECONDARY);
 	m_txtVisitDate->set_icon_from_icon_name("x-office-calendar", ENTRY_ICON_SECONDARY);
@@ -90,12 +91,14 @@ void SubVisitWindow::show()
 {
 	m_txtFatigue->grab_focus();
 	m_win->show();
+	m_win->set_page_complete(*m_win->get_nth_page(m_win->get_current_page()), !(m_type == WINDOW_TYPE_ADD));
 }
 
 void SubVisitWindow::show_all()
 {
 	m_txtFatigue->grab_focus();
 	m_win->show_all();
+	m_win->set_page_complete(*m_win->get_nth_page(m_win->get_current_page()), !(m_type == WINDOW_TYPE_ADD));
 }
 
 bool SubVisitWindow::close_on_esc(GdkEventKey* event)
@@ -159,7 +162,7 @@ void SubVisitWindow::on_widget_check()
 						(m_txtBPMax->get_text_length() > 0) &&
 						(m_txtBPMin->get_text_length() > 0) &&
 						(m_txtBPM->get_text_length() > 0) &&
-						(m_txtMenstruation->get_text_length() > 0) &&
+						(!m_txtMenstruation->get_visible() || m_txtMenstruation->get_text_length() > 0) &&
 						(m_txtPulseD->get_text_length() > 0) &&
 						(m_txtPulseE->get_text_length() > 0) &&
 						(m_txtApal->get_text_length() > 0));
@@ -174,20 +177,31 @@ void SubVisitWindow::on_apply()
 {
 	DBHandler::get_instance().open();
 	try {
-		//if(m_type == WINDOW_TYPE_ADD) {
+		if(m_type == WINDOW_TYPE_ADD) {
 			DBHandler::get_instance().subvisit_insert(*((SubVisitInterface*)this));
-		//} else {
-		//	DBHandler::get_instance().visit_update(*((VisitInterface*)this));
-		//}
+		} else {
+			//std::cout<< "Editing the shit out of the subvisit"<<std::endl;
+			DBHandler::get_instance().subvisit_update(*this);
+		}
 
-	} catch(std::exception& ex)
-	{
+	} catch(std::exception& ex) {
 		std::cout<< "Could not add the subvisit"<< std::endl;
 	}
 	DBHandler::get_instance().close();
 	m_win->hide();
 }
 
+void SubVisitWindow::set_sex_widgets(bool sex)
+{
+	m_txtMenstruation->set_visible(sex);
+	m_lblMenstruation->set_visible(sex);
+}
+
+void SubVisitWindow::set_window_type(SubVisitWindow::WindowType type, guint32 visitID)
+{
+	m_type = type;
+	m_visitID = visitID;
+}
 
 
 
@@ -200,11 +214,11 @@ guint32 SubVisitWindow::getPersonID() const
 {
 	return m_personID;
 }
-guint32 SubVisitWindow::getVisitID()
+guint32 SubVisitWindow::getSubVisitID()
 {
 	return m_visitID;
 }
-guint32 SubVisitWindow::getVisitID() const
+guint32 SubVisitWindow::getSubVisitID() const
 {
 	return m_visitID;
 }
@@ -216,109 +230,109 @@ guint32 SubVisitWindow::getParentVisitID() const
 {
 	return m_parentVisitID;
 }
-const Glib::Date SubVisitWindow::getDate()
+const Glib::Date SubVisitWindow::getSubVisitDate()
 {
 	return Util::parse_date(m_txtVisitDate->get_text());
 }
-const Glib::Date SubVisitWindow::getDate() const
+const Glib::Date SubVisitWindow::getSubVisitDate() const
 {
 	return Util::parse_date(m_txtVisitDate->get_text());
 }
-const Glib::ustring SubVisitWindow::getSleepiness()
+const Glib::ustring SubVisitWindow::getSubVisitSleepiness()
 {
 	return m_txtSleepiness->get_text();
 }
-const Glib::ustring SubVisitWindow::getSleepiness() const
+const Glib::ustring SubVisitWindow::getSubVisitSleepiness() const
 {
 	return m_txtSleepiness->get_text();
 }
-const Glib::ustring SubVisitWindow::getFatigue()
+const Glib::ustring SubVisitWindow::getSubVisitFatigue()
 {
 	return m_txtFatigue->get_text();
 }
-const Glib::ustring SubVisitWindow::getFatigue() const
+const Glib::ustring SubVisitWindow::getSubVisitFatigue() const
 {
 	return m_txtFatigue->get_text();
 }
-const Glib::ustring SubVisitWindow::getHead()
+const Glib::ustring SubVisitWindow::getSubVisitHead()
 {
 	return m_txtHead->get_text();
 }
-const Glib::ustring SubVisitWindow::getHead() const
+const Glib::ustring SubVisitWindow::getSubVisitHead() const
 {
 	return m_txtHead->get_text();
 }
-const Glib::ustring SubVisitWindow::getTongue()
+const Glib::ustring SubVisitWindow::getSubVisitTongue()
 {
 	return m_txtTongue->get_text();
 }
-const Glib::ustring SubVisitWindow::getTongue() const
+const Glib::ustring SubVisitWindow::getSubVisitTongue() const
 {
 	return m_txtTongue->get_text();
 }
-const Glib::ustring SubVisitWindow::getUrine()
+const Glib::ustring SubVisitWindow::getSubVisitUrine()
 {
 	return m_txtUrine->get_text();
 }
-const Glib::ustring SubVisitWindow::getUrine() const
+const Glib::ustring SubVisitWindow::getSubVisitUrine() const
 {
 	return m_txtUrine->get_text();
 }
-const Glib::ustring SubVisitWindow::getFaeces()
+const Glib::ustring SubVisitWindow::getSubVisitFaeces()
 {
 	return m_txtFaeces->get_text();
 }
-const Glib::ustring SubVisitWindow::getFaeces() const
+const Glib::ustring SubVisitWindow::getSubVisitFaeces() const
 {
 	return m_txtFaeces->get_text();
 }
-const Glib::ustring SubVisitWindow::getMenstruation()
+const Glib::ustring SubVisitWindow::getSubVisitMenstruation()
 {
 	return m_txtMenstruation->get_text();
 }
-const Glib::ustring SubVisitWindow::getMenstruation() const
+const Glib::ustring SubVisitWindow::getSubVisitMenstruation() const
 {
 	return m_txtMenstruation->get_text();
 }
-const Glib::ustring SubVisitWindow::getPulseD()
+const Glib::ustring SubVisitWindow::getSubVisitPulseD()
 {
 	return m_txtPulseD->get_text();
 }
-const Glib::ustring SubVisitWindow::getPulseD() const
+const Glib::ustring SubVisitWindow::getSubVisitPulseD() const
 {
 	return m_txtPulseD->get_text();
 }
-const Glib::ustring SubVisitWindow::getPulseE()
+const Glib::ustring SubVisitWindow::getSubVisitPulseE()
 {
 	return m_txtPulseE->get_text();
 }
-const Glib::ustring SubVisitWindow::getPulseE() const
+const Glib::ustring SubVisitWindow::getSubVisitPulseE() const
 {
 	return m_txtPulseE->get_text();
 }
-const Glib::ustring SubVisitWindow::getApal()
+const Glib::ustring SubVisitWindow::getSubVisitApal()
 {
 	return m_txtApal->get_text();
 }
-const Glib::ustring SubVisitWindow::getApal() const
+const Glib::ustring SubVisitWindow::getSubVisitApal() const
 {
 	return m_txtApal->get_text();
 }
-const Glib::ustring SubVisitWindow::getObservations()
+const Glib::ustring SubVisitWindow::getSubVisitObservations()
 {
 	return m_txtObservations->get_buffer()->get_text();
 }
-const Glib::ustring SubVisitWindow::getObservations() const
+const Glib::ustring SubVisitWindow::getSubVisitObservations() const
 {
 	return m_txtObservations->get_buffer()->get_text();
 }
-const void SubVisitWindow::getBloodPressure(guint16& max, guint16& min, guint16& bpm)
+const void SubVisitWindow::getSubVisitBloodPressure(guint16& max, guint16& min, guint16& bpm)
 {
 	max = m_txtBPMax->get_value();
 	min = m_txtBPMin->get_value();
 	bpm = m_txtBPM->get_value();
 }
-const void SubVisitWindow::getBloodPressure(guint16& max, guint16& min, guint16& bpm) const
+const void SubVisitWindow::getSubVisitBloodPressure(guint16& max, guint16& min, guint16& bpm) const
 {
 	max = m_txtBPMax->get_value();
 	min = m_txtBPMin->get_value();
@@ -330,7 +344,7 @@ void SubVisitWindow::setPersonID(guint32 val)
 {
 	m_personID = val;
 }
-void SubVisitWindow::setVisitID(guint32 val)
+void SubVisitWindow::setSubVisitID(guint32 val)
 {
 	m_visitID = val;
 }
@@ -338,55 +352,55 @@ void SubVisitWindow::setParentVisitID(guint32 val)
 {
 	m_parentVisitID = val;
 }
-void SubVisitWindow::setDate(const Glib::Date& val)
+void SubVisitWindow::setSubVisitDate(const Glib::Date& val)
 {
 	m_txtVisitDate->set_text(val.format_string("%Y-%m-%d"));
 }
-void SubVisitWindow::setSleepiness(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitSleepiness(const Glib::ustring& val)
 {
 	m_txtSleepiness->set_text(val);
 }
-void SubVisitWindow::setFatigue(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitFatigue(const Glib::ustring& val)
 {
 	m_txtFatigue->set_text(val);
 }
-void SubVisitWindow::setHead(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitHead(const Glib::ustring& val)
 {
 	m_txtHead->set_text(val);
 }
-void SubVisitWindow::setTongue(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitTongue(const Glib::ustring& val)
 {
 	m_txtTongue->set_text(val);
 }
-void SubVisitWindow::setUrine(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitUrine(const Glib::ustring& val)
 {
 	m_txtUrine->set_text(val);
 }
-void SubVisitWindow::setFaeces(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitFaeces(const Glib::ustring& val)
 {
 	m_txtFaeces->set_text(val);
 }
-void SubVisitWindow::setMenstruation(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitMenstruation(const Glib::ustring& val)
 {
 	m_txtMenstruation->set_text(val);
 }
-void SubVisitWindow::setPulseD(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitPulseD(const Glib::ustring& val)
 {
 	m_txtPulseD->set_text(val);
 }
-void SubVisitWindow::setPulseE(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitPulseE(const Glib::ustring& val)
 {
 	m_txtPulseE->set_text(val);
 }
-void SubVisitWindow::setApal(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitApal(const Glib::ustring& val)
 {
 	m_txtApal->set_text(val);
 }
-void SubVisitWindow::setObservations(const Glib::ustring& val)
+void SubVisitWindow::setSubVisitObservations(const Glib::ustring& val)
 {
 	m_txtObservations->get_buffer()->set_text(val);
 }
-void SubVisitWindow::setBloodPressure(guint16 max, guint16 min, guint16 bpm)
+void SubVisitWindow::setSubVisitBloodPressure(guint16 max, guint16 min, guint16 bpm)
 {
 	m_txtBPMax->set_text(max);
 	m_txtBPMin->set_text(min);

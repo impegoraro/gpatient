@@ -33,6 +33,7 @@
 #include <gtkmm/separatortoolitem.h>
 #include <gtkmm/image.h>
 #include <gtkmm/statusbar.h>
+#include <gtkmm/paned.h>
 
 
 #include "../person.h"
@@ -45,7 +46,7 @@
 
 #define GLADE_VISITS "src/ui/main-visit.glade"
 
-class MainWindow : public Gtk::Window, public VisitInterface, public Configuration
+class MainWindow : public Gtk::Window, public VisitInterface, public Configuration, public SubVisitInterface
 {
 protected:
 	class ListPatientsCols : public Gtk::TreeModel::ColumnRecord
@@ -85,6 +86,8 @@ protected:
 
 	Gtk::Box *m_boxVisitInfo;
 	Gtk::Label *m_lblSuggestions;
+	Gtk::Box *m_boxSuggestions;
+	Gtk::Button *m_btnNewVisit2;
 
 	Gtk::Toolbar m_mainToolbar;
 	Gtk::ToolButton m_mtbAdd;
@@ -199,8 +202,28 @@ protected:
 	Gtk::Label *m_lblTreatment;
 
 	Gtk::TreeView *m_treeAllergies;
-	
 	Gtk::TreeModel::iterator m_visitSelected;
+
+	/* SubVisit Widgets */
+	Gtk::Box *m_boxSubVisits;
+	Gtk::Paned *m_panedVisits;
+	Gtk::Label *m_lblSubVisitDate;
+	Gtk::Label *m_lblSubVisitSleepiness;
+	Gtk::Label *m_lblSubVisitFatigue;
+	Gtk::Label *m_lblSubVisitHead;
+	Gtk::Label *m_lblSubVisitTongue;
+	Gtk::Label *m_lblSubVisitUrine;
+	Gtk::Label *m_lblSubVisitFaeces;
+	Gtk::Label *m_lblSubVisitMenstruationInfo;
+	Gtk::Label *m_lblSubVisitMenstruation;
+	Gtk::Label *m_lblSubVisitPulseD;
+	Gtk::Label *m_lblSubVisitPulseE;
+	Gtk::Label *m_lblSubVisitApal;
+	Gtk::Label *m_lblSubVisitBloodPressure;
+	Gtk::Label *m_lblSubVisitObservations;
+
+	Gtk::Button *m_btnSubVisitEdit;
+
 
 	//Glib::SignalTimeout m_searchTimeout;
 	sigc::connection m_connSearch;
@@ -208,6 +231,7 @@ protected:
 
 	guint32 m_personID;
 	guint32 m_visitID;
+
 	bool m_entryPatientStatus;
 	bool m_fireSearch;
 	Glib::RefPtr<Gtk::Application> m_app;
@@ -242,6 +266,7 @@ protected:
 	void on_treeVisit_activated(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 	void on_visitEdit_clicked(void);
 	void on_btnRemoveVisit(void);
+	void on_subvisitEdit_clicked(void);
 
 	bool on_entryPatient_focusIn(GdkEventFocus *focus); 
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
@@ -254,6 +279,7 @@ protected:
 	bool handler_timeout_search();
 
 	void on_visitEdited(const VisitInterface&);
+	void on_subvisitEdited(const SubVisitInterface&);
 	void patient_window_add(PatientWindow &);
 
 	bool filter_patient_by_name(const Gtk::TreeModel::const_iterator&);
@@ -270,14 +296,17 @@ public:
  	virtual void get_window_size(gint& width, gint& height);
 	virtual void get_window_position(gint& posx, gint& posy);
 	virtual bool get_window_maximized();
+	virtual int get_visit_paned_position();
 
 	virtual void set_window_maximized(bool maximized = true);
 	virtual void set_window_resize(int width, int height);
 	virtual void set_window_move(int posx, int posy);
+	virtual void set_visit_paned_position(int &val);
 
 /*****************************************
  *           Interface methods           *
  ****************************************/
+	virtual guint32 getPersonID();
 	virtual guint32 getPersonID() const;
 	virtual guint32 getVisitID() const;
 	virtual Glib::ustring getComplaint() const;
@@ -348,6 +377,37 @@ public:
 	virtual Glib::ustring getTreatment() const;
 	virtual Gtk::TreeModel::Children getAllergies() const;
 	
+	virtual guint32 getSubVisitID();
+	virtual guint32 getSubVisitID() const;
+	virtual guint32 getParentVisitID();
+	virtual guint32 getParentVisitID() const;
+	virtual const Glib::Date getSubVisitDate();
+	virtual const Glib::Date getSubVisitDate() const;
+	virtual const Glib::ustring getSubVisitSleepiness();
+	virtual const Glib::ustring getSubVisitSleepiness() const;
+	virtual const Glib::ustring getSubVisitFatigue();
+	virtual const Glib::ustring getSubVisitFatigue() const;
+	virtual const Glib::ustring getSubVisitHead();
+	virtual const Glib::ustring getSubVisitHead() const;
+	virtual const Glib::ustring getSubVisitTongue();
+	virtual const Glib::ustring getSubVisitTongue() const;
+	virtual const Glib::ustring getSubVisitUrine();
+	virtual const Glib::ustring getSubVisitUrine() const;
+	virtual const Glib::ustring getSubVisitFaeces();
+	virtual const Glib::ustring getSubVisitFaeces() const;
+	virtual const Glib::ustring getSubVisitMenstruation();
+	virtual const Glib::ustring getSubVisitMenstruation() const;
+	virtual const Glib::ustring getSubVisitPulseD();
+	virtual const Glib::ustring getSubVisitPulseD() const;
+	virtual const Glib::ustring getSubVisitPulseE();
+	virtual const Glib::ustring getSubVisitPulseE() const;
+	virtual const Glib::ustring getSubVisitApal();
+	virtual const Glib::ustring getSubVisitApal() const;
+	virtual const Glib::ustring getSubVisitObservations();
+	virtual const Glib::ustring getSubVisitObservations() const;
+	virtual const void getSubVisitBloodPressure(guint16& max, guint16& min, guint16& bpm);
+	virtual const void getSubVisitBloodPressure(guint16& max, guint16& min, guint16& bpm) const;
+
 	virtual void setPersonID(guint32 val);
 	virtual void setVisitID(const guint32 val);
 	virtual void setComplaint(const Glib::ustring& val);
@@ -390,7 +450,6 @@ public:
 	virtual void setHead(const Glib::ustring& val);
 	virtual void setCirculation(const Glib::ustring& val);
 	virtual void setEatingHabits(const Glib::ustring& val);
-
 	virtual void setMenstruation(const Glib::ustring& val);
 	virtual void setPregnancy(const Glib::ustring& val);
 	virtual void setPain(const Glib::ustring& val);
@@ -415,6 +474,23 @@ public:
 	virtual void setMed(const Glib::ustring& val);
 	virtual void setMedication(const Glib::ustring& val);
 	virtual void setTreatment(const Glib::ustring& val);
+
+	virtual void setSubVisitID(const guint32 val);
+	virtual void setParentVisitID(guint32 val);
+	virtual void setSubVisitDate(const Glib::Date& val);
+	virtual void setSubVisitSleepiness(const Glib::ustring& val);
+	virtual void setSubVisitFatigue(const Glib::ustring& val);
+	virtual void setSubVisitHead(const Glib::ustring& val);
+	virtual void setSubVisitTongue(const Glib::ustring& val);
+	virtual void setSubVisitUrine(const Glib::ustring& val);
+	virtual void setSubVisitFaeces(const Glib::ustring& val);
+	virtual void setSubVisitMenstruation(const Glib::ustring& val);
+	virtual void setSubVisitPulseD(const Glib::ustring& val);
+	virtual void setSubVisitPulseE(const Glib::ustring& val);
+	virtual void setSubVisitApal(const Glib::ustring& val);
+	virtual void setSubVisitObservations(const Glib::ustring& val);
+	virtual void setSubVisitBloodPressure(guint16 max, guint16 min, guint16 bpm);
+
 };
 
 #endif

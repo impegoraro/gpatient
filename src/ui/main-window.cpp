@@ -153,8 +153,10 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	db.signal_subvisit_added().connect(sigc::mem_fun(*this, &MainWindow::hlpr_append_subvisit));
 	db.signal_person_edited().connect(sigc::mem_fun(*this, &MainWindow::on_db_person_edited));
 	db.signal_visit_edited().connect(sigc::mem_fun(*this, &MainWindow::on_visitEdited));
+	db.signal_subvisit_edited().connect(sigc::mem_fun(*this, &MainWindow::on_subvisitEdited));
 	m_mtbAdd.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAdd_clicked));
 	m_btnNewVisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAddVisit_clicked));
+	m_btnNewVisit2->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolAddVisit_clicked));
 	m_mtbEdit.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolEdit_clicked));
 	m_mtbRemove.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnToolRemove_clicked));
 	m_entryPatients.signal_focus_in_event().connect(sigc::mem_fun(*this, &MainWindow::on_entryPatient_focusIn));
@@ -173,7 +175,7 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_treeVisits->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_visits_selection_changed));
 	m_btnVisitEdit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_visitEdit_clicked));
 	m_btnNewSubvisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_newSubVisit_clicked));
-
+	m_btnSubVisitEdit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_subvisitEdit_clicked));
 
 
 	/************************************
@@ -206,10 +208,12 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_treeVisits->set_grid_lines(TREE_VIEW_GRID_LINES_HORIZONTAL);
 	swPatients->set_shadow_type(SHADOW_ETCHED_OUT);
 
+	m_panedVisits->set_position(420);
+
 	set_title(title);
 	set_default_size(860, 640);
 	set_icon_name(((ustring)PACKAGE_NAME).lowercase());
-	
+
 	m_entryPatients.set_width_chars(34);
 	swPatients->set_margin_left(1);
 	swPatients->set_margin_right(1);
@@ -544,8 +548,9 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		}
 		m_entryPatients.hide();
 	
-		m_lblSuggestions->show();
+		m_boxSuggestions->show();
 		m_boxVisitInfo->hide();
+		m_boxSubVisits->hide();
 		
 		m_nb.set_current_page(1);
 		msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), m_modelVisits->children().size());
@@ -740,6 +745,39 @@ void MainWindow::on_visitEdit_clicked(void)
 	m_vw->show();
 }
 
+void MainWindow::on_subvisitEdit_clicked(void)
+{
+	if(m_svw == NULL) {
+		m_svw = new SubVisitWindow(*this);
+		m_app->add_window((Window&)*m_svw->get_window());
+	}
+	m_svw->clean();
+	m_svw->set_window_type(SubVisitWindow::WindowType::WINDOW_TYPE_EDIT, getSubVisitID());
+	m_svw->setParentVisitID(getParentVisitID());
+	m_svw->setPersonID(m_personID);
+
+	DBHandler::get_instance().open();
+	DBHandler::get_instance().get_subvisit(getSubVisitID(), *m_svw);
+	DBHandler::get_instance().close();
+	m_svw->set_sex_widgets(!(m_lblPSex->get_text().substr(0,1) == (ustring)"M"));
+	m_svw->show();
+
+}
+void MainWindow::on_newSubVisit_clicked(void)
+{
+	if(m_svw == NULL) {
+		m_svw = new SubVisitWindow(*this);
+		m_app->add_window((Window&)*m_svw->get_window());
+	}
+	m_svw->set_window_type(SubVisitWindow::WindowType::WINDOW_TYPE_ADD);
+	m_svw->clean();
+	m_svw->setParentVisitID(m_visitID);
+	m_svw->setPersonID(m_personID);
+	m_svw->set_sex_widgets(!(m_lblPSex->get_text().substr(0, 1) == (ustring)"M"));
+	m_svw->show();
+}
+
+
 void MainWindow::on_visitEdited(const VisitInterface& v)
 {
 	//RefPtr<TreeSelection> sel = m_treeVisits->get_selection();
@@ -754,6 +792,21 @@ void MainWindow::on_visitEdited(const VisitInterface& v)
 
 		*((VisitInterface*) this) = v;
 	}
+}
+
+void MainWindow::on_subvisitEdited(const SubVisitInterface& v)
+{
+	RefPtr<TreeSelection> sel = m_treeVisits->get_selection();
+	TreeModel::iterator iter = sel->get_selected();
+	
+	if(iter) {
+		TreeRow row =*iter;
+
+		row[m_lvCols.m_col_complaint] = v.getSubVisitFatigue();
+		row[m_lvCols.m_col_date] = v.getSubVisitDate().format_string("%Y-%m-%d");
+
+		*((SubVisitInterface*) this) = v;
+	} else cout<<"HERE BITCHES"<<endl;
 }
 
 void MainWindow::get_visits_widgets(void)
@@ -845,7 +898,25 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("lblPregnancy", m_lblPregnancy);
 	builder->get_widget("treeAllergies", m_treeAllergies);
 	builder->get_widget("btnNewSubvisit", m_btnNewSubvisit);
-
+	builder->get_widget("lblSubVisitDate", m_lblSubVisitDate);
+	builder->get_widget("lblSubVisitSleepiness", m_lblSubVisitSleepiness);
+	builder->get_widget("lblSubVisitFatigue", m_lblSubVisitFatigue);
+	builder->get_widget("lblSubVisitHead", m_lblSubVisitHead);
+	builder->get_widget("lblSubVisitTongue", m_lblSubVisitTongue);
+	builder->get_widget("lblSubVisitUrine", m_lblSubVisitUrine);
+	builder->get_widget("lblSubVisitFaeces", m_lblSubVisitFaeces);
+	builder->get_widget("lblSubVisitMenstruationInfo", m_lblSubVisitMenstruationInfo);
+	builder->get_widget("lblSubVisitMenstruation", m_lblSubVisitMenstruation);
+	builder->get_widget("lblSubVisitPulseD", m_lblSubVisitPulseD);
+	builder->get_widget("lblSubVisitPulseE", m_lblSubVisitPulseE);
+	builder->get_widget("lblSubVisitApal", m_lblSubVisitApal);
+	builder->get_widget("lblSubVisitBloodPressure", m_lblSubVisitBloodPressure);
+	builder->get_widget("lblSubVisitObservations", m_lblSubVisitObservations);
+	builder->get_widget("panedVisits", m_panedVisits);
+	builder->get_widget("boxSubVisits", m_boxSubVisits);
+	builder->get_widget("boxSuggestions", m_boxSuggestions);
+	builder->get_widget("btnNewVisit2", m_btnNewVisit2);
+	builder->get_widget("btnSubVisitEdit", m_btnSubVisitEdit);
 
 	/* Tree allergies configuration */
 	m_treeAllergies->set_model(ListStore::create(m_la));
@@ -879,10 +950,10 @@ void MainWindow::on_btnRemoveVisit(void)
 					m_modelVisits->erase(row);
 					n_rows = m_modelVisits->children().size();
 					if(n_rows <= 0) {
-						m_lblSuggestions->show();
+						m_boxSuggestions->show();
 						m_boxVisitInfo->hide();
 					} else {
-						m_lblSuggestions->hide();
+						m_boxSuggestions->hide();
 						m_boxVisitInfo->show();
 					}
 					msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), n_rows);
@@ -914,15 +985,30 @@ void MainWindow::on_treeVisit_activated(const TreeModel::Path& path, TreeViewCol
 	DBHandler db = DBHandler::get_instance();
 	bool close = true;
 	RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model())->clear();
+	TreeIter iter;
 
 	if(*m_visitSelected) {
+		db.open();
+		
 		try{
-			db.open();
-			m_visitID = (*m_visitSelected)[m_lvCols.m_col_id];
-			db.get_visit((*m_visitSelected)[m_lvCols.m_col_id], *this);
-			db.get_person_allergies(m_personID, Util::parse_date(m_lblDate->get_text()), sigc::mem_fun(*this, &MainWindow::hlpr_append_allergy));	
-			m_lblSuggestions->hide();
-			m_boxVisitInfo->show();
+			
+			if(*(m_visitSelected->parent())) {
+				iter = m_visitSelected;
+				m_visitSelected = m_visitSelected->parent();
+				m_visitID = (*m_visitSelected)[m_lvCols.m_col_id];
+				db.get_visit(m_visitID, *this);
+				db.get_subvisit((*iter)[m_lvCols.m_col_id], *this);
+				m_boxSuggestions->hide();
+				m_boxVisitInfo->show();
+				m_boxSubVisits->show();
+			} else {
+				m_visitID = (*m_visitSelected)[m_lvCols.m_col_id];
+				db.get_visit((*m_visitSelected)[m_lvCols.m_col_id], *this);
+				db.get_person_allergies(m_personID, Util::parse_date(m_lblDate->get_text()), sigc::mem_fun(*this, &MainWindow::hlpr_append_allergy));	
+				m_boxSuggestions->hide();
+				m_boxVisitInfo->show();
+				m_boxSubVisits->hide();
+			}
 		}
 		catch(SqlConnectionOpenedException& ex) { close = false;}
 		
@@ -933,13 +1019,13 @@ void MainWindow::on_treeVisit_activated(const TreeModel::Path& path, TreeViewCol
 
 void MainWindow::on_visits_selection_changed(void)
 {
-	gint n_rows;
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator row = sel->get_selected();
 
 	if(*row) {
-		m_lblSuggestions->show();
+		m_boxSuggestions->show();
 		m_boxVisitInfo->hide();
+		m_boxSubVisits->hide();
 	}
 }
 
@@ -952,21 +1038,12 @@ bool MainWindow::on_maximized_change(GdkEventWindowState *state)
 	return false;
 }
 
-void MainWindow::on_newSubVisit_clicked(void)
-{
-	if(m_svw == NULL) {
-		m_svw = new SubVisitWindow(*this);
-		m_app->add_window((Window&)*m_svw->get_window());
-	}
-	m_svw->clean();
-	m_svw->setParentVisitID(m_visitID);
-	m_svw->setPersonID(m_personID);
-	m_svw->show_all();
-}
 
 /***********************************
  *          Configuration          *
 ***********************************/
+
+
 void MainWindow::get_window_size(gint& width, gint& height)
 {
 	get_size(width, height);
@@ -978,6 +1055,10 @@ void MainWindow::get_window_position(gint& posx, gint& posy)
 bool MainWindow::get_window_maximized()
 {
 	return m_maximized;
+}
+int MainWindow::get_visit_paned_position()
+{
+	return m_panedVisits->get_position();
 }
 void MainWindow::set_window_maximized(bool maximized)
 {
@@ -994,10 +1075,20 @@ void MainWindow::set_window_move(int posx, int posy)
 {
 	move(posx, posy);
 }
+void MainWindow::set_visit_paned_position(int &val)
+{
+	m_panedVisits->set_position(val);
+}
+
+
 /***********************************
  *             Getters             *
 ***********************************/
 
+guint32 MainWindow::getPersonID()
+{
+	return m_personID;
+}
 guint32 MainWindow::getPersonID() const
 {
 	return m_personID;
@@ -1283,6 +1374,168 @@ TreeModel::Children MainWindow::getAllergies() const
 {
 }
 
+
+/***********************************
+ *            SubVisits            *
+***********************************/
+guint32 MainWindow::getSubVisitID()
+{
+	TreeIter iter = m_treeVisits->get_selection()->get_selected();
+	if(iter){
+		return (*iter)[m_lvCols.m_col_id];
+	}
+}
+guint32 MainWindow::getSubVisitID() const
+{
+	TreeIter iter = m_treeVisits->get_selection()->get_selected();
+	if(iter) {
+		return (*iter)[m_lvCols.m_col_id];
+	}
+}
+guint32 MainWindow::getParentVisitID()
+{
+	TreeIter iter = m_treeVisits->get_selection()->get_selected();
+	if(iter && m_modelVisits->iter_is_valid(iter->parent())){
+		return (*iter->parent())[m_lvCols.m_col_id];
+	}
+}
+guint32 MainWindow::getParentVisitID() const
+{
+	TreeIter iter = m_treeVisits->get_selection()->get_selected();
+	if(iter && m_modelVisits->iter_is_valid(iter->parent())){
+		return (*iter->parent())[m_lvCols.m_col_id];
+	}
+}
+const Glib::Date MainWindow::getSubVisitDate()
+{
+	return Util::parse_date(m_lblSubVisitDate->get_text());
+}
+const Glib::Date MainWindow::getSubVisitDate() const
+{
+	return Util::parse_date(m_lblSubVisitDate->get_text());
+}
+const Glib::ustring MainWindow::getSubVisitSleepiness()
+{
+	return m_lblSubVisitSleepiness->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitSleepiness() const
+{
+	return m_lblSubVisitSleepiness->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitFatigue()
+{
+	return m_lblSubVisitFatigue->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitFatigue() const
+{
+	return m_lblSubVisitFatigue->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitHead()
+{
+	return m_lblSubVisitHead->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitHead() const
+{
+	return m_lblSubVisitHead->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitTongue()
+{
+	return m_lblSubVisitTongue->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitTongue() const
+{
+	return m_lblSubVisitTongue->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitUrine()
+{
+	return m_lblSubVisitUrine->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitUrine() const
+{
+	return m_lblSubVisitUrine->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitFaeces()
+{
+	return m_lblSubVisitFaeces->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitFaeces() const
+{
+	return m_lblSubVisitFaeces->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitMenstruation()
+{
+	return m_lblSubVisitMenstruation->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitMenstruation() const
+{
+	return m_lblSubVisitMenstruation->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitPulseD()
+{
+	return m_lblSubVisitPulseD->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitPulseD() const
+{
+	return m_lblSubVisitPulseD->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitPulseE()
+{
+	return m_lblSubVisitPulseE->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitPulseE() const
+{
+	return m_lblSubVisitPulseE->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitApal()
+{
+	return m_lblSubVisitApal->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitApal() const
+{
+	return m_lblSubVisitApal->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitObservations()
+{
+	return m_lblSubVisitObservations->get_text();
+}
+const Glib::ustring MainWindow::getSubVisitObservations() const
+{
+	return m_lblSubVisitObservations->get_text();
+}
+const void MainWindow::getSubVisitBloodPressure(guint16& max, guint16& min, guint16& bpm)
+{
+	guint16 val;
+	string tmp = m_lblSubVisitBloodPressure->get_text();
+	stringstream ss;
+	auto i = tmp.find_first_of('/');
+	auto i2 = tmp.find_first_of("PPM");
+	
+	ss<<tmp.substr(0, i-1);
+	ss>>max;
+	i = tmp.find_first_of('/');
+	ss<<tmp.substr(i + 1, i2 - 1);
+	ss>>min;
+	i = tmp.find_first_of("PPM");
+	ss<<tmp.substr(i+6);
+	ss>>bpm;
+}
+const void MainWindow::getSubVisitBloodPressure(guint16& max, guint16& min, guint16& bpm) const
+{
+	guint16 val;
+	string tmp = m_lblSubVisitBloodPressure->get_text();
+	stringstream ss;
+	auto i = tmp.find_first_of('/');
+	auto i2 = tmp.find_first_of("PPM");
+	
+	ss<<tmp.substr(0, i-1);
+	ss>>max;
+	i = tmp.find_first_of('/');
+	ss<<tmp.substr(i + 1, i2 - 1);
+	ss>>min;
+	i = tmp.find_first_of("PPM");
+	ss<<tmp.substr(i+6);
+	ss>>bpm;
+}
 
 /***********************************
  *             Setters             *
@@ -1779,4 +2032,67 @@ void MainWindow::setMedication(const Glib::ustring& val)
 void MainWindow::setTreatment(const Glib::ustring& val)
 {
 	m_lblTreatment->set_text(val);
+}
+
+/*void setSubVisitPersonID(guint32 val)
+{
+}*/
+void MainWindow::setParentVisitID(guint32 val)
+{
+}
+void MainWindow::setSubVisitID(guint32 val)
+{
+}
+void MainWindow::setSubVisitDate(const Glib::Date& val)
+{
+	m_lblSubVisitDate->set_text(val.format_string("%Y-%m-%d"));
+}
+void MainWindow::setSubVisitSleepiness(const Glib::ustring& val)
+{
+	m_lblSubVisitSleepiness->set_text(val);
+}
+void MainWindow::setSubVisitFatigue(const Glib::ustring& val)
+{
+	m_lblSubVisitFatigue->set_text(val);
+}
+void MainWindow::setSubVisitHead(const Glib::ustring& val)
+{
+	m_lblSubVisitHead->set_text(val);
+}
+void MainWindow::setSubVisitTongue(const Glib::ustring& val)
+{
+	m_lblSubVisitTongue->set_text(val);
+}
+void MainWindow::setSubVisitUrine(const Glib::ustring& val)
+{
+	m_lblSubVisitUrine->set_text(val);
+}
+void MainWindow::setSubVisitFaeces(const Glib::ustring& val)
+{
+	m_lblSubVisitFaeces->set_text(val);
+}
+void MainWindow::setSubVisitMenstruation(const Glib::ustring& val)
+{
+	m_lblSubVisitMenstruation->set_text(val);
+}
+void MainWindow::setSubVisitPulseD(const Glib::ustring& val)
+{
+	m_lblSubVisitPulseD->set_text(val);
+}
+void MainWindow::setSubVisitPulseE(const Glib::ustring& val)
+{
+	m_lblSubVisitPulseE->set_text(val);
+}
+void MainWindow::setSubVisitApal(const Glib::ustring& val)
+{
+	m_lblSubVisitApal->set_text(val);
+}
+void MainWindow::setSubVisitObservations(const Glib::ustring& val)
+{
+	m_lblSubVisitObservations->set_text(val);
+}
+void MainWindow::setSubVisitBloodPressure(guint16 max, guint16 min, guint16 bpm)
+{
+	m_lblSubVisitBloodPressure->set_text(ustring::compose(ustring("%1 <b>/</b> %2    <b>PPM: </b>%3"), max, min, bpm));
+	m_lblSubVisitBloodPressure->set_use_markup();
 }

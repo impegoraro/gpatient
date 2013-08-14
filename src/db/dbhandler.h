@@ -40,11 +40,12 @@ protected:
 	inline guint get_visit_from_person(gint PersonID) const;
 
 	sigc::signal<void, guint32, const Glib::ustring&, guint32> m_signal_person_added;
-	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_visit_added;
-	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_subvisit_added;
-	sigc::signal<void, const VisitInterface&> m_signal_visit_edited;
-	sigc::signal<void, const Allergy&, const Glib::Date&> m_signal_allergies;
 	sigc::signal<void, const Person&> m_signal_person_edit;
+	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_visit_added;
+	sigc::signal<void, const VisitInterface&> m_signal_visit_edited;
+	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&> m_signal_subvisit_added;
+	sigc::signal<void, const SubVisitInterface&> m_signal_subvisit_edited;
+	sigc::signal<void, const Allergy&, const Glib::Date&> m_signal_allergies;
 public:
 
 	static DBHandler& get_instance(const std::string& dbpath);
@@ -59,13 +60,16 @@ public:
 	bool exists_person_by_identification_card(const guint32 ic, guint32 *personID = NULL) const;
 	bool exists_person_by_tax_number(const guint32 tax, guint32 *personID = NULL) const;
 	
-	bool visit_remove(unsigned int id) const;
 	int visit_insert(VisitInterface& visit) const;
 	int visit_update(VisitInterface& v) const;
-	int subvisit_insert(SubVisitInterface& v) const;
+	bool visit_remove(unsigned int id) const;
 	void get_visits(guint32 personID) const;
 	bool get_visit(int id, VisitInterface &v) const;
 	
+	int subvisit_insert(SubVisitInterface& v) const;
+	bool get_subvisit(int id, SubVisitInterface &v) const;
+	int subvisit_update(SubVisitInterface& v) const;
+
 	void get_person_allergies(guint32 personID, const Glib::Date& date, SlotAppendAllergy) const;
 	
 	const Glib::ustring& get_database_path(void) const;
@@ -74,10 +78,11 @@ public:
 	void close(void);
 
 	sigc::signal<void, guint32, const Glib::ustring&, guint32>& signal_person_added();
-	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&>& signal_visit_added();
-	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&>& signal_subvisit_added();
-	sigc::signal<void, const VisitInterface&>& signal_visit_edited();
 	sigc::signal<void, const Person&>& signal_person_edited();
+	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&>& signal_visit_added();
+	sigc::signal<void, const VisitInterface&>& signal_visit_edited();
+	sigc::signal<void, guint32, const Glib::ustring&, const Glib::ustring&>& signal_subvisit_added();
+	sigc::signal<void, const SubVisitInterface&> signal_subvisit_edited();
 	sigc::signal<void, const Allergy&, const Glib::Date&>& signal_allergies();
 };
 

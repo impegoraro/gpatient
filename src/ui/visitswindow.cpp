@@ -364,6 +364,10 @@ const Gtk::Window* VisitsWindow::get_window()
 
 void VisitsWindow::show()
 {
+	m_win->set_page_complete(*m_win->get_nth_page(0), !(m_type == WINDOW_TYPE_ADD));
+	m_win->set_page_complete(*m_win->get_nth_page(1), !(m_type == WINDOW_TYPE_ADD));
+	m_win->set_page_complete(*m_win->get_nth_page(2), !(m_type == WINDOW_TYPE_ADD));
+	m_win->set_page_complete(*m_win->get_nth_page(3), !(m_type == WINDOW_TYPE_ADD));
 	m_txtComplaint->grab_focus();
 	get_db_data();
 	m_win->show_all();
@@ -476,15 +480,9 @@ void VisitsWindow::set_window_type(VisitsWindow::WindowType type, guint32 visitI
 	if(m_type == WINDOW_TYPE_ADD) {
 		m_lblTitle->set_markup("<span size=\"xx-large\"><b><i>Nova Visita</i></b></span>");
 		m_win->set_title("Nova Visita");
-	}
-	else{
+	} else {
 		m_lblTitle->set_markup("<span size=\"xx-large\"><b><i>Editar Visita</i></b></span>");
 		m_win->set_title("Editar Visita");
-
-		m_win->set_page_complete(*m_win->get_nth_page(0), true);
-		m_win->set_page_complete(*m_win->get_nth_page(1), true);
-		m_win->set_page_complete(*m_win->get_nth_page(2), true);
-		m_win->set_page_complete(*m_win->get_nth_page(3), true);
 	}
 }
 

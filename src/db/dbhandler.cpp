@@ -507,24 +507,24 @@ int DBHandler::subvisit_insert(SubVisitInterface& v) const
 		}
 
 		if((res = sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL)) == SQLITE_OK) {
-			ustring now = v.getDate().format_string("%Y-%m-%d");
+			ustring now = v.getSubVisitDate().format_string("%Y-%m-%d");
 			guint16 max, min, bpm;
 			
-			v.getBloodPressure(max, min, bpm);
+			v.getSubVisitBloodPressure(max, min, bpm);
 
 			sqlite3_bind_int(stmt, 1, v.getPersonID());
 			sqlite3_bind_text(stmt, 2, now.c_str(), now.bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 3, v.getSleepiness().c_str(), v.getSleepiness().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 4, v.getFatigue().c_str(), v.getFatigue().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 5, v.getHead().c_str(), v.getHead().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 6, v.getTongue().c_str(), v.getTongue().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 7, v.getUrine().c_str(), v.getUrine().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 8, v.getFaeces().c_str(), v.getFaeces().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 9, v.getMenstruation().c_str(), v.getMenstruation().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 10, v.getPulseD().c_str(), v.getPulseD().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 11, v.getPulseE().c_str(), v.getPulseE().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 12, v.getApal().c_str(), v.getApal().bytes(), SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 13, v.getObservations().c_str(), v.getObservations().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, v.getSubVisitSleepiness().c_str(), v.getSubVisitSleepiness().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 4, v.getSubVisitFatigue().c_str(), v.getSubVisitFatigue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 5, v.getSubVisitHead().c_str(), v.getSubVisitHead().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 6, v.getSubVisitTongue().c_str(), v.getSubVisitTongue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 7, v.getSubVisitUrine().c_str(), v.getSubVisitUrine().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, v.getSubVisitFaeces().c_str(), v.getSubVisitFaeces().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, v.getSubVisitMenstruation().c_str(), v.getSubVisitMenstruation().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, v.getSubVisitPulseD().c_str(), v.getSubVisitPulseD().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 11, v.getSubVisitPulseE().c_str(), v.getSubVisitPulseE().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 12, v.getSubVisitApal().c_str(), v.getSubVisitApal().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 13, v.getSubVisitObservations().c_str(), v.getSubVisitObservations().bytes(), SQLITE_TRANSIENT);
 			sqlite3_bind_int(stmt, 14, v.getParentVisitID());
 
 			if(sqlite3_step(stmt) == SQLITE_DONE) {
@@ -561,7 +561,115 @@ int DBHandler::subvisit_insert(SubVisitInterface& v) const
 				qFinish = "ROLLBACK TRANSACTION;";
 			else 
 				//TODO: Add signal to update the user interface...
-				m_signal_subvisit_added.emit(visitID, v.getHead(), v.getDate().format_string("%Y-%m-%d"));
+				m_signal_subvisit_added.emit(visitID, v.getSubVisitHead(), v.getSubVisitDate().format_string("%Y-%m-%d"));
+
+			// End the transaction... either by issuing a rollback or commit.
+			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
+				//Error could start transaction...
+				if(stmtB != NULL)
+					sqlite3_finalize(stmtB); // clean up
+				return -1;
+			}
+
+			//cleanup
+			sqlite3_finalize(stmtB);
+			sqlite3_finalize(stmtE);
+		} else {
+			std::cout<< "Error (" << res <<") while inserting" <<endl <<"Message: "<< sqlite3_errmsg(m_db) << std::endl<< "'" << query <<"'"<<endl;
+			sqlite3_finalize(stmtB);
+			qFinish = "ROLLBACK TRANSACTION;";
+			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
+				if(stmtB != NULL)
+					sqlite3_finalize(stmtB); // clean up
+			}
+		}
+	} else
+		throw (SqlConnectionClosedException());
+
+	return res;
+}
+
+int DBHandler::subvisit_update(SubVisitInterface& v) const
+{
+	int res = 0;
+	bool shouldRollback = false;
+
+	/*TODO: Handle the errors correctly */
+	//if(!v.validate())
+	//	throw std::invalid_argument("Os dados da visita são inválidos.");
+
+	if(m_db != NULL) {
+		int visitID;
+		string qBegin = "BEGIN IMMEDIATE TRANSACTION;";
+		string query = "UPDATE Visits SET VisitDate = ?, Sleepiness = ?, Fatigue = ?, Head = ?, Tongue = ?, " \
+					"Urine = ?, Faeces = ?, Menstruation = ?, PulseD = ?, PulseE = ?, Apal = ?, Observations = ? WHERE VisitID = ?; ";
+		//string queryPain = "INSERT INTO Pain(Type,Since,Observation,RefVisitID) " \
+		//				" VALUES(?, ?, ?, ?);";
+		string queryBP = "UPDATE BloodPressure SET High = ?, Low = ?, BPM = ? WHERE RefVisitID = ?;";
+		string qFinish = "COMMIT TRANSACTION;";
+
+		sqlite3_stmt *stmt, *stmtB, *stmtE;
+
+		if(sqlite3_prepare_v2(m_db, qBegin.c_str(), -1, &stmtB, NULL) == SQLITE_OK && sqlite3_step(stmtB) != SQLITE_DONE) {
+			//Error could start transaction...
+			if(stmtB != NULL)
+				sqlite3_finalize(stmtB);
+			return -1;
+		}
+
+		if((res = sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL)) == SQLITE_OK) {
+			ustring now = v.getSubVisitDate().format_string("%Y-%m-%d");
+			guint16 max, min, bpm;
+			
+			v.getSubVisitBloodPressure(max, min, bpm);
+
+			sqlite3_bind_text(stmt, 1, now.c_str(), now.bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, v.getSubVisitSleepiness().c_str(), v.getSubVisitSleepiness().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, v.getSubVisitFatigue().c_str(), v.getSubVisitFatigue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 4, v.getSubVisitHead().c_str(), v.getSubVisitHead().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 5, v.getSubVisitTongue().c_str(), v.getSubVisitTongue().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 6, v.getSubVisitUrine().c_str(), v.getSubVisitUrine().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 7, v.getSubVisitFaeces().c_str(), v.getSubVisitFaeces().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 8, v.getSubVisitMenstruation().c_str(), v.getSubVisitMenstruation().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 9, v.getSubVisitPulseD().c_str(), v.getSubVisitPulseD().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 10, v.getSubVisitPulseE().c_str(), v.getSubVisitPulseE().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 11, v.getSubVisitApal().c_str(), v.getSubVisitApal().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 12, v.getSubVisitObservations().c_str(), v.getSubVisitObservations().bytes(), SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 13, v.getSubVisitID());
+
+			if(sqlite3_step(stmt) == SQLITE_DONE) {
+				res = 1;
+			} else {
+				shouldRollback = true;
+				std::cerr<< "Error preparing the statement for the visit: "<< sqlite3_errmsg(m_db)<<std::endl;
+			}
+			sqlite3_finalize(stmt);
+
+			/************************ inserting blood pressure info ************************/
+			if((res = sqlite3_prepare_v2(m_db, queryBP.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
+				sqlite3_bind_int(stmt, 1, max);
+				sqlite3_bind_int(stmt, 2, min);
+				sqlite3_bind_int(stmt, 3, bpm);
+				sqlite3_bind_int(stmt, 4, v.getSubVisitID());
+				if(sqlite3_step(stmt) == SQLITE_DONE)
+					res = 1;
+				else {
+					std::cerr<< "Error executing the statement for blood pressure: "<< sqlite3_errmsg(m_db)<<std::endl;
+					shouldRollback = true;
+				}
+				sqlite3_finalize(stmt);
+			} else {
+				shouldRollback = true;
+				std::cerr<< "Error preparing the statement for blood pressure: "<< sqlite3_errmsg(m_db)<<std::endl;
+			}
+			
+			/************************  end of blood pressure info  ************************/
+
+			if(shouldRollback) {
+				std::cout<< "Rolling back transaction, an error occurred"<< std::endl;
+				qFinish = "ROLLBACK TRANSACTION;";
+			} else 
+				m_signal_subvisit_edited.emit(v);
 
 			// End the transaction... either by issuing a rollback or commit.
 			if(sqlite3_prepare_v2(m_db, qFinish.c_str(), -1, &stmtE, NULL) == SQLITE_OK && sqlite3_step(stmtE) != SQLITE_DONE) {
@@ -610,7 +718,7 @@ int DBHandler::visit_update(VisitInterface& v) const
 					"PreviousTreatment = ?, Pregnancy = ?, Exams = ?, ClinicalAnalysis = ?, Medication = ?, Color = ?, Escle = ?, MedTxt = ?, Treatment = ? WHERE RefVisitID = ? ";
 		string queryPain = "INSERT INTO Pain(Type,Since,Observation,RefVisitID) " \
 						" VALUES(?, ?, ?, ?);";
-		string queryBP = "UPDATE BloodPressure High = ?, Low = ?, BPM = ? WHERE  RefVisitID = ? ";
+		string queryBP = "UPDATE BloodPressure SET High = ?, Low = ?, BPM = ? WHERE  RefVisitID = ? ";
 		string qFinish = "COMMIT TRANSACTION;";
 
 		sqlite3_stmt *stmt, *stmtB, *stmtE;
@@ -1402,6 +1510,65 @@ bool DBHandler::get_visit(int id, VisitInterface &v) const
 	return res;
 }
 
+bool DBHandler::get_subvisit(int id, SubVisitInterface &v) const
+{
+	bool res = false;
+	sqlite3_stmt *stmt;
+	ustring tmp;
+
+	if(m_db != NULL) {
+		string query = "SELECT VisitDate, Sleepiness, Fatigue, Head, Tongue, Urine, "
+					 	"Faeces, Menstruation, PulseD, PulseE, Apal, Observations, High, Low, BPM "
+						"FROM Visits V " \
+						"INNER JOIN BloodPressure BP ON BP.RefVisitID = V.VisitID " \
+						"WHERE V.VisitID = ?";
+		if(sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL) == SQLITE_OK) {
+			int val(SQLITE_ROW);
+			sqlite3_bind_int(stmt, 1, id);
+
+			while(val == SQLITE_ROW) {
+				val = sqlite3_step(stmt);
+				switch(val) {
+				case SQLITE_ROW: {
+					v.setSubVisitDate(Util::parse_date((ustring)((const char*)sqlite3_column_text(stmt, 0))));
+					v.setSubVisitSleepiness((ustring)((const char*)sqlite3_column_text(stmt, 1)));
+					v.setSubVisitFatigue((ustring)((const char*)sqlite3_column_text(stmt, 2)));
+					v.setSubVisitHead((ustring)((const char*)sqlite3_column_text(stmt, 3)));
+					v.setSubVisitTongue((ustring)((const char*)sqlite3_column_text(stmt, 4)));
+					v.setSubVisitUrine((ustring)((const char*)sqlite3_column_text(stmt, 5)));
+					v.setSubVisitFaeces((ustring)((const char*)sqlite3_column_text(stmt, 6)));
+					v.setSubVisitMenstruation((ustring)((const char*)sqlite3_column_text(stmt, 7)));
+					v.setSubVisitPulseD((ustring)((const char*)sqlite3_column_text(stmt, 8)));
+					v.setSubVisitPulseE((ustring)((const char*)sqlite3_column_text(stmt, 9)));
+					v.setSubVisitApal((ustring)((const char*)sqlite3_column_text(stmt, 10)));
+					if(sqlite3_column_text(stmt, 11) != NULL)
+						v.setSubVisitObservations((ustring)((const char*)sqlite3_column_text(stmt, 11)));
+					else
+						v.setSubVisitObservations("");
+					v.setSubVisitBloodPressure(sqlite3_column_int(stmt, 12), sqlite3_column_int(stmt, 13), sqlite3_column_int(stmt, 14));
+
+					break;
+				}
+				case SQLITE_DONE: {
+					res = true;
+					break;
+				}
+				case SQLITE_ERROR:
+					cerr<< "Error executing the statement: "<< sqlite3_errmsg(m_db)<<endl;
+					res = false;
+					break;
+				}
+			}
+			sqlite3_finalize(stmt);
+		} else {
+			cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<endl;
+		}
+	} else
+		throw (SqlConnectionClosedException());
+
+	return res;
+}
+
 sigc::signal<void, guint32, const ustring&, guint32>& DBHandler::signal_person_added()
 {
 	return m_signal_person_added;
@@ -1415,6 +1582,10 @@ sigc::signal<void, guint32, const ustring&, const ustring&>& DBHandler::signal_v
 sigc::signal<void, guint32, const ustring&, const ustring&>& DBHandler::signal_subvisit_added()
 {
 	return m_signal_subvisit_added;
+}
+sigc::signal<void, const SubVisitInterface&> DBHandler::signal_subvisit_edited()
+{
+	return m_signal_subvisit_edited;
 }
 
 sigc::signal<void, const VisitInterface&>& DBHandler::signal_visit_edited()
