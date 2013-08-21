@@ -171,7 +171,6 @@ MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(
 	m_btnViewPatient->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnShPatient_clicked));
 	m_btnBack->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnBack_clicked));
 	m_btnRemoveVisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_btnRemoveVisit));
-	m_treeVisits->signal_row_activated().connect(sigc::mem_fun(*this, &MainWindow::on_treeVisit_activated));
 	m_treeVisits->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_visits_selection_changed));
 	m_btnVisitEdit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_visitEdit_clicked));
 	m_btnNewSubvisit->signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_newSubVisit_clicked));
@@ -977,10 +976,9 @@ void MainWindow::on_btnRemoveVisit(void)
 	}
 }
 
-void MainWindow::on_treeVisit_activated(const TreeModel::Path& path, TreeViewColumn* col)
+void MainWindow::on_visits_selection_changed(void)
 {
 	RefPtr<TreeSelection> sel = m_treeVisits->get_selection();
-	//TreeModel::iterator m_visitSelected = sel->get_selected();
 	m_visitSelected = sel->get_selected();
 	DBHandler db = DBHandler::get_instance();
 	bool close = true;
@@ -1014,15 +1012,7 @@ void MainWindow::on_treeVisit_activated(const TreeModel::Path& path, TreeViewCol
 		
 		if(close)
 			db.close();
-	}
-}
-
-void MainWindow::on_visits_selection_changed(void)
-{
-	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
-	TreeModel::iterator row = sel->get_selected();
-
-	if(*row) {
+	} else {
 		m_boxSuggestions->show();
 		m_boxVisitInfo->hide();
 		m_boxSubVisits->hide();

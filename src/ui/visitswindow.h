@@ -87,7 +87,7 @@ public:
 		Gtk::TreeModelColumn<guint32> m_col_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
 		Gtk::TreeModelColumn<Glib::ustring> m_col_obs;
-		Gtk::TreeModelColumn<guint32> m_col_status;
+		Gtk::TreeModelColumn<int> m_col_status;
 	};
 
 	class ListHereditary : public Gtk::TreeModel::ColumnRecord

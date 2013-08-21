@@ -263,7 +263,6 @@ protected:
 	void on_btnToolEdit_clicked(void);
 	void on_btnToolRemove_clicked(void);
 	void on_window_show(void);
-	void on_treeVisit_activated(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
 	void on_visitEdit_clicked(void);
 	void on_btnRemoveVisit(void);
 	void on_subvisitEdit_clicked(void);
@@ -272,7 +271,6 @@ protected:
 	bool on_entryPatient_focusOut(GdkEventFocus *focus);
 
 	void on_treePatients_activated(const Gtk::TreeModel::Path&, Gtk::TreeViewColumn*);
-	//void on_treePatients_selected();
 	void on_txtSearch_changed();
 	void on_db_person_edited(const Person& p);
 	void on_mhAbout_activate(void);

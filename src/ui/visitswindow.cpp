@@ -261,8 +261,8 @@ VisitsWindow::VisitsWindow(Window& win, int personID)
 	col->set_resizable();
 	col = m_treeAllergies->get_column(m_treeAllergies->append_column_editable("Observações", la.m_col_obs)-1);
 	col->set_resizable();
-	col = m_treeAllergies->get_column(m_treeAllergies->append_column_numeric("Status", la.m_col_status,"%u")-1);
-	col->set_visible(false);
+	col = m_treeAllergies->get_column(m_treeAllergies->append_column_numeric("Status", la.m_col_status,"%d")-1);
+	col->set_visible(true);
 
 
 	/* Tree Hereditary Diseases configuration */
@@ -376,7 +376,6 @@ void VisitsWindow::show()
 void VisitsWindow::get_db_data()
 {
 	DBHandler db = DBHandler::get_instance();
-	sigc::connection conn;
 	Date date;
 	auto allergies = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
 	auto hereditary = RefPtr<ListStore>::cast_dynamic(m_treeHereditary->get_model());	
@@ -385,10 +384,8 @@ void VisitsWindow::get_db_data()
 	allergies->clear();
 	hereditary->clear();
 
-	//conn = db.signal_allergies().connect(sigc::mem_fun(*this, &VisitsWindow::hlpr_append_allergy));
 	db.open();
- 	//db.get_person_allergies(m_personID, date, sigc::mem_fun(*this, &VisitsWindow::hlpr_append_allergy));
-	//conn.disconnect();
+ 	db.get_person_allergies(m_personID, date, sigc::mem_fun(*this, &VisitsWindow::hlpr_append_allergy));
 
 	db.close();
 }
@@ -418,7 +415,7 @@ void VisitsWindow::hlpr_list_allergies_add()
 	TreeIter iter = model->append();
 	TreeModel::Row row = *iter;
 
-	row[la.m_col_status] = 3;
+	row[la.m_col_status] = LIST_STATUS_ADDED;
 	row[la.m_col_id] = -1;
 	row[la.m_col_name] = "<Escreva o nome da alergia>";
 	m_treeAllergies->get_selection()->select(iter);
@@ -443,6 +440,7 @@ void VisitsWindow::hlpr_list_hereditary_add()
 	row[m_lhd.m_col_id] = -1;
 	row[m_lhd.m_col_parent] = "";
 	row[m_lhd.m_col_name] = "<Escreva o nome da doença>";
+	row[m_lhd.m_col_status] = LIST_STATUS_ADDED;
 	m_treeHereditary->get_selection()->select(iter);
 }
 
@@ -569,13 +567,15 @@ void VisitsWindow::hlpr_append_allergy(const Allergy& allergy, const Glib::Date&
 	RefPtr<ListStore> model = RefPtr<ListStore>::cast_dynamic(m_treeAllergies->get_model());
 	TreeIter iter = model->append();
 	VisitsWindow::ListAllergies la;
+
 	if(iter) {
 		TreeModel::Row row = *iter;
-
+	
+		row[la.m_col_status] = LIST_STATUS_NORMAL;
 		row[la.m_col_id] = allergy.m_id;
 		row[la.m_col_name] = allergy.m_name;
 		row[la.m_col_obs] = allergy.m_obs;
-		row[la.m_col_status] = allergy.m_status;
+		//row[la.m_col_status] = allergy.m_status;
 	}
 }
 
@@ -1071,7 +1071,8 @@ ustring VisitsWindow::getTreatment() const
 
 TreeModel::Children VisitsWindow::getAllergies() const
 {
-	return m_treeAllergies->get_model()->children();
+	TreeNodeChildren ch = m_treeAllergies->get_model()->children();
+	return ch;
 }
 
 /***********************************

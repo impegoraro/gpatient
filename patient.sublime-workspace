@@ -4,6 +4,58 @@
 		"selected_items":
 		[
 			[
+				"m_vi",
+				"m_visitID"
+			],
+			[
+				"getVisi",
+				"getVisitID"
+			],
+			[
+				"m_boxS",
+				"m_boxSubVisits"
+			],
+			[
+				"sqlite3_co",
+				"sqlite3_column_int"
+			],
+			[
+				"m_mode",
+				"m_modelVisits"
+			],
+			[
+				"get_selec",
+				"get_selection"
+			],
+			[
+				"m_mo",
+				"m_modelPatients"
+			],
+			[
+				"m_tree",
+				"m_treeVisits"
+			],
+			[
+				"SQLI",
+				"SQLITE_OK"
+			],
+			[
+				"m_visi",
+				"m_visitSelected"
+			],
+			[
+				"m_vist",
+				"m_parentVisitID"
+			],
+			[
+				"m_visit",
+				"m_visitID"
+			],
+			[
+				"G",
+				"GDK_KEY_PRESS"
+			],
+			[
 				"SQLITE",
 				"SQLITE_TRANSIENT"
 			],
@@ -24,18 +76,10 @@
 	"buffers":
 	[
 		{
-			"file": "src/database/02-visists.sql",
+			"file": "src/db/dbhandler.h",
 			"settings":
 			{
-				"buffer_size": 3606,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/database/Update 02.sql",
-			"settings":
-			{
-				"buffer_size": 1092,
+				"buffer_size": 3089,
 				"line_ending": "Unix"
 			}
 		},
@@ -43,15 +87,23 @@
 			"file": "src/db/dbhandler.cpp",
 			"settings":
 			{
-				"buffer_size": 56712,
+				"buffer_size": 68196,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "src/ui/subvisit-window.cpp",
+			"file": "src/ui/main-window.cpp",
 			"settings":
 			{
-				"buffer_size": 1658,
+				"buffer_size": 55716,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/ui/main-window.h",
+			"settings":
+			{
+				"buffer_size": 16683,
 				"line_ending": "Unix"
 			}
 		},
@@ -59,7 +111,55 @@
 			"file": "src/ui/subvisit-window.h",
 			"settings":
 			{
-				"buffer_size": 1091,
+				"buffer_size": 4380,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/ui/subvisit-window.cpp",
+			"settings":
+			{
+				"buffer_size": 12022,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/configuration.cpp",
+			"settings":
+			{
+				"buffer_size": 3102,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/configuration.h",
+			"settings":
+			{
+				"buffer_size": 907,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/ui/visitswindow.cpp",
+			"settings":
+			{
+				"buffer_size": 42391,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/ui/visitswindow.h",
+			"settings":
+			{
+				"buffer_size": 11915,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/db/subvisit-interface.h",
+			"settings":
+			{
+				"buffer_size": 3034,
 				"line_ending": "Unix"
 			}
 		}
@@ -67,7 +167,7 @@
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 361.0,
+		"height": 31.0,
 		"selected_items":
 		[
 			[
@@ -116,21 +216,30 @@
 	},
 	"file_history":
 	[
-		"/home/ilan/Projects/gestao-herb/src/ui/subvisit-window.h",
+		"/home/ilan/Projects/gestao-herb/src/db/visit-interface.cpp",
+		"/home/ilan/Dropbox/Documents/singelu-server.txt",
+		"/home/ilan/Projects/gestao-herb/src/db/subvisit-interface.h",
+		"/home/ilan/Projects/gestao-herb/src/db/subvisit-interface.cpp",
 		"/home/ilan/Projects/gestao-herb/src/ui/patient-window.cpp",
-		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.cpp",
-		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/view-patient.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/visitswindow.cpp",
+		"/home/ilan/Projects/gestao-herb/src/database/02-visists.sql",
+		"/home/ilan/Projects/gestao-herb/src/db/dbhandler.cpp",
+		"/home/ilan/Projects/gestao-herb/src/util.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/main-window.cpp",
+		"/home/ilan/Projects/gestao-herb/src/ui/subvisits-window.glade",
+		"/run/media/ilan/IlanSecret/secure/credentials/official-credentials.txt",
+		"/home/ilan/Projects/gestao-herb/src/ui/patient-window.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/subvisit-window.h",
+		"/home/ilan/Projects/gestao-herb/src/ui/subvisit-window.cpp",
+		"/home/ilan/Projects/gestao-herb/src/database/Update 01.sql",
+		"/home/ilan/Projects/gestao-herb/src/db/visit-interface.h",
+		"/home/ilan/Projects/gestao-herb/src/database/Update 02.sql",
 		"/home/ilan/tmp.txt",
 		"/home/ilan/Projects/gestao-herb/src/main.cpp",
-		"/home/ilan/Projects/gestao-herb/src/ui/patient-window.h",
-		"/home/ilan/Projects/gestao-herb/src/database/Update 01.sql",
 		"/home/ilan/Projects/gestao-herb/src/database/test-person.sql",
-		"/home/ilan/Projects/gestao-herb/src/db/dbhandler.cpp",
-		"/home/ilan/Projects/gestao-herb/src/db/visit-interface.cpp",
 		"/home/ilan/Projects/gestao-herb/src/ui/main-window.h",
-		"/home/ilan/Projects/gestao-herb/src/db/visit-interface.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/widgets/date-entry.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/widgets/numeric-entry.h",
 		"/home/ilan/Projects/gestao-herb/src/ui/widgets/widgets.h",
@@ -162,6 +271,98 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"true",
+			"m_visitSelected",
+			"getVisitID",
+			"[a-zA-Z]+,",
+			"iptables denied:",
+			"IN",
+			"iptables denied: ",
+			"iptables denied:",
+			"db",
+			"SRC",
+			"btnNewSubvisit",
+			"m_swVisits",
+			"boxSubVisits",
+			"m_swVisits",
+			"				m_panedVisits->set_position(420);\n				m_panedVisits->set_position(420);\nm_panedVisits",
+			"				m_panedVisits->set_position(420);\ngetPersonID",
+			"getSubVisit",
+			"ite3_bin",
+			"sqlite3_bind_int",
+			"Util::",
+			"indow::set",
+			"indow::get",
+			"VisitBloodPre",
+			"_lblSubVisi",
+			"inWindow::getSubV",
+			"indow::getS",
+			"tSubVisit",
+			"etSubVisitParent",
+			"m_lblSubVisitObserv",
+			"}",
+			"getSubVis",
+			"SubVis",
+			"etSub",
+			"getSubVisit",
+			" get",
+			"getPersonID",
+			"ListVisitsCols",
+			"getParentVisitID",
+			"get",
+			"getPersonID",
+			"guint32 getPersonID",
+			"32 get",
+			"getPersonID",
+			"get",
+			"getPersonID",
+			"get",
+			"getPersonID",
+			"guint32 getPersonID",
+			" get",
+			"m_lblSuggestions",
+			"sugges",
+			"mbox",
+			"MessageDialog",
+			"MessageBox",
+			"MessageDialog",
+			"selection",
+			"SubVisitsWindow",
+			"itsWind",
+			"Glib::ustring get",
+			"set_text",
+			"Glib::ustring&",
+			"Glib::ustring& ",
+			"Glib::ustring&",
+			"Glib::Date&",
+			"Glib::ustring&",
+			"SubVisitWindow:: ",
+			"stSubVis",
+			"Glib::",
+			"get",
+			"m_txtSleepiness",
+			"const Glib::",
+			"oid set",
+			"id set",
+			"oid set",
+			"set",
+			";\n",
+			"string",
+			"() = 0",
+			"getVisitDate() = 0",
+			"on_widget_check_textview",
+			"m_cmb",
+			"sigc::bind(",
+			"on_widget_check",
+			"textview",
+			"t",
+			"SuvVisitWindow",
+			"GdkEventButton",
+			"v",
+			"m_txtDate",
+			"Date",
+			"~Visi",
+			"SubVisitWindow",
 			"Entry",
 			"[a-zA-A]+,",
 			"format_strin",
@@ -214,141 +415,77 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "src/database/02-visists.sql",
+					"file": "src/db/dbhandler.h",
 					"settings":
 					{
-						"buffer_size": 3606,
+						"buffer_size": 3089,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								170,
-								170
-							],
-							[
-								218,
-								218
-							],
-							[
-								240,
-								240
-							],
-							[
-								261,
-								261
-							],
-							[
-								271,
-								271
-							],
-							[
-								298,
-								298
-							],
-							[
-								330,
-								330
-							],
-							[
-								358,
-								358
-							],
-							[
-								388,
-								388
-							],
-							[
-								418,
-								418
-							],
-							[
-								449,
-								449
-							],
-							[
-								486,
-								486
-							],
-							[
-								508,
-								508
-							],
-							[
-								539,
-								539
-							],
-							[
-								568,
-								568
-							],
-							[
-								604,
-								604
-							],
-							[
-								626,
-								626
+								2912,
+								2912
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/SQL/SQL.tmLanguage",
+							"syntax": "Packages/C++/C++.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 435.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "src/database/Update 02.sql",
+					"file": "src/db/dbhandler.cpp",
 					"settings":
 					{
-						"buffer_size": 1092,
+						"buffer_size": 68196,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1083,
-								1083
+								30811,
+								30811
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/SQL/SQL.tmLanguage",
+							"syntax": "Packages/C++/C++.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 10110.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "src/db/dbhandler.cpp",
+					"file": "src/ui/main-window.cpp",
 					"settings":
 					{
-						"buffer_size": 56712,
+						"buffer_size": 55716,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								28309,
-								28309
+								34293,
+								34293
 							]
 						],
 						"settings":
@@ -357,25 +494,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 6782.0,
+						"translation.y": 14857.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 3,
-					"file": "src/ui/subvisit-window.cpp",
+					"file": "src/ui/main-window.h",
 					"settings":
 					{
-						"buffer_size": 1658,
+						"buffer_size": 16683,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								74,
-								74
+								7322,
+								7322
 							]
 						],
 						"settings":
@@ -384,7 +521,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2794.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -394,15 +531,177 @@
 					"file": "src/ui/subvisit-window.h",
 					"settings":
 					{
-						"buffer_size": 1091,
+						"buffer_size": 4380,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1931,
+								1931
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1050.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/ui/subvisit-window.cpp",
+					"settings":
+					{
+						"buffer_size": 12022,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4206,
+								4206
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1170.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/configuration.cpp",
+					"settings":
+					{
+						"buffer_size": 3102,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2468,
+								2468
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 900.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "src/configuration.h",
+					"settings":
+					{
+						"buffer_size": 907,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								764,
+								764
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "src/ui/visitswindow.cpp",
+					"settings":
+					{
+						"buffer_size": 42391,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								18707,
+								18707
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 5122.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "src/ui/visitswindow.h",
+					"settings":
+					{
+						"buffer_size": 11915,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1517,
+								1517
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 225.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "src/db/subvisit-interface.h",
+					"settings":
+					{
+						"buffer_size": 3034,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								438,
+								438
 							]
 						],
 						"settings":
@@ -450,6 +749,10 @@
 		]
 	},
 	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 102.0
+	},
 	"output.git":
 	{
 		"height": 102.0

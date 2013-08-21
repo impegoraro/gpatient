@@ -389,18 +389,18 @@ int DBHandler::visit_insert(VisitInterface& v) const
 			string qAllAdd = "INSERT INTO Allergies (Name, Observation, RefVisitID) VALUES(?,?,?);";
 			string qAllMod = "UPDATE Allergies SET Name = ?, Observation = ? WHERE AllergyID = ?";
 			string qAllRem = "UPDATE Allergies SET DeleteDate = ? WHERE AllergyID = ?";
-			
+
 			for(auto iter = v.getAllergies().begin(); iter; iter++) {
 				Gtk::TreeRow row = *iter;
 				ustring allName = row[i.m_col_name];
 				ustring allObs = row[i.m_col_obs];
 				guint32 rstatus;
-
+				
 				// the name is mandatory
 				if(allName.length() == 0) 
 					continue;
 				rstatus = row[i.m_col_status];
-				cout<<"here: "<< allName<< " - " << rstatus << endl;
+				
 				if(rstatus == LIST_STATUS_ADDED) {
 					if(sqlite3_prepare_v2(m_db, qAllAdd.c_str(), qAllAdd.size(), &stmt, NULL) == SQLITE_OK) {
 						sqlite3_bind_text(stmt, 1, allName.c_str(), allName.bytes(), SQLITE_TRANSIENT);
