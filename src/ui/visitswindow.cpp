@@ -385,7 +385,7 @@ void VisitsWindow::get_db_data()
 	hereditary->clear();
 
 	db.open();
- 	db.get_person_allergies(m_personID, date, sigc::mem_fun(*this, &VisitsWindow::hlpr_append_allergy));
+ //	db.get_person_allergies(m_personID, date, sigc::mem_fun(*this, &VisitsWindow::hlpr_append_allergy));
 
 	db.close();
 }
@@ -1102,11 +1102,11 @@ void VisitsWindow::setWeight(float val)
 }
 void VisitsWindow::setAppearance(const Glib::ustring& val)
 {
-	//m_cmbAppearance->get_entry()->set_text(val);
+	m_cmbAppearance->set_active_text(val);
 }
 void VisitsWindow::setMovement(const Glib::ustring& val)
 {
-	//m_cmbMovement->get_entry()->set_text(val);
+	m_cmbMovement->set_active_text(val);
 }
 void VisitsWindow::setVoice(const Glib::ustring& val)
 {
@@ -1259,7 +1259,7 @@ void VisitsWindow::setPregnancy(const Glib::ustring& val)
 }
 void VisitsWindow::setPain(const Glib::ustring& val)
 {
-	//m_txtPain->set_text(val);
+	m_cmbPain->set_active_text(val);
 }
 void VisitsWindow::setPainSince(const Glib::ustring& val)
 {

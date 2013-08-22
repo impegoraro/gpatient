@@ -716,8 +716,7 @@ int DBHandler::visit_update(VisitInterface& v) const
 					"Cry = ?, Verm = ?, Ved = ?, Brad = ?, Prt = ?, Aml = ?, Alg = ?, Irritable = ?, Sad = ?, Med = ?, Melan = ?, Hearing = ?, Throat = ?, Scent = ?, Vision = ?,  " \
 					"SexualActivity = ?, Body = ?, Abdomen = ?, Circulation = ?, EatingHabits = ?, Prostheses = ?, Surgery = ?, Weight2 = ?,  " \
 					"PreviousTreatment = ?, Pregnancy = ?, Exams = ?, ClinicalAnalysis = ?, Medication = ?, Color = ?, Escle = ?, MedTxt = ?, Treatment = ? WHERE RefVisitID = ? ";
-		string queryPain = "INSERT INTO Pain(Type,Since,Observation,RefVisitID) " \
-						" VALUES(?, ?, ?, ?);";
+		string queryPain = "UPDATE Pain SET Type = ?, Since = ?, Observation = ? WHERE RefVisitID = ?";
 		string queryBP = "UPDATE BloodPressure SET High = ?, Low = ?, BPM = ? WHERE  RefVisitID = ? ";
 		string qFinish = "COMMIT TRANSACTION;";
 
@@ -822,21 +821,21 @@ int DBHandler::visit_update(VisitInterface& v) const
 			
 
 			/************************ inserting pain info ************************/
-			//if((res = sqlite3_prepare_v2(m_db, queryPain.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
-			//	sqlite3_bind_text(stmt, 1, v.getPain().c_str(), v.getPain().bytes(), SQLITE_TRANSIENT);
-			//	sqlite3_bind_text(stmt, 2, v.getPainSince().c_str(), v.getPainSince().bytes(), SQLITE_TRANSIENT);
-			//	sqlite3_bind_text(stmt, 3, v.getPainObs().c_str(), v.getPainObs().bytes(), SQLITE_TRANSIENT);
-			//	sqlite3_bind_int(stmt, 4, v.getVisitID());
-			//	if(sqlite3_step(stmt) == SQLITE_DONE)
-			//		res = 1;
-			//	else
-			//		shouldRollback = true;
-			//	sqlite3_finalize(stmt);
-			//} else {
-			//	shouldRollback = true;
-			//	std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
-			//	sqlite3_finalize(stmt);
-			//}
+			if((res = sqlite3_prepare_v2(m_db, queryPain.c_str(), -1, &stmt, NULL)) == SQLITE_OK) {
+				sqlite3_bind_text(stmt, 1, v.getPain().c_str(), v.getPain().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 2, v.getPainSince().c_str(), v.getPainSince().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 3, v.getPainObs().c_str(), v.getPainObs().bytes(), SQLITE_TRANSIENT);
+				sqlite3_bind_int(stmt, 4, v.getVisitID());
+				if(sqlite3_step(stmt) == SQLITE_DONE)
+					res = 1;
+				else
+					shouldRollback = true;
+				sqlite3_finalize(stmt);
+			} else {
+				shouldRollback = true;
+				std::cerr<< "Error preparing the statement: "<< sqlite3_errmsg(m_db)<<std::endl;
+				sqlite3_finalize(stmt);
+			}
 			
 			/************************  end of pain info  ************************/
 

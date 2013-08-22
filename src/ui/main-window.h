@@ -114,11 +114,27 @@ protected:
 	Gtk::Button *m_btnBack;
 
 	// Selected patient information
+	bool m_personSex;
+	int m_hypertension;
+	int m_cholesterol;
+	int m_triglyceride;
+	int m_diabetes;
+	int m_anxiety;
+	int m_irrt;
+	int m_frustration;
+	int m_cry;
+	int m_verm;
+	int m_ved;
+	int m_brad;
+	int m_prt;
+	int m_aml;
+	int m_alg;
+	int m_irritable;
+	int m_sad;
+	int m_med;
+	int m_melan;
+
 	Gtk::Label *m_lblPName;
-	Gtk::Label *m_lblPBloodtype;
-	Gtk::Label *m_lblPHeight;
-	Gtk::Label *m_lblPSex;
-	Gtk::Label *m_lblPAge;
 
 	Gtk::Button *m_btnViewPatient;
 	Gtk::Button *m_btnRemoveVisit;

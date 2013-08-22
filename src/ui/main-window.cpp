@@ -30,8 +30,10 @@ using namespace Gtk;
 #define SEARCH_TIMEOUT 0.325
 
 MainWindow::MainWindow(const ustring& title, RefPtr<Application>& app) : Window(WINDOW_TOPLEVEL),
-	m_app(app), m_vp(NULL), m_vw(NULL), m_svw(NULL), m_visitID(0),
-	m_lblPatients("<b>_Pacientes</b>", true),
+	m_app(app), m_vp(NULL), m_vw(NULL), m_svw(NULL), m_visitID(0), m_hypertension(0),
+	m_anxiety(0), m_irrt(0), m_frustration(0), m_cry(0), m_verm(0), m_ved(0), m_brad(0), 
+	m_prt(0), m_aml(0), m_alg(0), m_irritable(0), m_sad(0), m_med(0), m_melan	(0), 
+	m_cholesterol(0), m_triglyceride(0), m_diabetes(0), m_lblPatients("<b>_Pacientes</b>", true),
 	m_mtbAdd("Novo Paciente"), m_mtbEdit(Stock::EDIT),
 	m_mtbRemove("Remover Paciente"), m_entryPatientStatus(true), m_maximized(false)
 {
@@ -371,7 +373,7 @@ void MainWindow::on_btnToolAddVisit_clicked(void)
 	m_vw->set_window_type();
 	m_vw->set_to_garbage();
 	m_vw->setPersonID(m_personID);
-	m_vw->set_sex_widgets(!(m_lblPSex->get_text().substr(0,1) == (ustring)"M"));
+	m_vw->set_sex_widgets(!m_personSex);
 	m_vw->show();
 }
 
@@ -499,7 +501,7 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 	Person p;
 	Date today;
 	guint16 age;
-	char tmp[10];
+	string sex;
 	bool close= true;
 	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
 	TreeModel::iterator row = sel->get_selected();
@@ -523,33 +525,29 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		if(close)
 			db.close();
 		m_personID = p.get_id();
-		m_lblPName->set_text(ustring("<b><i><span size=\"x-large\">" + p.get_name() + "</span></i></b>"));
-		m_lblPName->set_use_markup();
+		
 		age = today.get_year() - p.get_birthday().get_year();
-
 		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
 			age--;
-
-		sprintf(tmp, "%hu", age);
-		m_lblPAge->set_text(tmp);
-		m_lblPBloodtype->set_text(p.get_blood_type_string());
-		sprintf(tmp, "%.2f cm", p.get_height());
-		m_lblPHeight->set_text(tmp);
 		
-		if(p.get_sex()) {
-			m_lblPSex->set_text("Masculino");
+		if((m_personSex = p.get_sex())) {
+			sex = "Masculino";
 			m_lblMenstruationStr->hide();
 			m_lblPregnancyStr->hide();
 		} else {
-			m_lblPSex->set_text("Feminino");
+			sex = "Feminino";
 			m_lblMenstruationStr->show();
 			m_lblPregnancyStr->show();
 		}
+
+		m_lblPName->set_text(ustring::compose("<b><i><span size=\"xx-large\">%1</span></i></b>\n   <span>%2m, %3, %4 anos, <b>Tipo de Sangue:</b> %5.</span>",
+												p.get_name(), p.get_height(), sex, age, p.get_blood_type_string()));
+		m_lblPName->set_use_markup();
+		
 		m_entryPatients.hide();
-	
-		m_boxSuggestions->show();
 		m_boxVisitInfo->hide();
 		m_boxSubVisits->hide();
+		m_boxSuggestions->show();
 		
 		m_nb.set_current_page(1);
 		msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), m_modelVisits->children().size());
@@ -557,67 +555,11 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 	}
 }
 
-//void  MainWindow::on_treePatients_selected()
-//{
-//	Person p;
-//	Date today;
-//	guint16 age;
-//	char tmp[6];
-//	bool close= true;
-//	RefPtr<TreeSelection> sel = m_treePatients.get_selection();
-//	TreeModel::iterator row = sel->get_selected();
-//	DBHandler db = DBHandler::get_instance();
-//
-//	today.set_time_current();
-//
-//	if(!row) {
-//		cout<< "Iterator is not valid"<< endl;
-//		return;
-//	}
-//	
-//	if(*row) {
-//		try{
-//			db.open();
-//		} catch(SqlConnectionOpenedException& ex) {
-//			close = false;
-//		}
-//
-//		db.get_person((*row)[m_lpCols.m_col_id], p);
-//		if(close)
-//			db.close();
-//		m_lblPName->set_text(ustring("<b>" + p.get_name() + "</b>"));
-//		age = today.get_year() - p.get_birthday().get_year();
-//
-//		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
-//			age--;
-//
-//		sprintf(tmp, "%hu", age);
-//		m_lblPAge->set_text(tmp);
-//		m_lblPBloodtype->set_text(p.get_blood_type_string());
-//		sprintf(tmp, "%.2f", p.get_height());
-//		m_lblPHeight->set_text(tmp);
-//		m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
-//
-//		//m_lblpname.set_use_markup();
-//		//m_lblpname.set_alignment(0.0f, 0.5f);
-//		//m_lblpage.set_use_markup();
-//		//m_lblpage.set_alignment(0.0f, 0.5f);
-//		//m_lblpbloodtype.set_use_markup();
-//		//m_lblpbloodtype.set_alignment(0.1f, 0.5f);
-//		//m_lblpheight.set_use_markup();
-//		//m_lblpheight.set_alignment(0.1f, 0.5f);
-//		//m_lblpsex.set_use_markup();
-//		//m_lblpsex.set_alignment(0.1f, 0.5f);
-//
-//		m_nb.set_current_page(1);
-//	}
-//}
-
 void MainWindow::on_db_person_edited(const Person &p)
 {
 	Date today;
 	int age;
-	char tmp[12];
+	string sex;
 
 	today.set_time_current();
 
@@ -627,12 +569,11 @@ void MainWindow::on_db_person_edited(const Person &p)
 	if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
 		age--;
 
-	sprintf(tmp, "%hu", age);
-	m_lblPAge->set_text(tmp);
-	m_lblPBloodtype->set_text(p.get_blood_type_string());
-	sprintf(tmp, "%.2f cm", p.get_height());
-	m_lblPHeight->set_text(tmp);
-	m_lblPSex->set_text((p.get_sex()? "Masculino" : "Feminino"));
+	sex = (p.get_sex() ? "Masculino" : "Feminino");
+
+	m_lblPName->set_text(ustring::compose("<b><i><span size=\"x-large\">%1</span></i></b>\n   <span size=\"small\">%2m, %3, %4 anos, <b>Tipo de Sangue:<b/> %5.</span>",
+												p.get_name(), p.get_height(), sex, age, p.get_blood_type_string()));
+	m_lblPName->set_use_markup();
 }
 
 void MainWindow::patient_window_add(PatientWindow &pw)
@@ -735,7 +676,7 @@ void MainWindow::on_visitEdit_clicked(void)
 	}
 	m_vw->set_window_type(VisitsWindow::WindowType::WINDOW_TYPE_EDIT, m_visitID);
 	m_vw->setPersonID(m_personID);
-	m_vw->set_sex_widgets(!(m_lblPSex->get_text().substr(0,1) == (ustring)"M"));
+	m_vw->set_sex_widgets(!m_personSex);
 	
 	db.open();
 	db.get_visit(m_visitID, *m_vw);
@@ -758,7 +699,7 @@ void MainWindow::on_subvisitEdit_clicked(void)
 	DBHandler::get_instance().open();
 	DBHandler::get_instance().get_subvisit(getSubVisitID(), *m_svw);
 	DBHandler::get_instance().close();
-	m_svw->set_sex_widgets(!(m_lblPSex->get_text().substr(0,1) == (ustring)"M"));
+	m_svw->set_sex_widgets(!m_personSex);
 	m_svw->show();
 
 }
@@ -772,7 +713,7 @@ void MainWindow::on_newSubVisit_clicked(void)
 	m_svw->clean();
 	m_svw->setParentVisitID(m_visitID);
 	m_svw->setPersonID(m_personID);
-	m_svw->set_sex_widgets(!(m_lblPSex->get_text().substr(0, 1) == (ustring)"M"));
+	m_svw->set_sex_widgets(!m_personSex);
 	m_svw->show();
 }
 
@@ -805,7 +746,7 @@ void MainWindow::on_subvisitEdited(const SubVisitInterface& v)
 		row[m_lvCols.m_col_date] = v.getSubVisitDate().format_string("%Y-%m-%d");
 
 		*((SubVisitInterface*) this) = v;
-	} else cout<<"HERE BITCHES"<<endl;
+	}
 }
 
 void MainWindow::get_visits_widgets(void)
@@ -817,10 +758,6 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("treeVisits", m_treeVisits);
 	builder->get_widget("btnBack", m_btnBack);
 	builder->get_widget("lblPName", m_lblPName);
-	builder->get_widget("lblPBlood", m_lblPBloodtype);
-	builder->get_widget("lblPHeight", m_lblPHeight);
-	builder->get_widget("lblPSex", m_lblPSex);
-	builder->get_widget("lblPAge", m_lblPAge);
 	builder->get_widget("btnViewPatient", m_btnViewPatient);
 	builder->get_widget("gridVisits", m_gridVisits);
 	builder->get_widget("btnNewVisit", m_btnNewVisit);
@@ -1128,15 +1065,19 @@ ustring MainWindow::getSmell() const
 
 int MainWindow::getHypertension() const
 {
+	return m_hypertension;
 }
 int MainWindow::getCholesterol() const
 {
+	return m_cholesterol;
 }
 int MainWindow::getTriglyceride() const
 {
+	return m_triglyceride;
 }
 int MainWindow::getDiabetes() const
 {
+	return m_diabetes;
 }
 
 ustring MainWindow::getSleepiness() const
@@ -1154,45 +1095,59 @@ ustring MainWindow::getDehydration() const
 
 int MainWindow::isAnxiety() const
 {
+	return m_anxiety;
 }
 int MainWindow::isIrrt() const
 {
+	return m_irrt;
 }
 int MainWindow::isFrustration() const
 {
+	return m_frustration;
 }
 int MainWindow::isCry() const
 {
+	return m_cry;
 }
 int MainWindow::isVerm() const
 {
+	return m_verm;
 }
 int MainWindow::isVed() const
 {
+	return m_ved;
 }
 int MainWindow::isBrad() const
 {
+	return m_brad;
 }
 int MainWindow::isPrt() const
 {
+	return m_prt;
 }
 int MainWindow::isAml() const
 {
+	return m_aml;
 }
 int MainWindow::isAlg() const
 {
+	return m_alg;
 }
 int MainWindow::isIrritable() const
 {
+	return m_irritable;
 }
 int MainWindow::isSad() const
 {
+	return m_sad;
 }
 int MainWindow::isMed() const
 {
+	return m_med;
 }
 int MainWindow::isMelan() const
 {
+	return m_melan;
 }
 ustring MainWindow::getHearing() const
 {
@@ -1269,9 +1224,11 @@ ustring MainWindow::getPreviousTreatment() const
 }
 bool MainWindow::getProstheses() const
 {
+	return (m_lblProstheses->get_text() == "Sim");
 }
 bool MainWindow::getWeightBool() const
 {
+	return (m_lblWeight2->get_text() == "Sim");
 }
 ustring MainWindow::getUrine() const
 {
@@ -1571,7 +1528,8 @@ void MainWindow::setSmell(const Glib::ustring& val)
 void MainWindow::setHypertension(int val)
 {
 	ustring iconStr;
-
+	
+	m_hypertension = val;
 	switch(val) {
 		case 0:
 			iconStr = "list-remove";
@@ -1589,7 +1547,8 @@ void MainWindow::setHypertension(int val)
 void MainWindow::setCholesterol(int val)
 {
 	ustring iconStr;
-
+	
+	m_cholesterol = val;
 	switch(val) {
 		case 0:
 			iconStr = "list-remove";
@@ -1607,7 +1566,8 @@ void MainWindow::setCholesterol(int val)
 void MainWindow::setTriglyceride(int val)
 {
 	ustring iconStr;
-
+	
+	m_triglyceride = val;
 	switch(val) {
 		case 0:
 			iconStr = "list-remove";
@@ -1625,7 +1585,8 @@ void MainWindow::setTriglyceride(int val)
 void MainWindow::setDiabetes(int val)
 {
 	ustring iconStr;
-
+	
+	m_diabetes = val;
 	switch(val) {
 		case 0:
 			iconStr = "list-remove";
@@ -1656,6 +1617,7 @@ void MainWindow::setAnxiety(int val)
 {
 	ustring iconStr;
 
+	m_anxiety = val;
 	switch(val)
 	{
 		case 1:
@@ -1672,6 +1634,7 @@ void MainWindow::setIrrt(int val)
 {
 	ustring iconStr;
 
+	m_irrt = val;
 	switch(val)
 	{
 		case 1:
@@ -1688,6 +1651,7 @@ void MainWindow::setFrustration(int val)
 {
 	ustring iconStr;
 
+	m_frustration = val;
 	switch(val)
 	{
 		case 1:
@@ -1704,6 +1668,7 @@ void MainWindow::setCry(int val)
 {
 	ustring iconStr;
 
+	m_cry = val;
 	switch(val)
 	{
 		case 1:
@@ -1720,6 +1685,7 @@ void MainWindow::setVerm(int val)
 {
 	ustring iconStr;
 
+	m_verm = val;
 	switch(val)
 	{
 		case 1:
@@ -1736,6 +1702,7 @@ void MainWindow::setVed(int val)
 {
 	ustring iconStr;
 
+	m_ved = val;
 	switch(val)
 	{
 		case 1:
@@ -1752,6 +1719,7 @@ void MainWindow::setBrad(int val)
 {
 	ustring iconStr;
 
+	m_brad = val;
 	switch(val)
 	{
 		case 1:
@@ -1768,6 +1736,7 @@ void MainWindow::setPrt(int val)
 {
 	ustring iconStr;
 
+	m_prt = val;
 	switch(val)
 	{
 		case 1:
@@ -1784,6 +1753,7 @@ void MainWindow::setAml(int val)
 {
 	ustring iconStr;
 
+	m_aml = val;
 	switch(val)
 	{
 		case 1:
@@ -1800,6 +1770,7 @@ void MainWindow::setAlg(int val)
 {
 	ustring iconStr;
 
+	m_alg = val;
 	switch(val)
 	{
 		case 1:
@@ -1816,6 +1787,7 @@ void MainWindow::setIrritable(int val)
 {
 	ustring iconStr;
 
+	m_irritable = val;
 	switch(val)
 	{
 		case 1:
@@ -1832,6 +1804,7 @@ void MainWindow::setSad(int val)
 {
 	ustring iconStr;
 
+	m_sad = val;
 	switch(val)
 	{
 		case 1:
@@ -1848,6 +1821,7 @@ void MainWindow::setMed(int val)
 {
 	ustring iconStr;
 
+	m_med = val;
 	switch(val)
 	{
 		case 1:
@@ -1864,6 +1838,7 @@ void MainWindow::setMelan(int val)
 {
 	ustring iconStr;
 
+	m_melan = val;
 	switch(val)
 	{
 		case 1:
@@ -2024,9 +1999,11 @@ void MainWindow::setTreatment(const Glib::ustring& val)
 	m_lblTreatment->set_text(val);
 }
 
-/*void setSubVisitPersonID(guint32 val)
-{
-}*/
+
+/***********************************
+ *             Setters             *
+***********************************/
+
 void MainWindow::setParentVisitID(guint32 val)
 {
 }
