@@ -32,9 +32,11 @@ void Configuration::store()
 	std::string tmp;
 	std::ofstream fstream;
 	int posx(0), posy(0), width(0), height(0);
+	bool expGeneral(true), expCardio(true), expDiseases(true), expEmotionalState(true), expStructural(true);
 
 	get_window_position(posx, posy);
 	get_window_size(width, height);
+	get_expanders_visibilities(expGeneral, expCardio, expDiseases, expEmotionalState, expStructural);
 
 	root["Position"][(Json::UInt)0] = posx;
 	root["Position"][(Json::UInt)1] = posy;
@@ -42,6 +44,11 @@ void Configuration::store()
 	root["Size"][(Json::UInt)1] = height;
 	root["Maximized"] = get_window_maximized();
 	root["PanedVisitSize"] = get_visit_paned_position();
+	root["ExpanderGeneralVisible"] = expGeneral;
+	root["ExpanderCardioVisible"] = expCardio;
+	root["ExpanderDiseasesVisible"] = expDiseases;
+	root["ExpanderEmotionalStateVisible"] = expEmotionalState;
+	root["ExpanderStructuralVisible"] = expStructural;
 
 	tmp = writer.write(root);
 	fstream.open(m_fpath);
@@ -60,7 +67,7 @@ bool Configuration::parse()
 	Json::Reader reader(features);
 	Json::Value jdefault;
 	int posx(0), posy(0), width(860), height(640), maximized(0), panedVisits(-1);
-
+	bool expGeneral(true), expCardio(true), expDiseases(true), expEmotionalState(true), expStructural(true);
 
 	text = read_input_file();
 	parsing = reader.parse(text, root);
@@ -98,9 +105,17 @@ bool Configuration::parse()
 	if(panedVisits > 0)
 		set_visit_paned_position(panedVisits);
 
+	expGeneral = root.get("ExpanderGeneralVisible", true).asBool();
+	expCardio = root.get("ExpanderCardioVisible", true).asBool();
+	expDiseases = root.get("ExpanderDiseasesVisible", true).asBool();
+	expEmotionalState = root.get("ExpanderEmotionalStateVisible", true).asBool();
+	expStructural = root.get("ExpanderStructuralVisible", true).asBool();
+
 	set_window_resize(width, height);
 	//set_window_move(posx, posy);
 	set_window_maximized(maximized);
+	set_expanders_visibilities(expGeneral, expCardio, expDiseases, expEmotionalState, expStructural);
+
 	return true;
 }
 

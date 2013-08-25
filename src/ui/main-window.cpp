@@ -368,10 +368,7 @@ void MainWindow::on_btnToolAddVisit_clicked(void)
 		m_app->add_window((Window&)*m_vw->get_window());
 	}
 
-	// TODO: remove gargage
-	//m_vw->clear();
 	m_vw->set_window_type();
-	m_vw->set_to_garbage();
 	m_vw->setPersonID(m_personID);
 	m_vw->set_sex_widgets(!m_personSex);
 	m_vw->show();
@@ -474,11 +471,10 @@ void MainWindow::on_btnToolRemove_clicked()
 				ustring msg;
 
 				m_modelPatients->erase(iter);
-				if(m_nb.get_current_page() == 0)
-					msg = ustring::compose("Pacientes registados: %1", m_modelPatients->children().size());
-				else 
-					msg = ustring::compose("Pacientes registados: %1, Visitas registadas: %2", m_modelPatients->children().size(), m_modelVisits->children().size());
+
+				msg = ustring::compose("Pacientes registados: %1", m_modelPatients->children().size());
 				m_statusbar.push(msg);
+				m_nb.set_current_page(0);
 			}
 			else {
 				MessageDialog dlg(*this, "Não foi possível remover o paciente selecionado.", false, MESSAGE_ERROR, BUTTONS_OK, true);
@@ -518,13 +514,13 @@ void MainWindow::on_treePatients_activated(const TreeModel::Path& path, TreeView
 		} catch(SqlConnectionOpenedException& ex) {
 			close = false;
 		}
+		m_personID = (*row)[m_lpCols.m_col_id];
 
 		m_modelVisits->clear();
 		db.get_person((*row)[m_lpCols.m_col_id], p);
 		db.get_visits((*row)[m_lvCols.m_col_id]);
 		if(close)
 			db.close();
-		m_personID = p.get_id();
 		
 		age = today.get_year() - p.get_birthday().get_year();
 		if(today.get_month() < p.get_birthday().get_month() || (today.get_month() == p.get_birthday().get_month() && today.get_day() < p.get_birthday().get_day()))
@@ -571,7 +567,7 @@ void MainWindow::on_db_person_edited(const Person &p)
 
 	sex = (p.get_sex() ? "Masculino" : "Feminino");
 
-	m_lblPName->set_text(ustring::compose("<b><i><span size=\"x-large\">%1</span></i></b>\n   <span size=\"small\">%2m, %3, %4 anos, <b>Tipo de Sangue:<b/> %5.</span>",
+	m_lblPName->set_text(ustring::compose("<b><i><span size=\"xx-large\">%1</span></i></b>\n   <span>%2m, %3, %4 anos, <b>Tipo de Sangue:</b> %5.</span>",
 												p.get_name(), p.get_height(), sex, age, p.get_blood_type_string()));
 	m_lblPName->set_use_markup();
 }
@@ -763,6 +759,11 @@ void MainWindow::get_visits_widgets(void)
 	builder->get_widget("btnNewVisit", m_btnNewVisit);
 	builder->get_widget("btnRemoveVisit", m_btnRemoveVisit);
 
+	builder->get_widget("expGeneral", m_expGeneral);
+	builder->get_widget("expCardio", m_expCardio);
+	builder->get_widget("expDiseases", m_expDiseases);
+	builder->get_widget("expEmotionalState", m_expEmotionalState);
+	builder->get_widget("expStructural", m_expStructural);
 	builder->get_widget("btnVisitEdit", m_btnVisitEdit);
 	builder->get_widget("lblComplaint", m_lblComplaint);
 	builder->get_widget("lblAnamnesis", m_lblAnamnesis);
@@ -987,6 +988,14 @@ int MainWindow::get_visit_paned_position()
 {
 	return m_panedVisits->get_position();
 }
+void MainWindow::get_expanders_visibilities(bool& general, bool& cardio, bool& state, bool& diseases, bool& structural)
+{
+	general = m_expGeneral->get_expanded();
+	cardio = m_expCardio->get_expanded();
+	diseases = m_expDiseases->get_expanded();
+	state = m_expEmotionalState->get_expanded();
+	structural = m_expStructural->get_expanded();
+}
 void MainWindow::set_window_maximized(bool maximized)
 {
 	if(maximized)
@@ -1005,6 +1014,14 @@ void MainWindow::set_window_move(int posx, int posy)
 void MainWindow::set_visit_paned_position(int &val)
 {
 	m_panedVisits->set_position(val);
+}
+void MainWindow::set_expanders_visibilities(bool general, bool cardio, bool state, bool diseases, bool structural)
+{
+	m_expGeneral->set_expanded(general);
+	m_expCardio->set_expanded(cardio);
+	m_expDiseases->set_expanded(diseases);
+	m_expEmotionalState->set_expanded(state);
+	m_expStructural->set_expanded(structural);
 }
 
 
@@ -1621,7 +1638,7 @@ void MainWindow::setAnxiety(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1638,7 +1655,7 @@ void MainWindow::setIrrt(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1655,7 +1672,7 @@ void MainWindow::setFrustration(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1672,7 +1689,7 @@ void MainWindow::setCry(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1689,7 +1706,7 @@ void MainWindow::setVerm(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1706,7 +1723,7 @@ void MainWindow::setVed(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1723,7 +1740,7 @@ void MainWindow::setBrad(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1740,7 +1757,7 @@ void MainWindow::setPrt(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1757,7 +1774,7 @@ void MainWindow::setAml(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1774,7 +1791,7 @@ void MainWindow::setAlg(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1791,7 +1808,7 @@ void MainWindow::setIrritable(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1808,7 +1825,7 @@ void MainWindow::setSad(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1825,7 +1842,7 @@ void MainWindow::setMed(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";
@@ -1842,7 +1859,7 @@ void MainWindow::setMelan(int val)
 	switch(val)
 	{
 		case 1:
-			iconStr = "emblem-default";
+			iconStr = "dialog-ok";
 			break;
 		default:
 			iconStr = "list-remove";

@@ -276,11 +276,12 @@ int DBHandler::visit_insert(VisitInterface& v) const
 				res = 1;
 			} else {
 				shouldRollback = true;
-				std::cerr<< "Error preparing the statement for the visit: "<< sqlite3_errmsg(m_db)<<std::endl;
+				std::cerr<< "Error: failed to insert visit information "<< sqlite3_errmsg(m_db)<<std::endl;
 			}
 			sqlite3_finalize(stmt);
 
 			visitID = get_visit_from_person(v.getPersonID());
+			
 			/************************ inserting detailed visit info ************************/
 			if((res = sqlite3_prepare_v2(m_db, qDetailed.c_str(), qDetailed.size(), &stmt, NULL)) == SQLITE_OK) {
 				sqlite3_bind_int(stmt, 1, visitID);
@@ -385,7 +386,7 @@ int DBHandler::visit_insert(VisitInterface& v) const
 			/************************  end of blood pressure info  ************************/
 
 			/****************************** updating allergies ****************************/
-			VisitsWindow::ListAllergies i;
+			/*VisitsWindow::ListAllergies i;
 			string qAllAdd = "INSERT INTO Allergies (Name, Observation, RefVisitID) VALUES(?,?,?);";
 			string qAllMod = "UPDATE Allergies SET Name = ?, Observation = ? WHERE AllergyID = ?";
 			string qAllRem = "UPDATE Allergies SET DeleteDate = ? WHERE AllergyID = ?";
@@ -443,9 +444,9 @@ int DBHandler::visit_insert(VisitInterface& v) const
 					break;
 				}
 				sqlite3_finalize(stmt);
-			}
+			}*/
 			/**************************** end updating allergies **************************/
-
+				
 			if(shouldRollback)
 				qFinish = "ROLLBACK TRANSACTION;";
 			else 

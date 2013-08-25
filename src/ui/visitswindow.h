@@ -64,8 +64,6 @@ public:
 
 	const Gtk::Window* get_window();
 
-	//TODO: Remove garbage
-	void set_to_garbage();
 	virtual void setPersonID(int personID);
 	virtual void set_sex_widgets(bool sex);
 	virtual int get_window_type();

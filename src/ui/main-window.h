@@ -34,6 +34,7 @@
 #include <gtkmm/image.h>
 #include <gtkmm/statusbar.h>
 #include <gtkmm/paned.h>
+ #include <gtkmm/expander.h>
 
 
 #include "../person.h"
@@ -145,6 +146,12 @@ protected:
 	Glib::RefPtr<Gtk::TreeModelFilter> m_treeFilter;
 	Glib::RefPtr<Gtk::ListStore> m_modelPatients;
 	Glib::RefPtr<Gtk::TreeStore> m_modelVisits;
+
+	Gtk::Expander *m_expGeneral;
+	Gtk::Expander *m_expCardio;
+	Gtk::Expander *m_expDiseases;
+	Gtk::Expander *m_expEmotionalState;
+	Gtk::Expander *m_expStructural;
 
 	Gtk::Button *m_btnVisitEdit;
 	Gtk::Label *m_lblComplaint;
@@ -311,7 +318,9 @@ public:
 	virtual void get_window_position(gint& posx, gint& posy);
 	virtual bool get_window_maximized();
 	virtual int get_visit_paned_position();
+	virtual void get_expanders_visibilities(bool& general, bool& cardio, bool& state, bool& diseases, bool& structural);
 
+	virtual void set_expanders_visibilities(bool general, bool cardio, bool state, bool diseases, bool structural);
 	virtual void set_window_maximized(bool maximized = true);
 	virtual void set_window_resize(int width, int height);
 	virtual void set_window_move(int posx, int posy);

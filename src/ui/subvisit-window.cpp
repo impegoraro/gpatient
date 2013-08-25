@@ -140,9 +140,10 @@ void SubVisitWindow::clean(void)
 void SubVisitWindow::on_txtDate_iconPress(Gtk::EntryIconPosition ipos, const GdkEventButton*ev)
 {
 	int x, y;
+	Gdk::ModifierType mtype;
 
-	m_win->get_position(x, y);
-	m_wincal->popup(x + 25, y + 30);
+	m_win->get_screen()->get_root_window()->get_pointer(x, y, mtype);
+	m_wincal->popup(x, y);
 }
 
 void SubVisitWindow::on_widget_check()

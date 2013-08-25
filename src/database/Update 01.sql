@@ -55,10 +55,10 @@ insert into Person(PersonID,Name,Address,Zip1,Zip2,Location,Sex,Height,Birthday,
 select PersonID,Name,Address,Zip1,Zip2,Location,Sex,Height,Birthday,Birthplace,Nationality,Profession,TaxNumber,Referer,Email,RefBloodTypeID,RefMaritalStatusID from personBk;
 drop table PersonBk;
 
-alter table allergies add Observation varchar(500);
-alter table allergies add Observation DeleteDate DATE;
+--alter table allergies add Observation varchar(500);
+--alter table allergies add Observation DeleteDate DATE;
 
 -- 
 -- Update the dates in the database for the new format
-update Person set Birthday = (substr(Birthday,7) || '-' || substr(Birthday, 4,2) || '-' || substr(Birthday,1,2));
-update Visits set VisitDate = (substr(VisitDate,7) || '-' || substr(VisitDate, 4,2) || '-' || substr(VisitDate,1,2));
+--update Person set Birthday = (substr(Birthday,7) || '-' || substr(Birthday, 4,2) || '-' || substr(Birthday,1,2));
+--update Visits set VisitDate = (substr(VisitDate,7) || '-' || substr(VisitDate, 4,2) || '-' || substr(VisitDate,1,2));

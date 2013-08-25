@@ -330,15 +330,21 @@ void PatientWindow::set_person(const Person& p)
 		m_txtCellphone.set_text(p.get_cellphone());
 	m_txtEmail.set_text(p.get_email());
 	m_txtReferer.set_text(p.get_referer());
-	if(p.get_tax_number() == 0)
+	if(p.get_tax_number() == 0) {
 		m_txtTaxNumber.set_text("");
-	else	
+		m_tnUnique = false;
+	} else {
 		m_txtTaxNumber.set_text(p.get_tax_number());
+		m_tnUnique = true;
+	}
 	m_cellphoneStatus = m_phoneStatus = false;
-	if(p.get_identification_card() == 0)
+	if(p.get_identification_card() == 0) {
 		m_txtIdentificationCard.set_text("");
-	else
+		m_icUnique = false;
+	} else {
 		m_txtIdentificationCard.set_text(p.get_identification_card());
+		m_icUnique = true;
+	}
 	helper_entry_set_state(m_txtPhone, false);
 	helper_entry_set_state(m_txtCellphone, false);
 }
@@ -438,9 +444,11 @@ bool PatientWindow::on_focusOut_trim(GdkEventFocus *event, Entry* entry)
 void PatientWindow::on_txtBirthday_iconPress(Gtk::EntryIconPosition, const GdkEventButton*)
 {
 	int x, y;
+	Gdk::ModifierType mtype;
 
-	get_window()->get_position(x, y);
-	m_wincal.popup(x + 125, y + 200);
+	get_screen()->get_root_window()->get_pointer(x, y, mtype);
+	//get_window()->get_position(x, y);
+	m_wincal.popup(x, y);
 }
 
 bool PatientWindow::on_delete_event(GdkEventAny *event)
